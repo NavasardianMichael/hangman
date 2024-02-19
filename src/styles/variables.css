@@ -1,0 +1,11 @@
+.app {
+  &.light {
+    --primary-color: #5e9b9d;
+    --secondary-color: #fff;
+  }
+
+  &.dark {
+    --primary-color: #fff;
+    --secondary-color: #6b6b6b;
+  }
+}
