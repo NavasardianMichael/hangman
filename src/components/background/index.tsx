@@ -1,5 +1,5 @@
 import { FC } from 'react'
-import BgPaperImage from 'assets/images/bg-paper.jpg'
+import BgPaperImage from 'assets/images/bg-paper.svg'
 import styles from './styles.module.css'
 
 type TProps = {

@@ -1,0 +1,27 @@
+.header {
+    padding: 1rem;
+    text-transform: uppercase;
+    
+    .logo {
+        margin: auto;
+        max-width: 120px;
+        display: flex;
+        justify-content: center;
+        text-align: center;
+        gap: 1rem;
+        color: #393a59;
+        flex-direction: column;
+        font-weight: bold;
+
+    }
+
+    button {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        border-radius: 0;
+        height: 60px;
+        font-size: 20px;
+        width: 100%;
+    }
+}
