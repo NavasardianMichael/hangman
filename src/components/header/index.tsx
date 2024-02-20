@@ -5,10 +5,10 @@ type TProps = {
   
 }
 
-export const User: FC<TProps> = ({  }) => {
+export const Header: FC<TProps> = ({  }) => {
   return (
-    <div className={styles.user}>
-        User
+    <div className={styles.header}>
+      Header
     </div>
   )
 }

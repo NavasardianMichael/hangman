@@ -1,10 +1,14 @@
 import { FC } from 'react'
+import { Header } from 'components/header'
 import './app.css'
+import { Background } from 'components/background'
 
 export const App: FC = () => {
-
   return (
-    <h1>Hmmmmm</h1>
+    <>
+      <Background />
+      <Header />
+    </>
   )
 }
 

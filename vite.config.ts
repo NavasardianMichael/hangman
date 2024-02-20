@@ -46,8 +46,8 @@ export default defineConfig({
 
 
 
-function generateAliases(srcDir) {
-  const aliases = {};
+function generateAliases(srcDir: string) {
+  const aliases: Record<string, string> = {};
 
   // Get all directories in srcDir
   const directories = readdirSync(path.resolve(srcDir), { withFileTypes: true })
