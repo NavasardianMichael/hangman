@@ -1,11 +1,11 @@
 import { FC, PropsWithChildren } from 'react'
 import { Provider } from 'react-redux'
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
-import { usersSlice } from './users/slice'
+import { appSlice } from './app/slice'
 
 export const store = configureStore({
   reducer: combineReducers({
-    users: usersSlice.reducer,
+    app: appSlice.reducer,
   }),
 })
 

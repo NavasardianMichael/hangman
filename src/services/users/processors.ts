@@ -1,4 +1,4 @@
-import { TUser, TUsersActionPayloads } from 'store/users/types'
+import { TUser, TUsersActionPayloads } from 'store/app/types'
 import { TGetUsersResponse, TSetUserOptionsResponse, TUserResponse } from './types'
 
 export const processGetUsers = (response: TGetUsersResponse): TUsersActionPayloads['setUsers'] => {

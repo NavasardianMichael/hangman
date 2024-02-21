@@ -1,13 +1,13 @@
-import { FC } from 'react'
-import { Header } from 'components/header'
-import './app.css'
 import { Background } from 'components/background'
+import { Stages } from 'components/stages/Stages'
+import { FC } from 'react'
+import './app.css'
 
 export const App: FC = () => {
   return (
     <>
       <Background />
-      <Header />
+      <Stages />
     </>
   )
 }

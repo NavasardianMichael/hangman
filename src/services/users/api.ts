@@ -1,4 +1,4 @@
-import { TUser } from 'store/users/types'
+import { TUser } from 'store/app/types'
 import { appFetch } from 'helpers/utils/api'
 import { processGetUsers, processSetUserOptions, processUser } from './processors'
 import { TGetUserResponse, TGetUsersResponse, TSetUserOptionsResponse } from './types'
