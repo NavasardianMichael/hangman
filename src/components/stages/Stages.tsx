@@ -14,39 +14,18 @@ type Props = {
 
 }
 
-const STAGES_TEMPLATE: Record<TAppSlice['currentStage'], FC<any>> = {
-    [GAME_STAGES.start]: {
-        Component: Start,
-        nextStage: GAME_STAGES.composition
-    },
-    [GAME_STAGES.composition]: {
-        Component: Composition,
-        nextStage: GAME_STAGES.discovery
-    },
-    [GAME_STAGES.discovery]: {
-        Component: Discovery,
-        nextStage: GAME_STAGES.summary
-    },
-    [GAME_STAGES.summary]: {
-        Component: Summary,
-        nextStage: GAME_STAGES.end
-    },
-    [GAME_STAGES.end]: {
-        Component: End,
-        nextStage: GAME_STAGES.composition
-    },
-}
+
 
 export const Stages: FC<Props> = ({  }) => {
 
     const appOptions = useAppSelector(selectAppOptions)
-    console.log({STAGE_COMPONENTS, appOptions: appOptions?.currentStage});
+    console.log({STAGES_TEMPLATE, appOptions: appOptions?.currentStage});
     
-    const CurrentStage = STAGE_COMPONENTS[appOptions?.currentStage]
+    const { Component } = STAGES_TEMPLATE[appOptions?.currentStage]
 
   return (
     <div>
-        <CurrentStage />
+        <Component />
     </div>
   )
 }
