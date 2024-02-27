@@ -4,12 +4,12 @@ import { End } from "components/stages/end"
 import { Start } from "components/stages/start"
 import { Summary } from "components/stages/summary"
 import { GAME_STAGES } from "helpers/constants/app"
-import { useAppSelector } from "./useAppSelector"
 import { selectAppOptions } from "store/app/selectors"
-import { useAppDispatch } from "./useAppDispatch"
 import { setAppOptions } from "store/app/slice"
+import { useAppDispatch } from "./useAppDispatch"
+import { useAppSelector } from "./useAppSelector"
 
-export const useStagesTemplate = () => {
+export const useStagesTemplate = (): JSX.Element => {
     const { currentStage } = useAppSelector(selectAppOptions)
     const dispatch = useAppDispatch()
 
@@ -40,8 +40,13 @@ export const useStagesTemplate = () => {
 
     const toNextPage = () => {
         const hasGameEnd = false
-        if(hasGameEnd) 
-        return () => dispatch(setAppOptions({currentStage: nextStage}))
+        if(!hasGameEnd) {
+            dispatch(setAppOptions({currentStage: nextStage}))
+            return
+        }
+
+        const newStage = currentStage === GAME_STAGES.summary ? GAME_STAGES.composition : nextStage
+        dispatch(setAppOptions({ currentStage: newStage }))
     }
 
     return <Component toNextPage={toNextPage} />

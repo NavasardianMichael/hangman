@@ -1,9 +1,7 @@
-import { FC } from 'react'
+import { StageComponent } from 'helpers/types/stage'
 import styles from './styles.module.css'
 
-type TProps = {}
-
-export const End: FC<TProps> = ({  }) => {
+export const End: StageComponent = ({  }) => {
   return (
     <div className={styles.end}>
       End

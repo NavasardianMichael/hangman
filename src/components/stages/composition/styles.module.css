@@ -1,3 +1,22 @@
 .composition {
-    
+
+
+    .alphabet {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 2rem 1rem;
+        bottom: 0;
+        position: fixed;
+        left: 0;
+        background-color: rgba(var(--secondary-color-rgb-components), 0.1);
+        color: var(--secondary-color);
+        font-weight: 500;
+        font-size: 2rem;
+        text-align: center;
+
+        .letter {
+            all: unset;
+            flex-basis: calc(100% / 6);
+        }
+    }
 }

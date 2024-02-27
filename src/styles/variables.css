@@ -1,11 +1,13 @@
 .app {
-  &.light {
+  /* &.light {
     --primary-color: #5e9b9d;
     --secondary-color: #fff;
-  }
+  } */
 
   &.dark {
     --primary-color: #fff;
-    --secondary-color: #6b6b6b;
+    --secondary-color: #575757;
+    --primary-color-rgb-components: 255, 255, 255;
+    --secondary-color-rgb-components: 87, 87, 87;
   }
 }

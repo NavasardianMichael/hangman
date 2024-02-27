@@ -1,12 +1,21 @@
-import { FC } from 'react'
+import { StageComponent } from 'helpers/types/stage'
 import styles from './styles.module.css'
+import { ALPHABET } from 'helpers/constants/app'
 
-type TProps = {}
-
-export const Composition: FC<TProps> = ({  }) => {
+export const Composition: StageComponent = ({  }) => {
   return (
     <div className={styles.composition}>
-      Composition
+      <div className={styles.alphabet}>
+        {
+          ALPHABET.map(letter => {
+            return (
+              <button className={styles.letter} key={letter}>
+                {letter}
+              </button>
+            )
+          })
+        }
+      </div>
     </div>
   )
 }

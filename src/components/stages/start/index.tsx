@@ -1,12 +1,15 @@
-import { FC } from 'react'
+import { StageComponent } from 'helpers/types/stage'
 import styles from './styles.module.css'
 
-type TProps = {}
+export const Start: StageComponent = ({ toNextPage }) => {
 
-export const Start: FC<TProps> = ({  }) => {
+  const handleClick = () => {
+    toNextPage()
+  }
+
   return (
     <div className={styles.start}>
-      <button className={styles.startGameBtn}>ՍԿՍԵԼ</button>
+      <button className={styles.startGameBtn} onClick={handleClick}>ՍԿՍԵԼ</button>
     </div>
   )
 }
