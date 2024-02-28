@@ -1,5 +1,5 @@
 .app {
   box-sizing: border-box;
   height: 100vh;
-  color: var(--primary-color);
+  color: var(--secondary-color);
 }
