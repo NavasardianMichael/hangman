@@ -17,6 +17,13 @@
         .letter {
             all: unset;
             flex-basis: calc(100% / 6);
+            
+            &:active {
+                background-color: var(--secondary-color);
+                transform: translateY(4px);
+                transition: .5s;
+            }
         }
+
     }
 }
