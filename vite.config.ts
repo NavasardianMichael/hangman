@@ -6,7 +6,6 @@ import { readdirSync } from 'fs';
 import svgr from "vite-plugin-svgr";
 
 let faviconURL = '/favicon.svg'
-console.log(generateAliases('./src'));
 
 // https://vitejs.dev/config/
 export default defineConfig({

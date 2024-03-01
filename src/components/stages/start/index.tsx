@@ -1,5 +1,6 @@
 import { StageComponent } from 'helpers/types/stage'
 import styles from './styles.module.css'
+import { CustomButton } from 'components/shared/customButton'
 
 export const Start: StageComponent = ({ toNextPage }) => {
 
@@ -9,7 +10,9 @@ export const Start: StageComponent = ({ toNextPage }) => {
 
   return (
     <div className={styles.start}>
-      <button className={styles.startGameBtn} onClick={handleClick}>ՍԿՍԵԼ</button>
+      <CustomButton onClick={handleClick}>
+        ՍԿՍԵԼ
+      </CustomButton>
     </div>
   )
 }

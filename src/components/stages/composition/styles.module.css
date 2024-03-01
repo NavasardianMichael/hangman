@@ -3,27 +3,34 @@
     .word {
         display: flex;
         flex-wrap: wrap;
+        align-items: center;
         text-align: center;
         gap: .5rem;
-        padding: 2rem;
+        padding: 2rem 1rem;
         font-size: 1.5rem;
         font-weight: bold;
+        user-select: none;
+
+        &::after {
+            content: '|';
+            transform: translateY(-2px);
+            font-weight: 400;
+            color: black;
+            animation: cursor-blink 1s steps(2) infinite;
+        }
         
         .letter {
-            user-select: none;
-            flex-basis: calc(100% / 10);
-
         }
     }
 
     .alphabet {
         display: flex;
         flex-wrap: wrap;
-        /* gap: .5rem; */
+        gap: .25rem;
         padding: 2rem 1rem;
-        bottom: 0;
         position: fixed;
         left: 0;
+        bottom: 10%;
         /* background-color: rgba(var(--secondary-color-rgb-components), 0.1);
         color: var(--secondary-color); */
         color: var(--primary-color);
@@ -38,10 +45,20 @@
             flex-basis: calc(100% / 10);
             
             &:active {
-                background-color: rgba(var(--secondary-color-rgb-components), 0.1);
+                background-color: rgba(var(--secondary-color-rgb-components), 0.4);
                 transition: .2s;
+            }
+
+            &:disabled {
+                background-color: rgba(var(--secondary-color-rgb-components), 0.4);
             }
         }
 
     }
+}
+
+@keyframes cursor-blink {
+  0% {
+    opacity: 0;
+  }
 }
