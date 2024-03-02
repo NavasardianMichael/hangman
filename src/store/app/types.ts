@@ -3,6 +3,7 @@ import { GAME_STAGES, PLAYERS } from 'helpers/constants/app'
 export type TAppSlice = {
   currentStage: typeof GAME_STAGES[keyof typeof GAME_STAGES]
   currentPlayer: typeof PLAYERS[keyof typeof PLAYERS]
+  currentWord: string
 }
 
 export type TAppActionPayloads = {

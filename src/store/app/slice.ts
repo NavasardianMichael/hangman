@@ -1,10 +1,11 @@
-import { Action, AnyAction, PayloadAction, createSlice } from '@reduxjs/toolkit'
+import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 import { GAME_STAGES, PLAYERS } from 'helpers/constants/app'
 import { TAppActionPayloads, TAppSlice } from './types'
 
 const initialState: TAppSlice = {
   currentStage: GAME_STAGES.start,
-  currentPlayer: PLAYERS.player1
+  currentPlayer: PLAYERS.player1,
+  currentWord: ''
 }
 
 export const appSlice = createSlice({

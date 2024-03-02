@@ -37,4 +37,9 @@
         background-color: #575757;
         opacity: .65;
     }
+
+    &:disabled {
+        opacity: .6;
+        filter: blur(1px);
+    }
 }

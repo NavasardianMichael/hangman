@@ -31,8 +31,6 @@
         position: fixed;
         left: 0;
         bottom: 10%;
-        /* background-color: rgba(var(--secondary-color-rgb-components), 0.1);
-        color: var(--secondary-color); */
         color: var(--primary-color);
         font-weight: 500;
         font-size: 1.25rem;
@@ -53,7 +51,6 @@
                 background-color: rgba(var(--secondary-color-rgb-components), 0.4);
             }
         }
-
     }
 }
 

@@ -1,3 +1,64 @@
 .discovery {
-    
+
+  .word {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    text-align: center;
+    padding: 2rem 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+
+    .cell {
+      outline: 1px solid var(--secondary-color);
+      flex-basis: calc(100% / 10);
+
+      &.guessed {
+        /* display: none; */
+      }
+    }
+  }
+
+  .alphabet {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 2rem 1rem;
+    position: fixed;
+    left: 0;
+    bottom: 5%;
+    color: var(--primary-color);
+    font-weight: 500;
+    font-size: 1.25rem;
+    text-align: center;
+
+    .letter {
+      all: unset;
+      background-color: rgba(var(--secondary-color-rgb-components), 0.6);
+      user-select: none;
+      flex-basis: calc(100% / 10);
+      position: relative;
+
+      &:active {
+        background-color: rgba(var(--secondary-color-rgb-components), 0.4);
+        transition: 0.2s;
+      }
+
+      &:disabled {
+        background-color: rgba(var(--secondary-color-rgb-components), 0.4);
+        
+        &:before {
+          position: absolute;
+          content: "";
+          left: 0;
+          top: 50%;
+          right: 0;
+          border-top: 1px solid;
+          border-color: var(--primary-color);
+          transform: rotate(-35deg);
+          transition: .3s;
+        }
+      }
+    }
+  }
 }

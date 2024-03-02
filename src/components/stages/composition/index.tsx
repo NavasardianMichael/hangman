@@ -22,7 +22,7 @@ export const Composition: StageComponent = ({ toNextPage }) => {
 
   const handleStartDiscovery: MouseEventHandler<HTMLButtonElement> = e => {
     dispatch(setAppOptions({
-      
+      currentWord: word
     }))
     toNextPage()
   }
@@ -52,7 +52,7 @@ export const Composition: StageComponent = ({ toNextPage }) => {
           ✕
         </button>
       </div>
-      <CustomButton onClick={handleStartDiscovery}>
+      <CustomButton disabled={!word.length} onClick={handleStartDiscovery}>
         Անցնել խաղին
       </CustomButton>
     </div>
