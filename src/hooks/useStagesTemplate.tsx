@@ -39,7 +39,7 @@ export const useStagesTemplate = (): JSX.Element => {
     const { Component, nextStage } = STAGES_TEMPLATE[currentStage]
 
     const toNextPage = () => {
-        const hasGameEnd = false
+        const hasGameEnd = true
         if(!hasGameEnd) {
             dispatch(setAppOptions({currentStage: nextStage}))
             return

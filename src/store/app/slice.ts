@@ -5,7 +5,11 @@ import { TAppActionPayloads, TAppSlice } from './types'
 const initialState: TAppSlice = {
   currentStage: GAME_STAGES.start,
   currentPlayer: PLAYERS.player1,
-  currentWord: ''
+  currentWord: '',
+  points: {
+    player1: 0,
+    player2: 0
+  }
 }
 
 export const appSlice = createSlice({
@@ -17,6 +21,9 @@ export const appSlice = createSlice({
         ...state,
         ...payload,
       }
+    },
+    incrementCurrentPlayerPoint: (state) => {
+      state.points[state.currentPlayer] += 1
     },
   },
   extraReducers: (builder) => {
@@ -35,6 +42,6 @@ export const appSlice = createSlice({
   },
 })
 
-export const { setAppOptions } = appSlice.actions
+export const { setAppOptions, incrementCurrentPlayerPoint } = appSlice.actions
 
 export default appSlice.reducer

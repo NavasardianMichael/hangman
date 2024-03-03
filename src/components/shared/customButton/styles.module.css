@@ -40,6 +40,5 @@
 
     &:disabled {
         opacity: .6;
-        filter: blur(1px);
     }
 }

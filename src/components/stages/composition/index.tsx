@@ -1,15 +1,20 @@
 import { StageComponent } from 'helpers/types/stage'
 import styles from './styles.module.css'
-import { ALPHABET } from 'helpers/constants/app'
+import { ALPHABET, PLAYERS } from 'helpers/constants/app'
 import { MouseEventHandler, useState } from 'react'
 import { CustomButton } from 'components/shared/customButton'
 import { combineClassNames } from 'helpers/utils/styles'
 import { useAppDispatch } from 'hooks/useAppDispatch'
 import { setAppOptions } from 'store/app/slice'
+import { useAppSelector } from 'hooks/useAppSelector'
+import { selectAppOptions } from 'store/app/selectors'
 
 export const Composition: StageComponent = ({ toNextPage }) => {
 
   const dispatch = useAppDispatch()
+
+  const { currentPlayer } = useAppSelector(selectAppOptions)
+  
   const [word, setWord] = useState('')
 
   const handleAlphabetLetterClick: MouseEventHandler<HTMLButtonElement> = e => {
@@ -33,7 +38,9 @@ export const Composition: StageComponent = ({ toNextPage }) => {
         {
           Array.from(word).map((letter, i) => {
             return (
-              <span key={i} className={styles.letter}>{letter}</span>
+              <span key={i} className={styles.letter}>
+                {letter === 'ւ' ? 'Ու' : letter}
+              </span>
             )
           })
         }
@@ -43,7 +50,7 @@ export const Composition: StageComponent = ({ toNextPage }) => {
           ALPHABET.map(letter => {
             return (
               <button className={styles.letter} key={letter} name={letter} onClick={handleAlphabetLetterClick}>
-                {letter}
+                {letter === 'ւ' ? 'Ու' : letter}
               </button>
             )
           })
@@ -53,7 +60,7 @@ export const Composition: StageComponent = ({ toNextPage }) => {
         </button>
       </div>
       <CustomButton disabled={!word.length} onClick={handleStartDiscovery}>
-        Անցնել խաղին
+        Գուշակելու է {currentPlayer === PLAYERS.player1 ? 'առաջին' : 'երկրորդ'} խաղացողը
       </CustomButton>
     </div>
   )

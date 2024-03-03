@@ -1,5 +1,4 @@
 .composition {
-
     .word {
         display: flex;
         flex-wrap: wrap;
@@ -43,8 +42,9 @@
             flex-basis: calc(100% / 10);
             
             &:active {
-                background-color: rgba(var(--secondary-color-rgb-components), 0.4);
-                transition: .2s;
+                background-color: rgba(var(--secondary-color-rgb-components), 0.5);
+                scale: .9;
+                transition: .3s;
             }
 
             &:disabled {

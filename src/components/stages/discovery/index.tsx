@@ -1,25 +1,53 @@
 import { StageComponent } from 'helpers/types/stage'
 import styles from './styles.module.css'
-import { ALPHABET } from 'helpers/constants/app'
-import { MouseEventHandler, useState } from 'react'
+import { ALPHABET, PLAYERS } from 'helpers/constants/app'
+import { MouseEventHandler, useEffect, useMemo, useState } from 'react'
 import { useAppSelector } from 'hooks/useAppSelector'
 import { selectAppOptions } from 'store/app/selectors'
 import { combineClassNames } from 'helpers/utils/styles'
+import { useAppDispatch } from 'hooks/useAppDispatch'
+import { incrementCurrentPlayerPoint, setAppOptions } from 'store/app/slice'
+import { CustomButton } from 'components/shared/customButton'
 
-export const Discovery: StageComponent = ({  }) => {
+export const Discovery: StageComponent = ({ toNextPage }) => {
 
-  const { currentWord } = useAppSelector(selectAppOptions);
-  const currentWordLettersArr = Array.from(currentWord) as (typeof ALPHABET[number])[];
+  const dispatch = useAppDispatch()
+
+  const HANGING_STAGES = [1,2,3]
+
+  const { currentPlayer, currentWord } = useAppSelector(selectAppOptions);
+  const currentWordLettersArr = useMemo(() => {
+    return Array.from(currentWord) as (typeof ALPHABET[number])[]
+  }, [currentWord]);
   
   const [ guessedLetters, setGuessedLetters ] = useState<{[key in typeof ALPHABET[number]]?: boolean} >({})
+  const [ wastedLetters, setWastedLetters ] = useState<{[key in typeof ALPHABET[number]]?: boolean} >({})
 
   const handleAlphabetLetterClick: MouseEventHandler<HTMLButtonElement> = e => {
     const letter = e.currentTarget.name
 
-    if(!currentWord.includes(letter)) return;
+    if(!currentWord.includes(letter)) {
+      setWastedLetters(prev => ({ ...prev, [letter]: true}))
+      if(Object.keys(wastedLetters).length + 1 >= HANGING_STAGES.length) {
+        toNextPage()
+      }
+      return
+    };
 
     setGuessedLetters(prev => ({ ...prev, [letter]: true}))
   }
+
+  const handleShowSummary = () => {
+    toNextPage()
+  }
+
+  const isWordGuessed = useMemo(() => {
+    return currentWordLettersArr.every(letter => guessedLetters[letter])
+  }, [currentWordLettersArr, guessedLetters])
+
+  useEffect(() => {
+    if(isWordGuessed) dispatch(incrementCurrentPlayerPoint())
+  }, [currentWordLettersArr, guessedLetters])
 
   return (
     <div className={styles.discovery}>
@@ -31,29 +59,40 @@ export const Discovery: StageComponent = ({  }) => {
                 key={i} 
                 className={combineClassNames(styles.cell, guessedLetters[letter] ? styles.guessed : undefined)}
               >
-                {letter}
+                <span>{letter === 'ւ' ? 'Ու' : letter}</span>
               </span>
             )
           })
         }
       </div>
-      <div className={styles.alphabet}>
+      <div className={combineClassNames(styles.alphabet, isWordGuessed ? styles.disabled : undefined)}>
         {
           ALPHABET.map(letter => {
             return (
               <button 
                 key={letter} 
                 name={letter}
-                disabled={guessedLetters[letter]} 
-                className={styles.letter} 
+                disabled={guessedLetters[letter] || wastedLetters[letter]} 
+                className={combineClassNames(
+                  styles.letter,
+                  guessedLetters[letter] ? styles.guessed : undefined,
+                  wastedLetters[letter] ? styles.wasted : undefined,
+                )}
+                 
                 onClick={handleAlphabetLetterClick}
               >
-                {letter}
+                {letter === 'ւ' ? 'Ու' : letter}
               </button>
             )
           })
         }
       </div>
+      {
+        isWordGuessed &&
+        <CustomButton onClick={handleShowSummary}>
+          Անցնել հաջորդ խաղացողին
+        </CustomButton>
+      }
     </div>
   )
 }

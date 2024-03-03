@@ -3,6 +3,7 @@
   .word {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: .5rem;
     text-align: center;
     padding: 2rem 1rem;
@@ -13,8 +14,17 @@
       outline: 1px solid var(--secondary-color);
       flex-basis: calc(100% / 10);
 
+      &:not(.guessed) {
+        & > span {
+          display: block;
+          scale: 0;
+        }
+      }
+
       &.guessed {
-        /* display: none; */
+        & > span {
+          scale: 1;
+        }
       }
     }
   }
@@ -26,11 +36,19 @@
     padding: 2rem 1rem;
     position: fixed;
     left: 0;
-    bottom: 5%;
+    bottom: 10%;
     color: var(--primary-color);
     font-weight: 500;
     font-size: 1.25rem;
     text-align: center;
+
+    &.disabled {
+      pointer-events: none;
+
+      & > .letter {
+        opacity: .6;
+      }
+    }
 
     .letter {
       all: unset;
@@ -41,11 +59,12 @@
 
       &:active {
         background-color: rgba(var(--secondary-color-rgb-components), 0.4);
-        transition: 0.2s;
+        transform: scale(.9);
+        transition: 0.3s;
       }
 
-      &:disabled {
-        background-color: rgba(var(--secondary-color-rgb-components), 0.4);
+      &.wasted {
+        background-color: rgba(255, 0, 0, 0.096);
         
         &:before {
           position: absolute;
@@ -58,6 +77,10 @@
           transform: rotate(-35deg);
           transition: .3s;
         }
+      }
+
+      &.guessed {
+        background-color: rgba(30, 221, 30, 0.24);        
       }
     }
   }

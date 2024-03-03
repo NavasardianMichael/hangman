@@ -4,22 +4,23 @@ import styles from "./styles.module.css";
 import { useMemoizedCombinedClassNames } from "hooks/useMemoizedCombinedClassNames";
 import { useAppSelector } from "hooks/useAppSelector";
 import { selectAppOptions } from "store/app/selectors";
-import { GAME_STAGES } from "helpers/constants/app";
+import { STAGES_WITH_CLEAR_BACKGROUND } from "helpers/constants/app";
 
 type TProps = {};
 
 export const Background: FC<TProps> = ({}) => {
-  const { currentStage } = useAppSelector(selectAppOptions);
+  const { currentStage, currentPlayer } = useAppSelector(selectAppOptions);
   const wrapperClassName = useMemoizedCombinedClassNames(
     [
       styles.background,
-      currentStage !== GAME_STAGES.start ? styles.light : undefined,
+      !STAGES_WITH_CLEAR_BACKGROUND.includes(currentStage) ? styles.light : undefined,
     ],
     [currentStage]
   )
 
   return (
     <div className={wrapperClassName}>
+      {/* <p className={styles.breadcrumb}>currentPlayer</p> */}
       <img src={BgPaperImage} />
     </div>
   );
