@@ -6,14 +6,14 @@ import { useAppSelector } from 'hooks/useAppSelector'
 import { selectAppOptions } from 'store/app/selectors'
 import { combineClassNames } from 'helpers/utils/styles'
 import { useAppDispatch } from 'hooks/useAppDispatch'
-import { incrementCurrentPlayerPoint, setAppOptions } from 'store/app/slice'
+import { incrementCurrentPlayerPoint } from 'store/app/slice'
 import { CustomButton } from 'components/shared/customButton'
 import { Hangman } from './hangman'
 
 export const Discovery: StageComponent = ({ toNextPage }) => {
 
   const dispatch = useAppDispatch()
-  const { currentPlayer, currentWord } = useAppSelector(selectAppOptions);
+  const { currentWord } = useAppSelector(selectAppOptions);
   const currentWordLettersArr = useMemo(() => {
     return Array.from(currentWord) as (typeof ALPHABET[number])[]
   }, [currentWord]);
@@ -53,7 +53,6 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
 
   return (
     <div className={styles.discovery}>
-      <Hangman step={wastedLettersCount} />
       <div className={styles.word}>
         {
           currentWordLettersArr.map((letter, i) => {
@@ -68,6 +67,7 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
           })
         }
       </div>
+      <Hangman step={wastedLettersCount} />
       <div className={combineClassNames(styles.alphabet, isWordGuessed ? styles.disabled : undefined)}>
         {
           ALPHABET.map(letter => {
