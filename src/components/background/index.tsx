@@ -9,7 +9,7 @@ import { STAGES_WITH_CLEAR_BACKGROUND } from "helpers/constants/app";
 type TProps = {};
 
 export const Background: FC<TProps> = ({}) => {
-  const { currentStage, currentPlayer } = useAppSelector(selectAppOptions);
+  const { currentStage } = useAppSelector(selectAppOptions);
   const wrapperClassName = useMemoizedCombinedClassNames(
     [
       styles.background,
@@ -20,7 +20,6 @@ export const Background: FC<TProps> = ({}) => {
 
   return (
     <div className={wrapperClassName}>
-      {/* <p className={styles.breadcrumb}>currentPlayer</p> */}
       <img src={BgPaperImage} />
     </div>
   );

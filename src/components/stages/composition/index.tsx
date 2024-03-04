@@ -60,7 +60,7 @@ export const Composition: StageComponent = ({ toNextPage }) => {
         </button>
       </div>
       <CustomButton disabled={!word.length} onClick={handleStartDiscovery}>
-        Գուշակելու է {currentPlayer === PLAYERS.player1 ? 'առաջին' : 'երկրորդ'} խաղացողը
+        Անցնել գուշակելուն
       </CustomButton>
     </div>
   )

@@ -29,7 +29,7 @@ export const Summary: StageComponent = ({ toNextPage }) => {
       </div>
 
       <CustomButton onClick={handleNextPlayerComposes}>
-        Հերթը {currentPlayer === PLAYERS.player1 ? 'երկրորդ' : 'առաջին'} խաղացողինն է
+        Բառ գրելու հերթը {currentPlayer === PLAYERS.player1 ? 'երկրորդ' : 'առաջին'} խաղացողինն է
       </CustomButton>
     </div>
   )
