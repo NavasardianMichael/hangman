@@ -8,13 +8,11 @@ import { combineClassNames } from 'helpers/utils/styles'
 import { useAppDispatch } from 'hooks/useAppDispatch'
 import { incrementCurrentPlayerPoint, setAppOptions } from 'store/app/slice'
 import { CustomButton } from 'components/shared/customButton'
+import { Hangman } from './hangman'
 
 export const Discovery: StageComponent = ({ toNextPage }) => {
 
   const dispatch = useAppDispatch()
-
-  const HANGING_STAGES = [1,2,3]
-
   const { currentPlayer, currentWord } = useAppSelector(selectAppOptions);
   const currentWordLettersArr = useMemo(() => {
     return Array.from(currentWord) as (typeof ALPHABET[number])[]
@@ -23,12 +21,16 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
   const [ guessedLetters, setGuessedLetters ] = useState<{[key in typeof ALPHABET[number]]?: boolean} >({})
   const [ wastedLetters, setWastedLetters ] = useState<{[key in typeof ALPHABET[number]]?: boolean} >({})
 
+  const wastedLettersCount = useMemo(() => {
+    return Object.keys(wastedLetters).length
+  }, [wastedLetters])
+
   const handleAlphabetLetterClick: MouseEventHandler<HTMLButtonElement> = e => {
     const letter = e.currentTarget.name
 
     if(!currentWord.includes(letter)) {
       setWastedLetters(prev => ({ ...prev, [letter]: true}))
-      if(Object.keys(wastedLetters).length + 1 >= HANGING_STAGES.length) {
+      if(Object.keys(wastedLetters).length + 1 >= 7) {
         toNextPage()
       }
       return
@@ -51,6 +53,7 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
 
   return (
     <div className={styles.discovery}>
+      <Hangman step={wastedLettersCount} />
       <div className={styles.word}>
         {
           currentWordLettersArr.map((letter, i) => {
