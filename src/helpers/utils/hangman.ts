@@ -3,17 +3,41 @@ export const canvasCreator = (canvas: HTMLCanvasElement | null) => {
   let context = canvas.getContext("2d");
   if (!context) return;
 
+  const color = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color');
+  let isAnimationActive = false
+
   context.beginPath();
   context.strokeStyle = "#000";
   context.lineWidth = 2;
 
-  //For drawing lines
+  // For drawing lines
   const drawLine = (fromX: number, fromY: number, toX: number, toY: number) => {
-    if (!context) return;
+    console.log({fromX, fromY, toX, toY});
+    if (
+      !context || 
+      (fromX >= toX && fromY >= toY)
+    ) return;
+    
     context.moveTo(fromX, fromY);
-    context.lineTo(toX, toY);
+    context.lineTo(fromX+2, fromY+2);
     context.stroke();
+    context.strokeStyle = '#818181'
+    requestAnimationFrame(
+      () => drawLine(
+        Math.min(fromX+1, toX), 
+        Math.min(fromY+1, toY), 
+        toX, 
+        toY
+      )
+    )
   };
+
+  // const drawLine = (fromX: number, fromY: number, toX: number, toY: number) => {
+  //   if (!context) return;
+  //   context.moveTo(fromX, fromY);
+  //   context.lineTo(toX, toY);
+  //   context.stroke();
+  // };
 
   const head = () => {
     if (!context) return;
@@ -51,9 +75,9 @@ export const canvasCreator = (canvas: HTMLCanvasElement | null) => {
     drawLine(10, 130, 130, 130);
     //left line
     drawLine(10, 10, 10, 131);
-    //top line
+    // //top line
     drawLine(10, 10, 70, 10);
-    //small top line
+    // //small top line
     drawLine(70, 10, 70, 20);
   };
 

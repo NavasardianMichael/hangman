@@ -32,7 +32,7 @@ export const useStagesTemplate = (): JSX.Element => {
         },
         [GAME_STAGES.end]: {
             Component: End,
-            nextStage: GAME_STAGES.composition
+            nextStage: GAME_STAGES.start
         },
     }
 

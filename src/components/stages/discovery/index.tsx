@@ -22,7 +22,7 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
   const [ wastedLetters, setWastedLetters ] = useState<{[key in typeof ALPHABET[number]]?: boolean} >({})
 
   const wastedLettersCount = useMemo(() => {
-    return Object.keys(wastedLetters).length
+    return Object.keys(wastedLetters).length - 1
   }, [wastedLetters])
 
   const handleAlphabetLetterClick: MouseEventHandler<HTMLButtonElement> = e => {
