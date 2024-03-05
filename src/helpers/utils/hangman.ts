@@ -3,9 +3,9 @@ export const canvasCreator = (canvas: HTMLCanvasElement | null) => {
   let context = canvas.getContext("2d");
   if (!context) return;
 
-  const color = '#818181';
-  const headDx = 2 * Math.PI / 50
-  const lineDx = 1
+  const color = 'black';
+  const headDx = 2 * Math.PI / 30
+  const lineDx = 2
   let isAnimationActive = false
 
   context.beginPath();
@@ -14,20 +14,27 @@ export const canvasCreator = (canvas: HTMLCanvasElement | null) => {
 
   // For drawing lines
   const drawLine = (fromX: number, fromY: number, toX: number, toY: number) => {
-    console.log({fromX, fromY, toX, toY});
+    
+    const isPositiveXDirection = toX - fromX > 0     
+    const isPositiveYDirection = toY - fromY > 0
+    const lineXDx = isPositiveXDirection ? fromX + lineDx : fromX - lineDx
+    const lineYDx = isPositiveYDirection ? fromY + lineDx : fromY - lineDx
+    
     if (
       !context || 
-      (fromX >= toX && fromY >= toY)
+      (!(toX - fromX) && !(toY - fromY))
     ) return;
+
     
     context.moveTo(fromX, fromY);
-    context.lineTo(fromX+lineDx, fromY+lineDx);
+    context.lineTo(lineXDx, lineYDx);
     context.stroke();
+    context.lineWidth = 3
     context.strokeStyle = color
     requestAnimationFrame(
       () => drawLine(
-        Math.min(fromX+lineDx, toX), 
-        Math.min(fromY+lineDx, toY), 
+        Math[isPositiveXDirection ? 'min' : 'max'](lineXDx, toX), 
+        Math[isPositiveYDirection ? 'min' : 'max'](lineYDx, toY), 
         toX, 
         toY
       )
@@ -42,13 +49,14 @@ export const canvasCreator = (canvas: HTMLCanvasElement | null) => {
   // };
 
   
-  const head: CanvasPath['arc'] = (x, y, radius, startAngle, endAngle, counterclockwise = true) => {
-    console.log({startAngle, endAngle});
+  const head: CanvasPath['arc'] = (x, y, radius, startAngle, endAngle, counterclockwise = false) => {
+    console.log({startAngle, end: startAngle+headDx});
     
     if (!context || startAngle >= endAngle) return;
     context.beginPath();
     context.arc(x, y, radius, startAngle, startAngle+headDx, counterclockwise);
     context.stroke();
+    context.lineWidth = 4
     context.strokeStyle = color
     context.closePath()
     requestAnimationFrame(() => head(
@@ -88,7 +96,7 @@ export const canvasCreator = (canvas: HTMLCanvasElement | null) => {
     //bottom line
     drawLine(10, 130, 130, 130);
     //left line
-    drawLine(10, 10, 10, 131);
+    drawLine(10, 10, 10, 130);
     // //top line
     drawLine(10, 10, 70, 10);
     // //small top line
