@@ -3,7 +3,9 @@ export const canvasCreator = (canvas: HTMLCanvasElement | null) => {
   let context = canvas.getContext("2d");
   if (!context) return;
 
-  const color = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color');
+  const color = '#818181';
+  const headDx = 2 * Math.PI / 50
+  const lineDx = 1
   let isAnimationActive = false
 
   context.beginPath();
@@ -19,13 +21,13 @@ export const canvasCreator = (canvas: HTMLCanvasElement | null) => {
     ) return;
     
     context.moveTo(fromX, fromY);
-    context.lineTo(fromX+2, fromY+2);
+    context.lineTo(fromX+lineDx, fromY+lineDx);
     context.stroke();
-    context.strokeStyle = '#818181'
+    context.strokeStyle = color
     requestAnimationFrame(
       () => drawLine(
-        Math.min(fromX+1, toX), 
-        Math.min(fromY+1, toY), 
+        Math.min(fromX+lineDx, toX), 
+        Math.min(fromY+lineDx, toY), 
         toX, 
         toY
       )
@@ -39,11 +41,23 @@ export const canvasCreator = (canvas: HTMLCanvasElement | null) => {
   //   context.stroke();
   // };
 
-  const head = () => {
-    if (!context) return;
+  
+  const head: CanvasPath['arc'] = (x, y, radius, startAngle, endAngle, counterclockwise = true) => {
+    console.log({startAngle, endAngle});
+    
+    if (!context || startAngle >= endAngle) return;
     context.beginPath();
-    context.arc(70, 30, 10, 0, Math.PI * 2, true);
+    context.arc(x, y, radius, startAngle, startAngle+headDx, counterclockwise);
     context.stroke();
+    context.strokeStyle = color
+    context.closePath()
+    requestAnimationFrame(() => head(
+      x,
+      y,
+      radius,
+      startAngle+headDx,
+      endAngle
+    ))
   };
 
   const body = () => {
@@ -81,5 +95,5 @@ export const canvasCreator = (canvas: HTMLCanvasElement | null) => {
     drawLine(70, 10, 70, 20);
   };
 
-  return [initialDrawing, head, body, leftArm, rightArm, leftLeg, rightLeg];
+  return [initialDrawing, () => head(70, 30, 10, 0, Math.PI * 2), body, leftArm, rightArm, leftLeg, rightLeg];
 };
