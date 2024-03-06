@@ -21,7 +21,7 @@ export const Hangman: FC<TProps> = ({ step }) => {
 
   return (
     <div className={styles.hangman}>
-      <canvas ref={canvasRef} />
+      <canvas width={250} height={200} ref={canvasRef} />
     </div>
   );
 };

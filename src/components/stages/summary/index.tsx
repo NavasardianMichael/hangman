@@ -28,7 +28,7 @@ export const Summary: StageComponent = ({ toNextPage }) => {
         <p className={styles.hint}>Խաղացող 2՝ {player2} միավոր</p>
       </div>
 
-      <CustomButton onClick={handleNextPlayerComposes}>
+      <CustomButton style={{fontSize: '.9rem'}} onClick={handleNextPlayerComposes}>
         Բառ գրելու հերթը {currentPlayer === PLAYERS.player1 ? 'երկրորդ' : 'առաջին'} խաղացողինն է
       </CustomButton>
     </div>

@@ -9,6 +9,7 @@ import { useAppDispatch } from 'hooks/useAppDispatch'
 import { incrementCurrentPlayerPoint } from 'store/app/slice'
 import { CustomButton } from 'components/shared/customButton'
 import { Hangman } from './hangman'
+import { Audio } from './Audio'
 
 export const Discovery: StageComponent = ({ toNextPage }) => {
 
@@ -67,6 +68,7 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
           })
         }
       </div>
+      <Audio step={wastedLettersCount} />
       <Hangman step={wastedLettersCount} />
       <div className={combineClassNames(styles.alphabet, isWordGuessed ? styles.disabled : undefined)}>
         {
