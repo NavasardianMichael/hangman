@@ -9,6 +9,7 @@ let faviconURL = '/favicon.svg'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: "/hangman/",
   server: {
     open: true,
   },
@@ -39,7 +40,7 @@ export default defineConfig({
           }
         ]
       },
-    })
+    }),
   ]
 })
 

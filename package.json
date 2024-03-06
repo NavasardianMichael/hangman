@@ -1,12 +1,15 @@
 {
   "name": "pwa-vite-react-boilerplate",
+  "homepage": "https://NavasardianMichael.github.io/hangman",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.1.1",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.0",
@@ -23,6 +26,7 @@
     "@types/react": "^18.2.61",
     "@types/react-dom": "^18.2.19",
     "@vitejs/plugin-react": "^4.2.1",
+    "gh-pages": "^6.1.1",
     "sass": "^1.71.1",
     "typescript": "^5.3.3",
     "vite": "^5.1.4",
