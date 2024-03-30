@@ -13,7 +13,7 @@
 
     .cell {
       outline: 1px solid var(--secondary-color);
-      flex-basis: calc(100% / 10);
+      flex-basis: calc(100% / 10 - 9 * .5rem / 10);
 
       &:not(.guessed) {
         & > span {
@@ -55,7 +55,7 @@
       all: unset;
       background-color: rgba(var(--secondary-color-rgb-components), 0.6);
       user-select: none;
-      flex-basis: calc(100% / 10);
+      flex-basis: calc(100% / 10 - 9 * .25rem / 10);
       position: relative;
 
       &:active {
