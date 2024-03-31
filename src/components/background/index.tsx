@@ -1,5 +1,5 @@
 import { FC } from "react";
-import BgPaperImage from "assets/images/gallow_scribble_by_infidel_absence_d4gvvvg-fullview1.jpg";
+import BgPaperImage from "assets/images/gallows-narrow.jpg";
 import styles from "./styles.module.css";
 import { useMemoizedCombinedClassNames } from "hooks/useMemoizedCombinedClassNames";
 import { useAppSelector } from "hooks/useAppSelector";

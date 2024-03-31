@@ -54,8 +54,6 @@ export const canvasCreator = (canvas: HTMLCanvasElement | null) => {
     endAngle,
     counterclockwise = false
   ) => {
-    console.log({ startAngle, end: startAngle + headDx });
-
     if (!context || startAngle > endAngle) return;
     context.beginPath();
     context.arc(
