@@ -25,7 +25,11 @@ export default defineConfig({
     VitePWA({
       includeAssets: [faviconURL],
       manifest: {
+        short_name: "Կախաղան",
+        name: 'Կախաղան | Hangman',
         theme_color: '#ffffff',
+        display: 'fullscreen',
+        description: 'Հայտնի ԿԱԽԱՂԱՆ (HANGMAN) Խաղի հայկական տարբերակն արդեն հասանելի է առցանց',
         icons: [
           {
             src: faviconURL,
