@@ -28,6 +28,18 @@
         }
       }
     }
+
+    &.success {
+      .cell {
+        background-color: rgba(30, 221, 30, 0.4);
+      }
+    }
+
+    &.fail {
+      .cell {
+        background-color: rgba(255, 0, 0, 0.3);
+      }
+    }
   }
 
   .alphabet {

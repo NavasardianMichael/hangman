@@ -12,8 +12,8 @@ export const Summary: StageComponent = ({ toNextPage }) => {
   const dispatch = useAppDispatch()
 
   const { player1, player2 } = useAppSelector(selectPoints)
-  const { currentPlayer } = useAppSelector(selectAppOptions)
-
+  const { currentPlayer, currentWord } = useAppSelector(selectAppOptions)
+  
   const handleNextPlayerComposes = () => {
     dispatch(setAppOptions({
       currentPlayer: currentPlayer === PLAYERS.player1 ? PLAYERS.player2 : PLAYERS.player1
@@ -24,6 +24,7 @@ export const Summary: StageComponent = ({ toNextPage }) => {
   return (
     <div className={styles.summary}>
       <div className={styles.hints}>
+        <p className={styles.main}>Պահված բառն էր՝ <span className={styles.currentWord}>«{currentWord}»</span></p>
         <p className={styles.hint}>Խաղացող 1՝ {player1} միավոր</p>
         <p className={styles.hint}>Խաղացող 2՝ {player2} միավոր</p>
       </div>

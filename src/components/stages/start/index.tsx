@@ -11,7 +11,7 @@ export const Start: StageComponent = ({ toNextPage }) => {
   return (
     <div className={styles.start}>
       <CustomButton onClick={handleClick}>
-        սկսել խաղը
+        սկսել
       </CustomButton>
     </div>
   )

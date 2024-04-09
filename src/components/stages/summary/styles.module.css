@@ -1,19 +1,23 @@
 .summary {
     position: relative;
-
+    display: flex;
+    min-height: 100dvh;
+    
     .hints {
-        position: fixed;
+        /* position: fixed; */
         width: 100%;
         display: flex;
+        margin-top: auto;
+        margin-bottom: auto;
         flex-wrap: wrap;
         justify-content: center;
         gap: 1.5rem;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
         font-size: 1.5rem;
-        font-weight: 700;
-
+        font-weight: 500;
+        
+        .currentWord {
+            font-weight: 700;
+        }
         .hint {
             margin: 0;
         }
