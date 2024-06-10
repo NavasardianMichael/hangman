@@ -28,6 +28,7 @@ export default defineConfig({
         short_name: "Կախաղան",
         name: 'Կախաղան | Hangman',
         theme_color: '#ffffff',
+        orientation: "portrait",
         display: 'fullscreen',
         description: 'Հայտնի ԿԱԽԱՂԱՆ (HANGMAN) Խաղի հայկական տարբերակն արդեն հասանելի է առցանց',
         icons: [

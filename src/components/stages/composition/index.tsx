@@ -6,6 +6,7 @@ import { CustomButton } from "components/shared/customButton";
 import { combineClassNames } from "helpers/utils/styles";
 import { useAppDispatch } from "hooks/useAppDispatch";
 import { setAppOptions } from "store/app/slice";
+import { processLocaleIssues } from 'helpers/utils/app';
 
 export const Composition: StageComponent = ({ toNextPage }) => {
   const dispatch = useAppDispatch();
@@ -37,7 +38,7 @@ export const Composition: StageComponent = ({ toNextPage }) => {
         {Array.from(word).map((letter, i) => {
           return (
             <span key={i} className={styles.letter}>
-              {letter === "Ւ" ? "Ու" : letter}
+              {processLocaleIssues(letter)}
             </span>
           );
         })}
@@ -51,7 +52,7 @@ export const Composition: StageComponent = ({ toNextPage }) => {
               name={letter}
               onClick={handleAlphabetLetterClick}
             >
-              {letter === "Ւ" ? "Ու" : letter}
+              {processLocaleIssues(letter)}
             </button>
           );
         })}

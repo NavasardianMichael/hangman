@@ -16,14 +16,17 @@ export const appSlice = createSlice({
   name: 'app',
   initialState,
   reducers: {
+    
     setAppOptions: (state, { payload }: PayloadAction<TAppActionPayloads['setAppOptions']>) => {
+      console.log({payload});
       return {
         ...state,
         ...payload,
       }
     },
     incrementCurrentPlayerPoint: (state) => {
-      state.points[state.currentPlayer] += 1
+      const opponent = state.currentPlayer === PLAYERS.player1 ? PLAYERS.player2 : PLAYERS.player1
+      state.points[opponent] += 1
     },
   },
   extraReducers: (builder) => {

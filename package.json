@@ -2,7 +2,7 @@
   "name": "Կախաղան",
   "homepage": "https://NavasardianMichael.github.io/hangman",
   "private": true,
-  "version": "1.1.6",
+  "version": "1.1.7",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
