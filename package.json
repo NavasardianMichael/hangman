@@ -1,8 +1,8 @@
 {
   "name": "armenian-hangman",
-  "homepage": "https://NavasardianMichael.github.io/hangman",
-  "private": true,
-  "version": "1.2.1",
+  "homepage": "https://NavasardianMichael.github.io/hangman/",
+  "private": false,
+  "version": "1.2.2",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
