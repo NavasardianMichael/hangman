@@ -3,35 +3,35 @@ import {
 } from '@ant-design/icons';
 import type { NotificationArgsProps } from 'antd';
 import { Button, notification } from 'antd';
-import { createContext, MouseEventHandler, useEffect, useMemo, useRef } from 'react';
+import { createContext, FC, MouseEventHandler, useEffect, useMemo, useRef } from 'react';
 
 type NotificationPlacement = NotificationArgsProps['placement'];
 
 const Context = createContext({ name: 'Default' });
 
-let deferredPrompt: any | null = null;
-const preservePrompt = (event: Event) => {
-  alert(1)
-  // Prevent the mini-infobar from appearing on mobile
-  event.preventDefault();
-  // Stash the event so it can be triggered later
-  if (!deferredPrompt) return;
-  deferredPrompt = event;
-}
-
-window.addEventListener('beforeinstallprompt', preservePrompt);
-export const DownloadAppBtn = () => {
+export const DownloadAppBtn: FC = () => {
   const [api, contextHolder] = notification.useNotification();
+  const deferredPrompt = useRef<any | null>(null);
   const timeout = useRef<NodeJS.Timeout | null>(null);
 
 
-  // useEffect(() => {
+  useEffect(() => {
+    const preservePrompt = (event: Event) => {
+      alert(1)
+      // Prevent the mini-infobar from appearing on mobile
+      event.preventDefault();
+      // Stash the event so it can be triggered later
+      if (!deferredPrompt) return;
+      deferredPrompt.current = event;
+    }
 
-  // return () => {
-  //   // Clean up the event listener
-  //   window.removeEventListener('beforeinstallprompt', preservePrompt);
-  // }
-  // }, [])
+    window.addEventListener('beforeinstallprompt', preservePrompt);
+
+    return () => {
+      // Clean up the event listener
+      window.removeEventListener('beforeinstallprompt', preservePrompt);
+    }
+  }, [])
 
   useEffect(() => {
     const openDownloadNotification = () => {
@@ -51,13 +51,13 @@ export const DownloadAppBtn = () => {
   const downloadAppBtnClick: MouseEventHandler<HTMLElement> = async (event) => {
     console.log({ deferredPrompt });
 
-    if (!deferredPrompt) return;
+    if (!deferredPrompt.current) return;
 
     // Show the install prompt
-    deferredPrompt.prompt();
+    deferredPrompt.current.prompt();
 
     // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice;
+    const { outcome } = await deferredPrompt.current.userChoice;
 
     if (outcome === 'accepted') {
       console.log('User accepted the install prompt');
@@ -65,7 +65,7 @@ export const DownloadAppBtn = () => {
       console.log('User dismissed the install prompt');
     }
 
-    deferredPrompt = null;
+    deferredPrompt.current = null;
   }
 
   const openNotification = (placement: NotificationPlacement) => {
