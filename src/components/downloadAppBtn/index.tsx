@@ -9,7 +9,7 @@ type NotificationPlacement = NotificationArgsProps['placement'];
 
 const Context = createContext({ name: 'Default' });
 
-let deferredPrompt: Event | null = null;
+let deferredPrompt: any | null = null;
 const preservePrompt = (event: Event) => {
   alert(1)
   // Prevent the mini-infobar from appearing on mobile
