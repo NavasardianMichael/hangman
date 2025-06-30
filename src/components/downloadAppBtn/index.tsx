@@ -14,7 +14,6 @@ export const DownloadAppBtn: FC = () => {
   const deferredPrompt = useRef<any | null>(null);
   const timeout = useRef<NodeJS.Timeout | null>(null);
 
-
   useEffect(() => {
     const preservePrompt = (event: Event) => {
       alert(1)
