@@ -5,6 +5,11 @@ import type { NotificationArgsProps } from 'antd';
 import { Button, notification } from 'antd';
 import { createContext, FC, MouseEventHandler, useEffect, useMemo, useRef } from 'react';
 
+const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase())
+
+const isInStandaloneMode = () =>
+  ('standalone' in window.navigator) && (window.navigator.standalone)
+
 type NotificationPlacement = NotificationArgsProps['placement'];
 
 const Context = createContext({ name: 'Default' });
