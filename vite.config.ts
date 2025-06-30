@@ -5,7 +5,7 @@ import path from 'path';
 import { readdirSync } from 'fs';
 import svgr from "vite-plugin-svgr";
 
-let faviconURL = '/favicon.svg'
+let faviconURL = '/hangman/favicon.svg'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -15,7 +15,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      src: path.resolve(__dirname, 'src'), 
+      src: path.resolve(__dirname, 'src'),
       ...generateAliases('./src')
     }
   },
@@ -29,7 +29,8 @@ export default defineConfig({
         name: 'Կախաղան | Hangman',
         theme_color: '#ffffff',
         orientation: "portrait",
-        display: 'fullscreen',
+        start_url: '/hangman/',
+        display: 'standalone',
         description: 'Հայտնի ԿԱԽԱՂԱՆ (HANGMAN) Խաղի հայկական տարբերակն արդեն հասանելի է առցանց',
         icons: [
           {
