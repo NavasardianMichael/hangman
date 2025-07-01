@@ -3,7 +3,7 @@ import {
 } from '@ant-design/icons';
 import type { NotificationArgsProps } from 'antd';
 import { Button, Carousel, Modal, notification } from 'antd';
-import { createContext, FC, MouseEventHandler, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, FC, MouseEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Hint1Img from "assets/images/hint1.png";
 import Hint2Img from "assets/images/hint2.png";
 import Hint3Img from "assets/images/hint3.png";
@@ -28,16 +28,21 @@ export const DownloadAppBtn: FC = () => {
   const isIosRef = useRef(isIos());
   const isAppInstalledRef = useRef(localStorage.getItem('pwa-installed') === 'true');
 
+  const setAppInstalled = useCallback(() => {
+    localStorage.setItem('pwa-installed', 'true')
+    isAppInstalledRef.current = true;
+  }, [isAppInstalledRef.current])
+
   useEffect(() => {
-    if (isAppInstalledRef.current) return;
+    if (isAppInstalledRef.current) return setAppInstalled();
 
     if (isIosRef.current) {
-      if (isIosInStandaloneMode()) return;
+      if (isIosInStandaloneMode()) return setAppInstalled();;
       setShowIosDownloadAppHintModal(true)
       return
     };
 
-    if (isNonIosStandaloneMode()) return;
+    if (isNonIosStandaloneMode()) return setAppInstalled();;
 
     const preservePrompt = (event: Event) => {
       // Prevent the mini-infobar from appearing on mobile
@@ -56,10 +61,6 @@ export const DownloadAppBtn: FC = () => {
   }, [isIosRef.current])
 
   useEffect(() => {
-    const setAppInstalled = () => {
-      localStorage.setItem('pwa-installed', 'true')
-      isAppInstalledRef.current = true;
-    };
     document.addEventListener('appinstalled', setAppInstalled)
     return () => document.removeEventListener('appinstalled', setAppInstalled);
   }, [])
@@ -91,10 +92,7 @@ export const DownloadAppBtn: FC = () => {
     // Wait for the user to respond to the prompt
     const { outcome } = await deferredPromptRef.current.userChoice;
 
-    if (outcome === 'accepted') {
-      localStorage.setItem('pwa-installed', 'true');
-      isAppInstalledRef.current = true;
-    }
+    if (outcome === 'accepted') setAppInstalled()
 
     deferredPromptRef.current = null;
   }
