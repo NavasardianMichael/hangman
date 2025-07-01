@@ -31,7 +31,7 @@ export const DownloadAppBtn: FC = () => {
   useEffect(() => {
     if (isAppInstalledRef.current) return;
 
-    if (!isIosRef.current) {
+    if (isIosRef.current) {
       if (isIosInStandaloneMode()) return;
       setShowIosDownloadAppHintModal(true)
       return
@@ -56,7 +56,10 @@ export const DownloadAppBtn: FC = () => {
   }, [isIosRef.current])
 
   useEffect(() => {
-    const setAppInstalled = () => localStorage.setItem('pwa-installed', 'true');
+    const setAppInstalled = () => {
+      localStorage.setItem('pwa-installed', 'true')
+      isAppInstalledRef.current = true;
+    };
     document.addEventListener('appinstalled', setAppInstalled)
     return () => document.removeEventListener('appinstalled', setAppInstalled);
   }, [])
@@ -88,7 +91,10 @@ export const DownloadAppBtn: FC = () => {
     // Wait for the user to respond to the prompt
     const { outcome } = await deferredPromptRef.current.userChoice;
 
-    if (outcome === 'accepted') localStorage.setItem('pwa-installed', 'true');
+    if (outcome === 'accepted') {
+      localStorage.setItem('pwa-installed', 'true');
+      isAppInstalledRef.current = true;
+    }
 
     deferredPromptRef.current = null;
   }
