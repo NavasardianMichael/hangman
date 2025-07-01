@@ -52,17 +52,17 @@ export const DownloadAppBtn: FC = () => {
       deferredPrompt = event;
     }
 
-    document.addEventListener('beforeinstallprompt', preservePrompt);
+    window.addEventListener('beforeinstallprompt', preservePrompt);
 
     return () => {
       if (isIosRef.current) return;
-      document.removeEventListener('beforeinstallprompt', preservePrompt);
+      window.removeEventListener('beforeinstallprompt', preservePrompt);
     }
   }, [isIosRef.current])
 
   useEffect(() => {
-    document.addEventListener('appinstalled', setAppInstalled)
-    return () => document.removeEventListener('appinstalled', setAppInstalled);
+    window.addEventListener('appinstalled', setAppInstalled)
+    return () => window.removeEventListener('appinstalled', setAppInstalled);
   }, [])
 
   useEffect(() => {
