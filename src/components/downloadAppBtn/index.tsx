@@ -47,7 +47,7 @@ export const DownloadAppBtn: FC = () => {
     const preservePrompt = (event: Event) => {
       alert('Ներբեռնեք հավելվածը ձեր համակարգիչից կամ սմարթֆոնից');
       // Prevent the mini-infobar from appearing on mobile
-      event.preventDefault();
+      // event.preventDefault();
       // Stash the event so it can be triggered later
       if (!deferredPrompt) return;
       deferredPrompt = event;
@@ -86,6 +86,7 @@ export const DownloadAppBtn: FC = () => {
   }, []);
 
   const downloadAppBtnClick: MouseEventHandler<HTMLElement> = async (event) => {
+    alert(JSON.stringify(deferredPrompt))
     if (!deferredPrompt) return;
 
     // Show the install prompt
