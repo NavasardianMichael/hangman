@@ -12,3 +12,7 @@
 .ant-modal-title {
   margin-top: 16px !important;
 }
+
+.ant-modal-content {
+  box-sizing: border-box !important;
+}

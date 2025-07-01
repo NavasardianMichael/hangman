@@ -31,8 +31,6 @@ export const DownloadAppBtn: FC = () => {
   useEffect(() => {
     if (isAppInstalledRef.current) return;
 
-
-
     if (!isIosRef.current) {
       if (isIosInStandaloneMode()) return;
       setShowIosDownloadAppHintModal(true)
@@ -133,17 +131,17 @@ export const DownloadAppBtn: FC = () => {
             style: { display: 'none' }
           }}
         >
-          <div style={{ maxHeight: '80vh' }}>
+          <div style={{ maxHeight: '80vh', boxSizing: 'border-box' }}>
 
             <Carousel autoplay arrows dots dotPosition='bottom' >
               <div>
-                <img src={Hint1Img} alt="Hint 1" style={{ width: '100%' }} />
+                <img src={Hint1Img} alt="Hint 1" style={{ margin: 'auto', maxWidth: '100%', maxHeight: '80vh', objectFit: 'cover' }} />
               </div>
               <div>
-                <img src={Hint2Img} alt="Hint 2" style={{ width: '100%' }} />
+                <img src={Hint2Img} alt="Hint 2" style={{ margin: 'auto', maxWidth: '100%', maxHeight: '80vh', objectFit: 'cover' }} />
               </div>
               <div>
-                <img src={Hint3Img} alt="Hint 3" style={{ width: '100%' }} />
+                <img src={Hint3Img} alt="Hint 3" style={{ margin: 'auto', maxWidth: '100%', maxHeight: '80vh', objectFit: 'cover' }} />
               </div>
             </Carousel>
           </div>
