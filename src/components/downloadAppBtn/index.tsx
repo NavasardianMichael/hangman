@@ -9,6 +9,7 @@ import Hint2Img from "assets/images/hint2.png";
 import Hint3Img from "assets/images/hint3.png";
 
 const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase())
+let deferredPrompt: any = null;
 
 const isIosInStandaloneMode = () =>
   ('standalone' in window.navigator) && (window.navigator.standalone)
@@ -23,7 +24,6 @@ const Context = createContext({ name: 'Default' });
 export const DownloadAppBtn: FC = () => {
   const [api, contextHolder] = notification.useNotification();
   const [showIosDownloadAppHintModal, setShowIosDownloadAppHintModal] = useState(false);
-  const deferredPromptRef = useRef<any | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isIosRef = useRef(isIos());
   const isAppInstalledRef = useRef(localStorage.getItem('pwa-installed') === 'true');
@@ -48,8 +48,8 @@ export const DownloadAppBtn: FC = () => {
       // Prevent the mini-infobar from appearing on mobile
       event.preventDefault();
       // Stash the event so it can be triggered later
-      if (!deferredPromptRef) return;
-      deferredPromptRef.current = event;
+      if (!deferredPrompt) return;
+      deferredPrompt = event;
     }
 
     document.addEventListener('beforeinstallprompt', preservePrompt);
@@ -85,16 +85,16 @@ export const DownloadAppBtn: FC = () => {
   }, []);
 
   const downloadAppBtnClick: MouseEventHandler<HTMLElement> = async (event) => {
-    if (!deferredPromptRef.current) return;
+    if (!deferredPrompt) return;
 
     // Show the install prompt
-    deferredPromptRef.current.prompt();
+    deferredPrompt.prompt();
     // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPromptRef.current.userChoice;
+    const { outcome } = await deferredPrompt.userChoice;
 
     if (outcome === 'accepted') setAppInstalled()
 
-    deferredPromptRef.current = null;
+    deferredPrompt = null;
   }
 
   const openNotification = (placement: NotificationPlacement) => {
