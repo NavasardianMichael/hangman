@@ -2,8 +2,11 @@ import {
   DownloadOutlined
 } from '@ant-design/icons';
 import type { NotificationArgsProps } from 'antd';
-import { Button, notification } from 'antd';
-import { createContext, FC, MouseEventHandler, useEffect, useMemo, useRef } from 'react';
+import { Button, Carousel, Modal, notification } from 'antd';
+import { createContext, FC, MouseEventHandler, useEffect, useMemo, useRef, useState } from 'react';
+import Hint1Img from "assets/images/hint1.png";
+import Hint2Img from "assets/images/hint2.png";
+import Hint3Img from "assets/images/hint3.png";
 
 const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase())
 
@@ -19,14 +22,25 @@ const Context = createContext({ name: 'Default' });
 
 export const DownloadAppBtn: FC = () => {
   const [api, contextHolder] = notification.useNotification();
+  const [showIosDownloadAppHintModal, setShowIosDownloadAppHintModal] = useState(false);
   const deferredPromptRef = useRef<any | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isIosRef = useRef(isIos());
+  const isAppInstalledRef = useRef(localStorage.getItem('pwa-installed') === 'true');
 
   useEffect(() => {
-    console.log({ isIosRef });
+    if (isAppInstalledRef.current) return;
 
-    if (isIosRef.current) return;
+
+
+    if (!isIosRef.current) {
+      if (isIosInStandaloneMode()) return;
+      setShowIosDownloadAppHintModal(true)
+      return
+    };
+
+    if (isNonIosStandaloneMode()) return;
+
     const preservePrompt = (event: Event) => {
       // Prevent the mini-infobar from appearing on mobile
       event.preventDefault();
@@ -35,54 +49,55 @@ export const DownloadAppBtn: FC = () => {
       deferredPromptRef.current = event;
     }
 
-    window.addEventListener('beforeinstallprompt', preservePrompt);
+    document.addEventListener('beforeinstallprompt', preservePrompt);
 
     return () => {
-      // Clean up the event listener
-      window.removeEventListener('beforeinstallprompt', preservePrompt);
+      if (isIosRef.current) return;
+      document.removeEventListener('beforeinstallprompt', preservePrompt);
     }
   }, [isIosRef.current])
 
   useEffect(() => {
+    const setAppInstalled = () => localStorage.setItem('pwa-installed', 'true');
+    document.addEventListener('appinstalled', setAppInstalled)
+    return () => document.removeEventListener('appinstalled', setAppInstalled);
+  }, [])
+
+  useEffect(() => {
+    if (isAppInstalledRef.current) return;
+
     const openDownloadNotification = () => {
       openNotification('top')
     }
 
-    timeoutRef.current = setTimeout(() => {
-      if (isIosRef.current) return;
-      openDownloadNotification();
-    }, 1000);
+    if (!isIosRef.current) {
+      timeoutRef.current = setTimeout(() => {
+        openDownloadNotification();
+      }, 1000);
+    }
 
     return () => {
       if (isIosRef.current) return;
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     }
-
   }, []);
 
   const downloadAppBtnClick: MouseEventHandler<HTMLElement> = async (event) => {
-    console.log({ deferredPromptRef });
-
     if (!deferredPromptRef.current) return;
 
     // Show the install prompt
     deferredPromptRef.current.prompt();
-
     // Wait for the user to respond to the prompt
     const { outcome } = await deferredPromptRef.current.userChoice;
 
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-    } else {
-      console.log('User dismissed the install prompt');
-    }
+    if (outcome === 'accepted') localStorage.setItem('pwa-installed', 'true');
 
     deferredPromptRef.current = null;
   }
 
   const openNotification = (placement: NotificationPlacement) => {
     api.info({
-      message: `Ներբեռնե՞լ հավելվածը`,
+      message: <b>Ներբեռնե՞լ հավելվածը</b>,
       duration: 0,
       icon: ' ',
       description: <Context.Consumer>{() => {
@@ -104,8 +119,39 @@ export const DownloadAppBtn: FC = () => {
   const contextValue = useMemo(() => ({ name: 'Ant Design' }), []);
 
   return (
-    <Context.Provider value={contextValue}>
-      {contextHolder}
-    </Context.Provider>
+    <>
+      {
+        <Modal
+          title="Ինչպե՞ս ներբեռնել հավելվածը"
+          centered
+          width={'80%'}
+          open={showIosDownloadAppHintModal}
+          okButtonProps={{
+            style: { display: 'none' }
+          }}
+          cancelButtonProps={{
+            style: { display: 'none' }
+          }}
+        >
+          <div style={{ maxHeight: '80vh' }}>
+
+            <Carousel autoplay arrows dots dotPosition='bottom' >
+              <div>
+                <img src={Hint1Img} alt="Hint 1" style={{ width: '100%' }} />
+              </div>
+              <div>
+                <img src={Hint2Img} alt="Hint 2" style={{ width: '100%' }} />
+              </div>
+              <div>
+                <img src={Hint3Img} alt="Hint 3" style={{ width: '100%' }} />
+              </div>
+            </Carousel>
+          </div>
+        </Modal>
+      }
+      <Context.Provider value={contextValue}>
+        {contextHolder}
+      </Context.Provider>
+    </>
   );
 };

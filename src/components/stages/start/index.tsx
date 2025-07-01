@@ -1,8 +1,8 @@
+import { ConfigProvider } from 'antd'
+import { DownloadAppBtn } from 'components/downloadAppBtn'
+import { CustomButton } from 'components/shared/customButton'
 import { StageComponent } from 'helpers/types/stage'
 import styles from './styles.module.css'
-import { CustomButton } from 'components/shared/customButton'
-import { Button, ConfigProvider } from 'antd'
-import { DownloadAppBtn } from 'components/downloadAppBtn'
 
 export const Start: StageComponent = ({ toNextPage }) => {
 
@@ -14,11 +14,8 @@ export const Start: StageComponent = ({ toNextPage }) => {
     <ConfigProvider
       theme={{
         token: {
-          // Seed Token
           colorPrimary: '#575757',
           borderRadius: 0,
-
-          // Alias Token
           colorBgContainer: '#d3d3d32e',
         },
       }}

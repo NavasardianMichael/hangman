@@ -3,3 +3,12 @@
   height: 100vh;
   color: var(--secondary-color);
 }
+
+.ant-notification-notice-message,
+.ant-notification-notice-description {
+  margin-left: 0 !important;
+}
+
+.ant-modal-title {
+  margin-top: 16px !important;
+}
