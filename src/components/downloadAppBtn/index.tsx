@@ -7,8 +7,11 @@ import { createContext, FC, MouseEventHandler, useEffect, useMemo, useRef } from
 
 const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase())
 
-const isInStandaloneMode = () =>
+const isIosInStandaloneMode = () =>
   ('standalone' in window.navigator) && (window.navigator.standalone)
+
+const isNonIosStandaloneMode = () =>
+  window.matchMedia('(display-mode: standalone)').matches
 
 type NotificationPlacement = NotificationArgsProps['placement'];
 
@@ -16,17 +19,20 @@ const Context = createContext({ name: 'Default' });
 
 export const DownloadAppBtn: FC = () => {
   const [api, contextHolder] = notification.useNotification();
-  const deferredPrompt = useRef<any | null>(null);
-  const timeout = useRef<NodeJS.Timeout | null>(null);
+  const deferredPromptRef = useRef<any | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isIosRef = useRef(isIos());
 
   useEffect(() => {
+    console.log({ isIosRef });
+
+    if (isIosRef.current) return;
     const preservePrompt = (event: Event) => {
-      alert(1)
       // Prevent the mini-infobar from appearing on mobile
       event.preventDefault();
       // Stash the event so it can be triggered later
-      if (!deferredPrompt) return;
-      deferredPrompt.current = event;
+      if (!deferredPromptRef) return;
+      deferredPromptRef.current = event;
     }
 
     window.addEventListener('beforeinstallprompt', preservePrompt);
@@ -35,33 +41,35 @@ export const DownloadAppBtn: FC = () => {
       // Clean up the event listener
       window.removeEventListener('beforeinstallprompt', preservePrompt);
     }
-  }, [])
+  }, [isIosRef.current])
 
   useEffect(() => {
     const openDownloadNotification = () => {
       openNotification('top')
     }
 
-    timeout.current = setTimeout(() => {
+    timeoutRef.current = setTimeout(() => {
+      if (isIosRef.current) return;
       openDownloadNotification();
     }, 1000);
 
     return () => {
-      if (timeout.current) clearTimeout(timeout.current);
+      if (isIosRef.current) return;
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     }
 
   }, []);
 
   const downloadAppBtnClick: MouseEventHandler<HTMLElement> = async (event) => {
-    console.log({ deferredPrompt });
+    console.log({ deferredPromptRef });
 
-    if (!deferredPrompt.current) return;
+    if (!deferredPromptRef.current) return;
 
     // Show the install prompt
-    deferredPrompt.current.prompt();
+    deferredPromptRef.current.prompt();
 
     // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.current.userChoice;
+    const { outcome } = await deferredPromptRef.current.userChoice;
 
     if (outcome === 'accepted') {
       console.log('User accepted the install prompt');
@@ -69,21 +77,23 @@ export const DownloadAppBtn: FC = () => {
       console.log('User dismissed the install prompt');
     }
 
-    deferredPrompt.current = null;
+    deferredPromptRef.current = null;
   }
 
   const openNotification = (placement: NotificationPlacement) => {
     api.info({
-      message: `Notification ${placement}`,
+      message: `Ներբեռնե՞լ հավելվածը`,
+      duration: 0,
+      icon: ' ',
       description: <Context.Consumer>{() => {
         return (
           <Button
-            type="dashed"
+            type="primary"
             style={{ width: '100%' }}
             onClick={downloadAppBtnClick}
             icon={<DownloadOutlined />}
           >
-            Ներբեռնել հավելվածը
+            Ներբեռնել
           </Button>
         )
       }}</Context.Consumer>,
