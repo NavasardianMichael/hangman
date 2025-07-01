@@ -45,20 +45,21 @@ export const DownloadAppBtn: FC = () => {
     if (isNonIosStandaloneMode()) return setAppInstalled();;
 
     const preservePrompt = (event: Event) => {
+      alert('Ներբեռնեք հավելվածը ձեր համակարգիչից կամ սմարթֆոնից');
       // Prevent the mini-infobar from appearing on mobile
       event.preventDefault();
       // Stash the event so it can be triggered later
       if (!deferredPrompt) return;
       deferredPrompt = event;
     }
-
+    alert(15)
     window.addEventListener('beforeinstallprompt', preservePrompt);
 
     return () => {
       if (isIosRef.current) return;
       window.removeEventListener('beforeinstallprompt', preservePrompt);
     }
-  }, [isIosRef.current])
+  }, [])
 
   useEffect(() => {
     window.addEventListener('appinstalled', setAppInstalled)
