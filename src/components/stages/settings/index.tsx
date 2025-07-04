@@ -1,4 +1,4 @@
-import { Checkbox, CheckboxProps, Form, InputNumber } from 'antd';
+import { Checkbox, CheckboxProps, Flex, Form, InputNumber } from 'antd';
 import { CustomButton } from "components/shared/customButton";
 import { StageComponent } from "helpers/types/stage";
 import { useAppDispatch } from "hooks/useAppDispatch";
@@ -18,23 +18,27 @@ export const Settings: StageComponent = ({ toNextPage }) => {
 
   return (
     <div className={styles.settings}>
-      <Checkbox onChange={onTimeLimitationChange} checked={settings.withTimeLimit}>Ժամանակով</Checkbox>
-      {
-        settings.withTimeLimit && (
-          <Form.Item label="Վայրկյան">
-            <InputNumber min={1} max={200} value={settings.timeLimit} onChange={(value) => dispatch(setGameSettings({ timeLimit: value ?? 0 }))} style={{ background: 'transparent' }} />
-          </Form.Item>
-        )
-      }
-      <Form.Item label="Առավելագույն Միավորների քանակ">
-        <InputNumber min={1} max={999} value={settings.pointsToWin} onChange={(value) => dispatch(setGameSettings({ pointsToWin: value ?? 1 }))} style={{ background: 'transparent' }} />
-      </Form.Item>
-      <Form.Item label="Նվազագույն տառերի քանակ" labelAlign='right'>
-        <InputNumber min={2} max={8} value={settings.minLettersCount} onChange={(value) => dispatch(setGameSettings({ minLettersCount: value ?? 3 }))} style={{ background: 'transparent' }} />
-      </Form.Item>
-      <CustomButton disabled={false} onClick={() => toNextPage()}>
-        Սկսել խաղը
-      </CustomButton>
+      <Form layout='vertical' style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }} >
+        <Flex vertical gap={12}>
+          <Checkbox onChange={onTimeLimitationChange} checked={settings.withTimeLimit}>Ժամանակով</Checkbox>
+          {
+            settings.withTimeLimit && (
+              <Form.Item label="Վայրկյան">
+                <InputNumber min={1} max={200} value={settings.timeLimit} onChange={(value) => dispatch(setGameSettings({ timeLimit: value ?? 0 }))} style={{ background: 'transparent' }} />
+              </Form.Item>
+            )
+          }
+        </Flex>
+        <Form.Item label="Առավելագույն Միավոր">
+          <InputNumber min={1} max={999} controls value={settings.pointsToWin} onChange={(value) => dispatch(setGameSettings({ pointsToWin: value ?? 1 }))} style={{ background: 'transparent' }} />
+        </Form.Item>
+        <Form.Item label="Նվազագույն տառերի քանակ" >
+          <InputNumber min={2} max={8} controls value={settings.minLettersCount} onChange={(value) => dispatch(setGameSettings({ minLettersCount: value ?? 3 }))} style={{ background: 'transparent' }} />
+        </Form.Item>
+        <CustomButton disabled={false} onClick={() => toNextPage()}>
+          Սկսել խաղը
+        </CustomButton>
+      </Form>
     </div >
   );
 };

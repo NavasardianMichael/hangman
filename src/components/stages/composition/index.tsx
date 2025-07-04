@@ -9,9 +9,12 @@ import { setAppOptions } from "store/app/slice";
 import { processLocaleIssues } from 'helpers/utils/app';
 import { Audio } from 'components/shared/audio';
 import WritingAudio from "assets/audio/writing.mp3";
+import { useAppSelector } from 'hooks/useAppSelector';
+import { selectGameSettings } from 'store/app/selectors';
 
 export const Composition: StageComponent = ({ toNextPage }) => {
   const dispatch = useAppDispatch();
+  const settings = useAppSelector(selectGameSettings);
 
   const [word, setWord] = useState("");
 
@@ -68,7 +71,7 @@ export const Composition: StageComponent = ({ toNextPage }) => {
           ✕
         </button>
       </div>
-      <CustomButton disabled={word.length < 3} onClick={handleStartDiscovery}>
+      <CustomButton disabled={word.length < settings.minLettersCount} onClick={handleStartDiscovery}>
         Անցնել գուշակելուն
       </CustomButton>
       <Audio deps={[word]} src={WritingAudio} />

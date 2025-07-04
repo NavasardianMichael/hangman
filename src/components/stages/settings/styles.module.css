@@ -2,11 +2,12 @@
   display: flex;
   height: calc(100dvh - 60px);
   flex-grow: 1;
-  /* justify-content: center; */
+  justify-content: center;
   padding-left: 2rem;
   padding-right: 2rem;
   padding-top: 6rem;
-  padding-bottom: 2rem;
+  padding-bottom: 6rem;
   flex-direction: column;
   gap: 2rem;
+  box-sizing: border-box;
 }

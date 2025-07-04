@@ -6,14 +6,16 @@ import { useAppSelector } from "hooks/useAppSelector";
 import { selectAppOptions } from "store/app/selectors";
 import { STAGES_WITH_CLEAR_BACKGROUND } from "helpers/constants/app";
 
-type TProps = {};
+type TProps = {
+  blurred?: boolean;
+};
 
-export const Background: FC<TProps> = ({}) => {
+export const Background: FC<TProps> = ({ blurred = false }) => {
   const { currentStage } = useAppSelector(selectAppOptions);
   const wrapperClassName = useMemoizedCombinedClassNames(
     [
       styles.background,
-      !STAGES_WITH_CLEAR_BACKGROUND.includes(currentStage) ? styles.light : undefined,
+      (!STAGES_WITH_CLEAR_BACKGROUND.includes(currentStage) || blurred) ? styles.light : undefined,
     ],
     [currentStage]
   )

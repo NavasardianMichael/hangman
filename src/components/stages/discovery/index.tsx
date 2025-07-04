@@ -1,78 +1,89 @@
-import { StageComponent } from "helpers/types/stage";
-import { GAME_STAGES, LETTERS, PLAY_MODES } from "helpers/constants/app";
-import { MouseEventHandler, useEffect, useMemo, useState } from "react";
-import { useAppSelector } from "hooks/useAppSelector";
-import { selectAppOptions } from "store/app/selectors";
-import { combineClassNames } from "helpers/utils/styles";
-import { useAppDispatch } from "hooks/useAppDispatch";
-import { incrementCurrentPlayerPoint } from "store/app/slice";
-import { CustomButton } from "components/shared/customButton";
-import { Hangman } from "./hangman";
-import { Audio } from "components/shared/audio";
-import CorrectWordAudio from "assets/audio/correct.mp3";
-import ScribbleAudio from "assets/audio/scribble.mp3";
-import WinAudio from "assets/audio/win.mp3";
-import LossAudio from "assets/audio/loss.mp3";
-import styles from "./styles.module.css";
-import { processLocaleIssues } from "helpers/utils/app";
-import { Statistic } from 'antd';
+import { StageComponent } from 'helpers/types/stage'
+import { GAME_STAGES, LETTERS, PLAY_MODES } from 'helpers/constants/app'
+import { MouseEventHandler, useEffect, useMemo, useState } from 'react'
+import { useAppSelector } from 'hooks/useAppSelector'
+import { selectAppOptions } from 'store/app/selectors'
+import { combineClassNames } from 'helpers/utils/styles'
+import { useAppDispatch } from 'hooks/useAppDispatch'
+import { incrementCurrentPlayerPoint } from 'store/app/slice'
+import { CustomButton } from 'components/shared/customButton'
+import { Hangman } from './hangman'
+import { Audio } from 'components/shared/audio'
+import CorrectWordAudio from 'assets/audio/correct.mp3'
+import ScribbleAudio from 'assets/audio/scribble.mp3'
+import WinAudio from 'assets/audio/win.mp3'
+import LossAudio from 'assets/audio/loss.mp3'
+import styles from './styles.module.css'
+import { processLocaleIssues } from 'helpers/utils/app'
+import { Statistic } from 'antd'
 
 export const Discovery: StageComponent = ({ toNextPage }) => {
-  const dispatch = useAppDispatch();
-  const { currentWord, mode, settings } = useAppSelector(selectAppOptions);
+  const dispatch = useAppDispatch()
+  const { currentWord, mode, settings } = useAppSelector(selectAppOptions)
   const currentWordLettersArr = useMemo(() => {
-    return Array.from(currentWord.toUpperCase()) as (typeof LETTERS)[number][];
-  }, [currentWord]);
+    return Array.from(currentWord.toUpperCase()) as (typeof LETTERS)[number][]
+  }, [currentWord])
 
   const [guessedLetters, setGuessedLetters] = useState<{
-    [key in (typeof LETTERS)[number]]?: boolean;
-  }>({});
+    [key in (typeof LETTERS)[number]]?: boolean
+  }>({})
   const [wastedLetters, setWastedLetters] = useState<{
-    [key in (typeof LETTERS)[number]]?: boolean;
-  }>({});
+    [key in (typeof LETTERS)[number]]?: boolean
+  }>({})
 
   const wastedLettersCount = useMemo(() => {
-    return Object.keys(wastedLetters).length;
-  }, [wastedLetters]);
+    return Object.keys(wastedLetters).length
+  }, [wastedLetters])
+
+  const countdownDeadline = useMemo(() => {
+    if (!settings.withTimeLimit || settings.timeLimit <= 0) return 0
+    return Date.now() + (settings.timeLimit) * 1000
+  }, [settings.timeLimit, settings.withTimeLimit])
 
   const handleAlphabetLetterClick: MouseEventHandler<HTMLButtonElement> = (
     e
   ) => {
-    const letter = e.currentTarget.name.toUpperCase();
+    const letter = e.currentTarget.name.toUpperCase()
 
-    console.log({ letter });
+    console.log({ letter })
 
     if (!currentWord.toUpperCase().includes(letter)) {
-      setWastedLetters((prev) => ({ ...prev, [letter]: true }));
+      setWastedLetters((prev) => ({ ...prev, [letter]: true }))
       // if(Object.keys(wastedLetters).length + 1 >= 7) {
       //   toNextPage()
       // }
-      return;
+      return
     }
 
-    setGuessedLetters((prev) => ({ ...prev, [letter]: true }));
-  };
+    setGuessedLetters((prev) => ({ ...prev, [letter]: true }))
+  }
 
   const handleShowSummary = () => {
-    toNextPage();
-  };
+    toNextPage()
+  }
 
   const isWordGuessed = useMemo(() => {
-    return currentWordLettersArr.every((letter) => guessedLetters[letter]);
-  }, [currentWordLettersArr, guessedLetters]);
+    return currentWordLettersArr.every((letter) => guessedLetters[letter])
+  }, [currentWordLettersArr, guessedLetters])
 
   useEffect(() => {
-    if (isWordGuessed) dispatch(incrementCurrentPlayerPoint());
-  }, [currentWordLettersArr, guessedLetters]);
+    if (isWordGuessed) dispatch(incrementCurrentPlayerPoint())
+  }, [currentWordLettersArr, guessedLetters])
 
   useEffect(() => {
-    console.log({ currentWordLettersArr });
-
+    console.log({ currentWordLettersArr })
   }, [currentWordLettersArr])
 
   return (
     <div className={styles.discovery}>
-      <Statistic.Timer type="countdown" value={1000 * settings.timeLimit} />
+      {settings.withTimeLimit && settings.timeLimit > 0 && (
+        <Statistic.Timer
+          style={{ textAlign: 'center', position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', fontVariantNumeric: 'tabular-nums' }}
+          type='countdown'
+          value={countdownDeadline}
+          onFinish={() => toNextPage()}
+        />
+      )}
       <div
         className={combineClassNames(
           styles.word,
@@ -95,10 +106,13 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
             >
               <span>{processLocaleIssues(letter)}</span>
             </span>
-          );
+          )
         })}
       </div>
-      <Audio deps={[wastedLettersCount, currentWordLettersArr]} src={ScribbleAudio} />
+      <Audio
+        deps={[wastedLettersCount, currentWordLettersArr]}
+        src={ScribbleAudio}
+      />
       <Audio deps={[isWordGuessed]} src={WinAudio} />
       <Audio
         deps={[!isWordGuessed && wastedLettersCount > 6]}
@@ -130,18 +144,16 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
             >
               {processLocaleIssues(letter)}
             </button>
-          );
+          )
         })}
       </div>
       {(isWordGuessed || wastedLettersCount > 6) && (
         <CustomButton onClick={handleShowSummary}>
-          {
-            mode === PLAY_MODES.single ?
-              `Շարունակել` :
-              `Անցնել հաջորդ խաղացողին`
-          }
+          {mode === PLAY_MODES.single
+            ? `Շարունակել`
+            : `Անցնել հաջորդ խաղացողին`}
         </CustomButton>
       )}
     </div>
-  );
-};
+  )
+}
