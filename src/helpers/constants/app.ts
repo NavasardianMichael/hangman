@@ -3,8 +3,14 @@ export const PLAYERS = {
   player2: "player2",
 } as const;
 
+export const PLAY_MODES = {
+  single: "single",
+  multiplayer: "multiplayer",
+} as const;
+
 export const GAME_STAGES = {
   start: "start",
+  settings: "settings",
   composition: "composition",
   discovery: "discovery",
   summary: "summary",

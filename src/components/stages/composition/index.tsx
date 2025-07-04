@@ -7,6 +7,8 @@ import { combineClassNames } from "helpers/utils/styles";
 import { useAppDispatch } from "hooks/useAppDispatch";
 import { setAppOptions } from "store/app/slice";
 import { processLocaleIssues } from 'helpers/utils/app';
+import { Audio } from 'components/shared/audio';
+import WritingAudio from "assets/audio/writing.mp3";
 
 export const Composition: StageComponent = ({ toNextPage }) => {
   const dispatch = useAppDispatch();
@@ -69,6 +71,7 @@ export const Composition: StageComponent = ({ toNextPage }) => {
       <CustomButton disabled={word.length < 3} onClick={handleStartDiscovery}>
         Անցնել գուշակելուն
       </CustomButton>
+      <Audio deps={[word]} src={WritingAudio} />
     </div>
   );
 };

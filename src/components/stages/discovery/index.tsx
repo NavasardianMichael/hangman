@@ -1,5 +1,5 @@
 import { StageComponent } from "helpers/types/stage";
-import { GAME_STAGES, LETTERS } from "helpers/constants/app";
+import { GAME_STAGES, LETTERS, PLAY_MODES } from "helpers/constants/app";
 import { MouseEventHandler, useEffect, useMemo, useState } from "react";
 import { useAppSelector } from "hooks/useAppSelector";
 import { selectAppOptions } from "store/app/selectors";
@@ -15,12 +15,13 @@ import WinAudio from "assets/audio/win.mp3";
 import LossAudio from "assets/audio/loss.mp3";
 import styles from "./styles.module.css";
 import { processLocaleIssues } from "helpers/utils/app";
+import { Statistic } from 'antd';
 
 export const Discovery: StageComponent = ({ toNextPage }) => {
   const dispatch = useAppDispatch();
-  const { currentWord } = useAppSelector(selectAppOptions);
+  const { currentWord, mode, settings } = useAppSelector(selectAppOptions);
   const currentWordLettersArr = useMemo(() => {
-    return Array.from(currentWord) as (typeof LETTERS)[number][];
+    return Array.from(currentWord.toUpperCase()) as (typeof LETTERS)[number][];
   }, [currentWord]);
 
   const [guessedLetters, setGuessedLetters] = useState<{
@@ -37,9 +38,11 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
   const handleAlphabetLetterClick: MouseEventHandler<HTMLButtonElement> = (
     e
   ) => {
-    const letter = e.currentTarget.name;
+    const letter = e.currentTarget.name.toUpperCase();
 
-    if (!currentWord.includes(letter)) {
+    console.log({ letter });
+
+    if (!currentWord.toUpperCase().includes(letter)) {
       setWastedLetters((prev) => ({ ...prev, [letter]: true }));
       // if(Object.keys(wastedLetters).length + 1 >= 7) {
       //   toNextPage()
@@ -62,8 +65,14 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
     if (isWordGuessed) dispatch(incrementCurrentPlayerPoint());
   }, [currentWordLettersArr, guessedLetters]);
 
+  useEffect(() => {
+    console.log({ currentWordLettersArr });
+
+  }, [currentWordLettersArr])
+
   return (
     <div className={styles.discovery}>
+      <Statistic.Timer type="countdown" value={1000 * settings.timeLimit} />
       <div
         className={combineClassNames(
           styles.word,
@@ -89,7 +98,7 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
           );
         })}
       </div>
-      <Audio deps={[wastedLettersCount]} src={ScribbleAudio} />
+      <Audio deps={[wastedLettersCount, currentWordLettersArr]} src={ScribbleAudio} />
       <Audio deps={[isWordGuessed]} src={WinAudio} />
       <Audio
         deps={[!isWordGuessed && wastedLettersCount > 6]}
@@ -126,7 +135,11 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
       </div>
       {(isWordGuessed || wastedLettersCount > 6) && (
         <CustomButton onClick={handleShowSummary}>
-          Անցնել հաջորդ խաղացողին
+          {
+            mode === PLAY_MODES.single ?
+              `Շարունակել` :
+              `Անցնել հաջորդ խաղացողին`
+          }
         </CustomButton>
       )}
     </div>

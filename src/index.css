@@ -1,10 +1,72 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600&family=Noto+Serif+Armenian:wght@400;500;600;700&display=swap");
+
+@font-face {
+  font-family: "Kotayk";
+  src: url("./assets/fonts/fonter.am_kotayk/Kotayk-Regular.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Kotayk";
+  src: url("./assets/fonts/fonter.am_kotayk/Kotayk-Italic.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Oldtimer";
+  src: url("./assets/fonts/fonter.am_oldtimer/Oldtimer.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "NasaFont";
+  src: url("./assets/fonts/fonter.am_nasa-font/TTF/NasaFont.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "BraindYerevan";
+  src: url("./assets/fonts/fonter.am_braind-yerevan/BraindYerevan.otf")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Adamathuz";
+  src: url("./assets/fonts/fonter.am_adamathuz/Adamathuz-Bold.ttf")
+    format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   touch-action: manipulation;
   user-select: none;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+button,
+.ant-typography,
+div,
+span,
+a {
+  letter-spacing: 2px;
+  line-height: 2;
+  font-family: "Oldtimer", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif !important;
 }

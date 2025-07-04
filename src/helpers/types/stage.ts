@@ -1,5 +1,6 @@
 import { FC } from 'react';
+import { TAppSlice } from 'store/app/types';
 
 export type StageComponent = FC<{
-    toNextPage: () => void
+    toNextPage: (mode?: TAppSlice['mode']) => void
 }>

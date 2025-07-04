@@ -4,12 +4,17 @@
     flex-wrap: wrap;
     align-items: center;
     text-align: center;
+    justify-content: center;
     gap: 0.5rem;
     margin-top: 8rem;
     padding: 2rem 1rem;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     font-weight: bold;
     user-select: none;
+
+    @media (orientation: landscape) {
+      margin-top: 3rem;
+    }
 
     &::after {
       content: "|";
@@ -20,7 +25,6 @@
     }
 
     .letter {
-      text-shadow: 1px 1px 6px lightgray;
     }
   }
 

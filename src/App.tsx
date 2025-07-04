@@ -1,12 +1,13 @@
 import { Background } from 'components/background'
-import { Stages } from 'components/stages/Stages'
-import { FC, useEffect } from 'react'
 import { Breadcrumb } from 'components/breadcrumb'
+import { Stages } from 'components/stages/Stages'
+import { useAppSelector } from 'hooks/useAppSelector'
+import { FC } from 'react'
+import { selectIsSingleMode } from 'store/app/selectors'
 import './app.css'
-import { useAppDispatch } from 'hooks/useAppDispatch'
-// import { getAppData } from 'api'
 
 export const App: FC = () => {
+  const isSingleMode = useAppSelector(selectIsSingleMode)
 
   // const dispatch = useAppDispatch()
 
@@ -17,8 +18,8 @@ export const App: FC = () => {
   return (
     <div className='app dark'>
       <Background />
-      <Breadcrumb />
       <Stages />
+      {!isSingleMode && <Breadcrumb />}
     </div>
   )
 }
