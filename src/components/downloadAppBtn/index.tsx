@@ -126,6 +126,7 @@ export const DownloadAppBtn: FC = () => {
           centered
           width={'80%'}
           open={showIosDownloadAppHintModal}
+          onCancel={() => setShowIosDownloadAppHintModal(false)}
           okButtonProps={{
             style: { display: 'none' }
           }}

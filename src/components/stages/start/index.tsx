@@ -25,6 +25,9 @@ export const Start: StageComponent = ({ toNextPage }) => {
         <CustomButton onClick={handleClick}>
           սկսել
         </CustomButton>
+        <CustomButton onClick={handleClick}>
+          dqw
+        </CustomButton>
       </div>
     </ConfigProvider>
   )
