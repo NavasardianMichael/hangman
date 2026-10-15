@@ -1,0 +1,4 @@
+# Normalise every text file to LF in the repository and in the working tree.
+# The files under deployment/ run on Linux: a CRLF checkout on Windows breaks bash ("$'\r': command not found").
+# Binary files are detected automatically by `text=auto` and left untouched.
+* text=auto eol=lf

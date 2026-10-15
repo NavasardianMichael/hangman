@@ -3,25 +3,37 @@
   display: block;
   background-color: transparent;
   z-index: 1;
-  box-shadow: none;
-  left: 0;
+  left: 50%;
+  translate: -50% 0;
   bottom: 0;
-  height: 3.75rem !important;
+  width: min(100%, var(--column-width));
+  height: var(--bottom-bar-height) !important;
   color: #ececec !important;
   border-radius: 0;
   font-size: 1rem !important;
   text-transform: uppercase;
-  width: 100%;
-  outline: 0 !important;
+  outline: 0;
   box-shadow: none !important;
   border: none;
+  cursor: pointer;
   transition: 0.3s;
   text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.2);
 
-  &:hover,
   &:active {
     color: #ececec !important;
     background-color: #57575769;
+  }
+
+  @media (hover: hover) {
+    &:hover:not(:disabled) {
+      color: #ffffff !important;
+      background-color: #57575769;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ececec;
+    outline-offset: -4px;
   }
 
   &::before {
@@ -40,5 +52,6 @@
 
   &:disabled {
     opacity: 0.6;
+    cursor: default;
   }
 }

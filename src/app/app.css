@@ -1,45 +1,3 @@
-/* @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600&family=Noto+Serif+Armenian:wght@400;500;600;700&display=swap');
-
-@font-face {
-  font-family: 'Kotayk';
-  src: url('/fonts/fonter.am_kotayk/Kotayk-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Kotayk';
-  src: url('/fonts/fonter.am_kotayk/Kotayk-Italic.ttf') format('truetype');
-  font-weight: normal;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: 'NasaFont';
-  src: url('/fonts/fonter.am_nasa-font/TTF/NasaFont.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'BraindYerevan';
-  src: url('/fonts/fonter.am_braind-yerevan/BraindYerevan.otf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'Adamathuz';
-  src: url('/fonts/fonter.am_adamathuz/Adamathuz-Bold.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-} */
-
-@font-face {
-  font-family: 'Oldtimer';
-  src: url('/Oldtimer.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
 .app-title {
   position: fixed;
   left: 0;
@@ -49,7 +7,6 @@
   font-size: 2rem;
   font-weight: 400;
   text-align: center;
-  margin-top: 32px;
   color: #ffffff;
   margin: 0;
   text-shadow: 5px 5px 0px rgba(0, 0, 0, 0.2);
@@ -67,8 +24,14 @@
   }
 }
 
+/* With ads on, the title bar is always shown: it is the band the AdSense top anchor covers */
+.ads-enabled .app-title {
+  display: block !important;
+}
+
 body {
   margin: 0;
+  background-color: #8c8c8c;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   touch-action: manipulation;
@@ -94,14 +57,26 @@ span,
 a {
   letter-spacing: 2px;
   line-height: 1.8;
-  font-family: 'Oldtimer', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+  font-family: var(--font-app), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
     'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif !important;
 }
 
+/* The game column: full width on phones, centered on larger screens */
 .app {
+  position: relative;
   box-sizing: border-box;
-  height: 100vh;
+  width: min(100%, var(--column-width));
+  min-height: 100dvh;
+  margin-inline: auto;
+  padding-top: var(--ad-band-height);
   color: var(--secondary-color);
+}
+
+/* Keyboard users get a visible focus ring (game buttons reset their outline) */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--secondary-color);
+  outline-offset: 2px;
 }
 
 .ant-notification-notice-message,

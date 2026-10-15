@@ -1,0 +1,254 @@
+# =============================================================================
+# Build and deploy https://hangman.mnavasardian.com
+#
+# Operator documentation, including the one-time server setup: docs/DEPLOYMENT.md
+#
+# REQUIRED GITHUB SECRETS:
+#   SSH_HOST, SSH_USER, SSH_KEY, SSH_PORT (optional, default 22)
+#   APP_DIR           deployment root, e.g. /home/michael/apps/hangman
+#   ENV_FILE_BASE64   base64 of the production .env (`pnpm envtob64`): GEMINI_KEY.
+#                     NODE_ENV/PORT/HOSTNAME belong to the systemd unit and are
+#                     stripped from it.
+#
+# On-host layout:
+#   $APP_DIR/releases/<sha>/   Next standalone bundle (server.js, .next, public, node_modules)
+#   $APP_DIR/current        -> releases/<sha>   (systemd unit `hangman` runs from here)
+#   $APP_DIR/shared/.env       mode 600, written by this workflow
+# =============================================================================
+
+name: Deploy to Production
+
+on:
+  push:
+    branches: [master]
+    # deployment/ holds templates that are copied to the server by hand
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'deployment/**'
+      - '.vscode/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  KEEP_RELEASES: 3
+  # Must match hangman.service (Environment=PORT) and the nginx proxy_pass
+  APP_PORT: 9005
+  SSH_OPTS: '-o ServerAliveInterval=30 -o ServerAliveCountMax=120 -o TCPKeepAlive=yes -o ConnectTimeout=30'
+
+# Deploys queue rather than abort: cancelling mid-script could leave `current`
+# pointing at a release whose service was never restarted.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      # Version from package.json "packageManager"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      # Type checking runs as part of the build
+      - name: Build
+        run: pnpm build
+
+      # `output: 'standalone'` traces node_modules into .next/standalone but leaves
+      # public/ and .next/static out. nginx serves .next/static from the release, and
+      # Node serves public/, so both are copied in.
+      - name: Assemble standalone bundle
+        run: |
+          cp -r public .next/standalone/
+          cp -r .next/static .next/standalone/.next/
+          test -f .next/standalone/server.js
+          tar -czf build.tar.gz -C .next/standalone .
+          echo "bundle: $(du -sh build.tar.gz | cut -f1)"
+
+      # Boot what actually ships. Output file tracing can miss files that only the
+      # standalone server needs, and that shows up only when node runs server.js:
+      # `next build` stays green. POST /getWord with an empty body proves the route
+      # loads without calling Gemini (no key here): it must be rejected with 400.
+      - name: Smoke-test the standalone bundle
+        working-directory: .next/standalone
+        env:
+          PORT: ${{ env.APP_PORT }}
+          HOSTNAME: 127.0.0.1
+          NODE_ENV: production
+        run: |
+          node server.js > /tmp/smoke.log 2>&1 &
+          pid=$!
+          ready=false
+          for i in $(seq 1 30); do
+            if ! kill -0 "$pid" 2>/dev/null; then
+              echo "::error::the standalone bundle exited before it listened on $PORT"
+              cat /tmp/smoke.log
+              exit 1
+            fi
+            if curl -sf -o /dev/null --max-time 5 "http://127.0.0.1:$PORT/"; then
+              echo "/ answered after ${i}s"
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then
+            echo "::error::the standalone bundle never answered / on port $PORT"
+            cat /tmp/smoke.log
+            kill "$pid" 2>/dev/null || true
+            exit 1
+          fi
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST \
+            -H 'Content-Type: application/json' -d '{}' "http://127.0.0.1:$PORT/getWord" || true)
+          kill "$pid" 2>/dev/null || true
+          if [ "$code" != "400" ]; then
+            echo "::error::POST /getWord answered HTTP $code, expected 400"
+            cat /tmp/smoke.log
+            exit 1
+          fi
+          echo "POST /getWord rejects an invalid request (400)"
+
+      # Strips stray quotes/whitespace from the secret
+      - name: Resolve deployment directory
+        env:
+          RAW_APP_DIR: ${{ secrets.APP_DIR }}
+        run: |
+          APP_DIR="$(printf '%s' "$RAW_APP_DIR" | tr -d "\"'" | xargs)"
+          if [ -z "$APP_DIR" ]; then
+            echo "::error::APP_DIR secret is not set"
+            exit 1
+          fi
+          echo "APP_DIR=$APP_DIR" >> "$GITHUB_ENV"
+
+      # The runtime half of the env (NODE_ENV, PORT, HOSTNAME) is owned by the systemd
+      # unit; values here would override it, so they are stripped. Prints key names only.
+      - name: Prepare env file
+        env:
+          ENV_FILE_BASE64: ${{ secrets.ENV_FILE_BASE64 }}
+        run: |
+          if [ -z "$ENV_FILE_BASE64" ]; then
+            echo "::error::ENV_FILE_BASE64 secret is not set. Run 'pnpm envtob64' locally and save the output as that secret."
+            exit 1
+          fi
+          printf '%s' "$ENV_FILE_BASE64" | base64 -d | tr -d '\r' > /tmp/hangman.env
+          sed -i -e 's/^export //' -e '/^\(NODE_ENV\|PORT\|HOSTNAME\)=/d' /tmp/hangman.env
+          if ! grep -qE '^GEMINI_KEY=.+' /tmp/hangman.env; then
+            echo "::warning::GEMINI_KEY is empty: single player will use the built-in words only"
+          fi
+          echo "keys:"; sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=.*/  - \1/p' /tmp/hangman.env
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Add server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "${{ secrets.SSH_PORT || 22 }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Copy release to the server
+        run: |
+          cp build.tar.gz "/tmp/hangman-build-$GITHUB_SHA.tar.gz"
+          cp /tmp/hangman.env "/tmp/hangman-env-$GITHUB_SHA"
+          scp ${{ env.SSH_OPTS }} -P "${{ secrets.SSH_PORT || 22 }}" \
+            "/tmp/hangman-build-$GITHUB_SHA.tar.gz" "/tmp/hangman-env-$GITHUB_SHA" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/tmp/"
+          rm -f /tmp/hangman.env "/tmp/hangman-env-$GITHUB_SHA"
+
+      # Extract → write env → flip `current` → restart → health check. A release that
+      # doesn't come up is rolled back to the previous one, and the job fails.
+      - name: Deploy
+        run: |
+          ssh ${{ env.SSH_OPTS }} -p "${{ secrets.SSH_PORT || 22 }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" bash -s -- \
+            "$APP_DIR" "$GITHUB_SHA" "${{ env.KEEP_RELEASES }}" "${{ env.APP_PORT }}" << 'EOF'
+          set -euo pipefail
+          APP_DIR="$1"; RELEASE="$2"; KEEP="$3"; APP_PORT="$4"
+          UNIT=hangman
+          RELEASES="$APP_DIR/releases"
+          NEW="$RELEASES/$RELEASE"
+          CURRENT="$APP_DIR/current"
+          TAR="/tmp/hangman-build-$RELEASE.tar.gz"
+          ENV_FILE="/tmp/hangman-env-$RELEASE"
+
+          echo "==> release $RELEASE"
+          mkdir -p "$RELEASES" "$APP_DIR/shared"
+          rm -rf "$NEW"; mkdir -p "$NEW"
+          tar -xzf "$TAR" -C "$NEW"
+          # tar restores the archive's mtime; order releases by deploy time instead
+          touch "$NEW"
+          install -m 600 "$ENV_FILE" "$APP_DIR/shared/.env"
+          rm -f "$TAR" "$ENV_FILE"
+
+          healthy() {
+            for i in $(seq 1 30); do
+              if curl -sf -o /dev/null --max-time 5 "http://127.0.0.1:$APP_PORT/"; then
+                echo "healthy after $((i * 2))s"
+                return 0
+              fi
+              sleep 2
+            done
+            return 1
+          }
+
+          PREVIOUS=$(readlink "$CURRENT" || true)
+          ln -sfn "$NEW" "$CURRENT"
+
+          # -n: fail at once instead of waiting for a password
+          if ! sudo -n systemctl restart "$UNIT"; then
+            echo "::error::could not restart $UNIT. Is /etc/sudoers.d/$UNIT in place? See docs/DEPLOYMENT.md"
+            if [ -n "$PREVIOUS" ]; then ln -sfn "$PREVIOUS" "$CURRENT"; fi
+            exit 1
+          fi
+
+          if ! healthy; then
+            echo "::error::$UNIT did not answer on 127.0.0.1:$APP_PORT within 60s"
+            systemctl status "$UNIT" --no-pager --lines=20 || true
+            journalctl -u "$UNIT" -n 100 --no-pager || true
+            if [ -n "$PREVIOUS" ] && [ -d "$PREVIOUS" ] && [ "$PREVIOUS" != "$NEW" ]; then
+              echo "==> rolling back to $PREVIOUS"
+              ln -sfn "$PREVIOUS" "$CURRENT"
+              sudo -n systemctl restart "$UNIT"
+              healthy || echo "::error::the previous release did not come back either"
+              # A broken release must not take a slot or become a manual rollback target
+              rm -rf "$NEW"
+            fi
+            exit 1
+          fi
+
+          # Keep the new release plus the (KEEP - 1) newest others; never delete the live one
+          cd "$RELEASES"
+          # (grep finds nothing on the first deploy; pipefail must not fail it)
+          ls -1t | grep -vxF "$RELEASE" | tail -n +"$KEEP" | xargs -r rm -rf || true
+          echo "==> live: $CURRENT -> $NEW"
+          EOF
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## Deployment"
+            echo "**Release:** \`$GITHUB_SHA\`"
+            echo ""
+            echo "- \`APP_DIR/current\` → \`releases/$GITHUB_SHA\`, systemd \`hangman\` on \`127.0.0.1:${{ env.APP_PORT }}\`"
+            echo "- https://hangman.mnavasardian.com"
+          } >> "$GITHUB_STEP_SUMMARY"

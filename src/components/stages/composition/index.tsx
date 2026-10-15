@@ -1,46 +1,51 @@
 'use client'
 
 import { MouseEventHandler, useState } from 'react'
-import { selectGameSettings } from 'store/app/selectors'
-import { setAppOptions } from 'store/app/slice'
-import { useAppDispatch } from 'hooks/useAppDispatch'
-import { useAppSelector } from 'hooks/useAppSelector'
-import { LETTERS, SPACE_CHAR, STORE_VARS } from 'helpers/constants/app'
+import { useGameStore } from 'store/game'
+import { LETTERS, PLAY_MODES, SPACE_CHAR } from 'helpers/constants/app'
 import { StageComponent } from 'helpers/types/stage'
+import { trackEvent } from 'helpers/utils/analytics'
+import { createChallengeLink } from 'helpers/utils/challenge'
 import { normalizeSpaces } from 'helpers/utils/commons'
 import { combineClassNames } from 'helpers/utils/styles'
 import { CustomButton } from 'components/shared/customButton'
 import styles from './styles.module.css'
 
 export const Composition: StageComponent = ({ toNextPage }) => {
-  const dispatch = useAppDispatch()
-  const settings = useAppSelector(selectGameSettings)
+  const minLettersCount = useGameStore((state) => state.settings.minLettersCount)
+  const isChallenge = useGameStore((state) => state.mode === PLAY_MODES.challenge)
 
   const [word, setWord] = useState('')
 
   const handleAlphabetLetterClick: MouseEventHandler<HTMLButtonElement> = (e) => {
-    setWord(word + e.currentTarget.name)
+    const letter = e.currentTarget.name
+    setWord((prev) => prev + letter)
   }
 
   const handleAddSpaceCharClick: MouseEventHandler<HTMLButtonElement> = () => {
     setWord((prev) => prev + ' ')
   }
+
   const handleRemoveCharClick: MouseEventHandler<HTMLButtonElement> = () => {
     setWord((prev) => prev.substring(0, prev.length - 1))
   }
 
-  const handleStartDiscovery: MouseEventHandler<HTMLButtonElement> = () => {
-    dispatch(
-      setAppOptions({
-        currentWord: normalizeSpaces(word),
-      })
-    )
-    localStorage.setItem(STORE_VARS.COUNTDOWN_LAST_VALUE, settings.timeLimit.toString())
+  const handleSubmit: MouseEventHandler<HTMLButtonElement> = () => {
+    const finalWord = normalizeSpaces(word)
+    const { startRound, setAppOptions } = useGameStore.getState()
+
+    if (isChallenge) {
+      setAppOptions({ challengeLink: createChallengeLink(finalWord) })
+      trackEvent('challenge_created', { wordLength: finalWord.length })
+    } else {
+      startRound({ word: finalWord })
+    }
     toNextPage()
   }
 
   return (
     <div className={styles.composition}>
+      {isChallenge && <p className={styles.caption}>Գրեք բառ, որը ընկերը պետք է գուշակի</p>}
       <div className={styles.word}>
         {Array.from(word).map((letter, i) => {
           return (
@@ -61,8 +66,8 @@ export const Composition: StageComponent = ({ toNextPage }) => {
         <button
           disabled={!word.length || word.endsWith(' ')}
           className={combineClassNames(styles.letter, styles.space)}
-          key={SPACE_CHAR}
-          name=" "
+          name=' '
+          aria-label='Բացատ'
           onClick={handleAddSpaceCharClick}
         >
           {SPACE_CHAR}
@@ -70,15 +75,15 @@ export const Composition: StageComponent = ({ toNextPage }) => {
         <button
           disabled={!word.length}
           className={combineClassNames(styles.letter, styles.remove)}
-          key="✕"
-          name="✕"
+          name='✕'
+          aria-label='Ջնջել'
           onClick={handleRemoveCharClick}
         >
           ✕
         </button>
       </div>
-      <CustomButton disabled={word.length < settings.minLettersCount} onClick={handleStartDiscovery}>
-        Անցնել գուշակելուն
+      <CustomButton disabled={normalizeSpaces(word).length < minLettersCount} onClick={handleSubmit}>
+        {isChallenge ? 'Ստեղծել հղումը' : 'Անցնել գուշակելուն'}
       </CustomButton>
     </div>
   )

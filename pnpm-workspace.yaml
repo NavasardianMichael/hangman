@@ -1,0 +1,16 @@
+# pnpm settings (pnpm 11+ reads only registry/auth settings from .npmrc)
+
+# Windows: avoid EPERM when native binaries are locked (e.g. dev server running).
+packageImportMethod: copy
+
+# eslint-plugin-react / import / jsx-a11y (via eslint-config-next) work on ESLint 10
+# but haven't widened their declared peer range yet.
+peerDependencyRules:
+  allowedVersions:
+    eslint: '10'
+
+# Dependency install scripts (pnpm 11 fails the install on unreviewed ones).
+allowBuilds:
+  '@google/genai': false # no-op preinstall echo
+  protobufjs: false # postinstall only warns about version mismatches
+  unrs-resolver: false # prebuilt @unrs/resolver-binding-* is installed as an optional dep

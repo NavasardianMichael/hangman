@@ -1,178 +1,122 @@
 'use client'
 
-import { createContext, FC, MouseEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { CSSProperties, FC, useEffect, useState, useSyncExternalStore } from 'react'
 import { DownloadOutlined } from '@ant-design/icons'
-import type { NotificationArgsProps } from 'antd'
-import { Button, Carousel, Modal, notification } from 'antd'
-import Typography from 'antd/es/typography/Typography'
+import { Button, Carousel, Modal, notification, Typography } from 'antd'
 import Image from 'next/image'
-import Hint1Img from 'assets/images/hint1.png'
-import Hint2Img from 'assets/images/hint2.png'
-import Hint3Img from 'assets/images/hint3.png'
+import Hint1Img from 'assets/images/hint1.webp'
+import Hint2Img from 'assets/images/hint2.webp'
+import Hint3Img from 'assets/images/hint3.webp'
+import { useBackClose } from 'hooks/useBackClose'
 import { STORE_VARS } from 'helpers/constants/app'
-import { isInWebView, isIosInStandaloneMode, isNonIosStandaloneMode } from 'helpers/utils/commons'
+import { trackEvent } from 'helpers/utils/analytics'
+import { isInstalledApp, isInWebView, isIos } from 'helpers/utils/commons'
+import {
+  clearInstallPrompt,
+  getInstallPrompt,
+  getServerInstallPrompt,
+  subscribeToInstallPrompt,
+} from 'helpers/utils/installPrompt'
 
-const isIos = () => /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase())
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let deferredPrompt: any | null = null
+const NOTIFICATION_KEY = 'download-app'
 
-type NotificationPlacement = NotificationArgsProps['placement']
+const HINT_IMAGE_STYLE: CSSProperties = { margin: 'auto', maxWidth: '100%', maxHeight: '80vh', objectFit: 'cover' }
 
-const Context = createContext({ name: 'Default' })
+const setAppInstalled = () => {
+  localStorage.setItem(STORE_VARS.PWA_INSTALLED_DATE, Date.now().toString())
+}
+
+const handleAppInstalled = () => {
+  setAppInstalled()
+  trackEvent('pwa_installed')
+}
 
 export const DownloadAppBtn: FC = () => {
   const [api, contextHolder] = notification.useNotification()
-  const [showIosDownloadAppHintModal, setShowIosDownloadAppHintModal] = useState(false)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const isIosRef = useRef(isIos())
-  const isInWebViewRef = useRef(isInWebView())
-  const isStandaloneModeRef = useRef((() => {
-    if (isIos()) return isIosInStandaloneMode()
-    return isNonIosStandaloneMode()
-  })())
+  const [isIosDevice] = useState(isIos)
+  const [isInstalled] = useState(isInstalledApp)
+  const [showIosDownloadAppHintModal, setShowIosDownloadAppHintModal] = useState(() => isIosDevice && !isInstalled)
+  const installPrompt = useSyncExternalStore(subscribeToInstallPrompt, getInstallPrompt, getServerInstallPrompt)
+  useBackClose(showIosDownloadAppHintModal, () => setShowIosDownloadAppHintModal(false))
 
-  const setAppInstalled = useCallback(() => {
-    localStorage.setItem(STORE_VARS.PWA_INSTALLED_DATE, Date.now().toString())
+  useEffect(() => {
+    if (isInstalled) setAppInstalled()
+  }, [isInstalled])
+
+  useEffect(() => {
+    window.addEventListener('appinstalled', handleAppInstalled)
+    return () => window.removeEventListener('appinstalled', handleAppInstalled)
   }, [])
 
+  // The download notification is only offered when the browser actually allows installing
   useEffect(() => {
-    const isIos = isIosRef.current
-    if (isIos) {
-      if (isIosInStandaloneMode()) return setAppInstalled()
-      setShowIosDownloadAppHintModal(true)
-      return
+    if (isIosDevice || isInstalled || !installPrompt || isInWebView()) return
+
+    const handleDownloadClick = async () => {
+      api.destroy(NOTIFICATION_KEY)
+      await installPrompt.prompt()
+      const { outcome } = await installPrompt.userChoice
+      if (outcome === 'accepted') setAppInstalled()
+      clearInstallPrompt()
     }
 
-    if (isInWebViewRef.current) return
-
-    if (isNonIosStandaloneMode()) return setAppInstalled()
-
-    const preservePrompt = (event: Event) => {
-      // Prevent the mini-infobar from appearing on mobile
-      event.preventDefault()
-      // Stash the event so it can be triggered later
-      deferredPrompt = event
-    }
-    window.addEventListener('beforeinstallprompt', preservePrompt)
-
-    return () => {
-      if (isIos) return
-      window.removeEventListener('beforeinstallprompt', preservePrompt)
-    }
-  }, [setAppInstalled])
-
-  useEffect(() => {
-    window.addEventListener('appinstalled', setAppInstalled)
-    return () => window.removeEventListener('appinstalled', setAppInstalled)
-  }, [setAppInstalled])
-
-  const downloadAppBtnClick = useCallback<MouseEventHandler>(async () => {
-    if (!deferredPrompt) return
-    // Show the install prompt
-    deferredPrompt.prompt()
-    // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice
-
-    if (outcome === 'accepted') setAppInstalled()
-
-    deferredPrompt = null
-  }, [setAppInstalled])
-
-  const openNotification = useCallback(
-    (placement: NotificationPlacement) => {
+    const timeoutId = setTimeout(() => {
+      trackEvent('pwa_prompt_shown')
       api.info({
-        message: <div style={{ textAlign: 'center' }}><b>Ներբեռնե՞լ հավելվածը</b><Typography style={{ fontSize: '8px', textAlign: 'center' }}>* Ինկոգնիտո ռեժիմում կարող է չաշխատել</Typography></div>,
+        key: NOTIFICATION_KEY,
+        title: (
+          <div style={{ textAlign: 'center' }}>
+            <b>Ներբեռնե՞լ հավելվածը</b>
+            <Typography style={{ fontSize: '8px', textAlign: 'center' }}>* Ինկոգնիտո ռեժիմում կարող է չաշխատել</Typography>
+          </div>
+        ),
         duration: 0,
         icon: ' ',
         description: (
-          <Context.Consumer>
-            {() => {
-              return (
-                <Button
-                  type='primary'
-                  style={{ width: '100%' }}
-                  onClick={downloadAppBtnClick}
-                  icon={<DownloadOutlined />}
-                >
-                  Ներբեռնել
-                </Button>
-              )
-            }}
-          </Context.Consumer>
+          <Button type='primary' style={{ width: '100%' }} onClick={handleDownloadClick} icon={<DownloadOutlined />}>
+            Ներբեռնել
+          </Button>
         ),
-        placement,
+        placement: 'top',
       })
-    },
-    [api, downloadAppBtnClick]
-  )
+    }, 1000)
 
-  useEffect(() => {
-    const openDownloadNotification = () => {
-      openNotification('top')
-    }
+    return () => clearTimeout(timeoutId)
+  }, [api, installPrompt, isInstalled, isIosDevice])
 
-    if (!isIosRef.current) {
-      timeoutRef.current = setTimeout(() => {
-        openDownloadNotification()
-      }, 1000)
-    }
-
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    }
-  }, [openNotification])
-
-  const contextValue = useMemo(() => ({ name: 'Ant Design' }), [])
-  console.log({ isStandaloneModeRef });
-
-  if (isStandaloneModeRef.current) return
+  if (isInstalled) return null
 
   return (
     <>
-      {
-        <Modal
-          title='Ինչպե՞ս ներբեռնել հավելվածը'
-          centered
-          width={'80%'}
-          open={showIosDownloadAppHintModal}
-          onCancel={() => setShowIosDownloadAppHintModal(false)}
-          okButtonProps={{
-            style: { display: 'none' },
-          }}
-          cancelButtonProps={{
-            style: { display: 'none' },
-          }}
-        >
-          <div style={{ maxHeight: '80vh', boxSizing: 'border-box' }}>
-            <Typography style={{ fontSize: '8px', textAlign: 'center' }}>* Ինկոգնիտո ռեժիմում կարող է չաշխատել</Typography>
-            <Carousel autoplay arrows dots dotPosition='bottom'>
-              <div>
-                <Image
-                  src={Hint1Img}
-                  alt='Hint 1'
-                  style={{ margin: 'auto', maxWidth: '100%', maxHeight: '80vh', objectFit: 'cover' }}
-                  priority
-                />
-              </div>
-              <div>
-                <Image
-                  src={Hint2Img}
-                  alt='Hint 2'
-                  style={{ margin: 'auto', maxWidth: '100%', maxHeight: '80vh', objectFit: 'cover' }}
-                />
-              </div>
-              <div>
-                <Image
-                  src={Hint3Img}
-                  alt='Hint 3'
-                  style={{ margin: 'auto', maxWidth: '100%', maxHeight: '80vh', objectFit: 'cover' }}
-                />
-              </div>
-            </Carousel>
-          </div>
-        </Modal>
-      }
-      <Context.Provider value={contextValue}>{contextHolder}</Context.Provider>
+      <Modal
+        title='Ինչպե՞ս ներբեռնել հավելվածը'
+        centered
+        width='min(80vw, 420px)'
+        open={showIosDownloadAppHintModal}
+        onCancel={() => setShowIosDownloadAppHintModal(false)}
+        okButtonProps={{
+          style: { display: 'none' },
+        }}
+        cancelButtonProps={{
+          style: { display: 'none' },
+        }}
+      >
+        <div style={{ maxHeight: '80vh', boxSizing: 'border-box' }}>
+          <Typography style={{ fontSize: '8px', textAlign: 'center' }}>* Ինկոգնիտո ռեժիմում կարող է չաշխատել</Typography>
+          <Carousel autoplay arrows dots dotPlacement='bottom'>
+            <div>
+              <Image src={Hint1Img} alt='Hint 1' style={HINT_IMAGE_STYLE} />
+            </div>
+            <div>
+              <Image src={Hint2Img} alt='Hint 2' style={HINT_IMAGE_STYLE} />
+            </div>
+            <div>
+              <Image src={Hint3Img} alt='Hint 3' style={HINT_IMAGE_STYLE} />
+            </div>
+          </Carousel>
+        </div>
+      </Modal>
+      {contextHolder}
     </>
   )
 }

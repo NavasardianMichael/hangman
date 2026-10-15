@@ -2,190 +2,188 @@
 
 import { MouseEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Statistic, StatisticTimerProps } from 'antd'
-import { selectAppOptions } from 'store/app/selectors'
-import { incrementCurrentPlayerPoint } from 'store/app/slice'
-import { useAppDispatch } from 'hooks/useAppDispatch'
-import { useAppSelector } from 'hooks/useAppSelector'
-import { LETTERS, PLAY_MODES, STORE_VARS } from 'helpers/constants/app'
+import { prefetchWord } from 'app/getWord/client'
+import { useShallow } from 'zustand/react/shallow'
+import { useGameStore } from 'store/game'
+import { TLetter, TRoundResult } from 'store/types'
+import { useUiStore } from 'store/ui'
+import { LETTERS, MAX_MISTAKES, PLAY_MODES } from 'helpers/constants/app'
 import { StageComponent } from 'helpers/types/stage'
+import { trackEvent } from 'helpers/utils/analytics'
 import { combineClassNames } from 'helpers/utils/styles'
+import { splitWordToLetters } from 'helpers/utils/words'
 import { Audio } from 'components/shared/audio'
 import { CustomButton } from 'components/shared/customButton'
-import { Hangman } from './hangman'
+import { Hangman, THangmanStatus } from './hangman'
 import styles from './styles.module.css'
 
-type MappedLettersBooleans = {
-  [key in ExtendedLetters[number]]?: boolean
+type TWordCell = TLetter | ' '
+
+// Resumes from the seconds left before a pause, or from those saved before a reload
+const getCountdownDeadline = (remainingSeconds: number | null = null) => {
+  const { settings, round } = useGameStore.getState()
+  if (!settings.withTimeLimit || settings.timeLimit <= 0) return 0
+  return Date.now() + (remainingSeconds ?? round.remainingSeconds ?? settings.timeLimit) * 1000
 }
 
-type ExtendedLetters = (typeof LETTERS)[number] | ' '
-
-const fixLocalIssue = (word: string) => {
-  const result: string[] = [];
-  let i = 0;
-
-  while (i < word.length) {
-    const char = word[i];
-
-    // Check if current and next character form 'ՈՒ'
-    if (char === 'Ո' && word[i + 1] === 'Ւ') {
-      result.push('ՈՒ');
-      i += 2; // Skip both characters
-    } else {
-      result.push(char);
-      i += 1;
-    }
-  }
-
-  return result;
-}
+const isTimerPausedByUi = ({ leaveDialog, isHintFlowActive }: ReturnType<typeof useUiStore.getState>) =>
+  !!leaveDialog || isHintFlowActive
 
 export const Discovery: StageComponent = ({ toNextPage }) => {
-  const dispatch = useAppDispatch()
-  const { currentWord, mode, settings } = useAppSelector(selectAppOptions)
+  const { currentWord, mode, withTimeLimit, timeLimit, minLettersCount, category, difficulty } = useGameStore(
+    useShallow((state) => ({
+      currentWord: state.currentWord,
+      mode: state.mode,
+      withTimeLimit: state.settings.withTimeLimit,
+      timeLimit: state.settings.timeLimit,
+      minLettersCount: state.settings.minLettersCount,
+      category: state.settings.category,
+      difficulty: state.settings.difficulty,
+    }))
+  )
+  const { guessedLetters, wastedLetters, hint, hintRevealed, result } = useGameStore(
+    useShallow((state) => ({
+      guessedLetters: state.round.guessedLetters,
+      wastedLetters: state.round.wastedLetters,
+      hint: state.round.hint,
+      hintRevealed: state.round.hintRevealed,
+      result: state.round.result,
+    }))
+  )
+  const isTimerPaused = useUiStore(isTimerPausedByUi)
+
   const [finishedAudioTrigger, setFinishedAudioTrigger] = useState(false)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const isOpenForCountdownValueStoring = useRef(true)
+  const [countdownDeadline, setCountdownDeadline] = useState(() => getCountdownDeadline())
+  // Seconds left on the countdown. Kept out of the store while ticking: saving the store writes localStorage, so
+  // it's saved only when the page is hidden, closed or reloaded.
+  const remainingSecondsRef = useRef<number | null>(null)
 
-  const currentWordLettersArr = useMemo(() => {
-    const word = currentWord.toUpperCase()
-    const arr = fixLocalIssue(word) as ExtendedLetters[]
+  // During the leave question, a hint dialog or the rewarded ad, the countdown pauses and then resumes where it stopped
+  useEffect(
+    () =>
+      useUiStore.subscribe((state, previous) => {
+        if (isTimerPausedByUi(previous) && !isTimerPausedByUi(state)) {
+          setCountdownDeadline(getCountdownDeadline(remainingSecondsRef.current))
+        }
+      }),
+    []
+  )
 
-    return arr
-  }, [currentWord])
+  useEffect(() => {
+    const saveRemainingSeconds = () => {
+      const seconds = remainingSecondsRef.current
+      const { round, setRemainingSeconds } = useGameStore.getState()
+      if (seconds === null || round.result || seconds === round.remainingSeconds) return
+      setRemainingSeconds(seconds)
+    }
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') saveRemainingSeconds()
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('pagehide', saveRemainingSeconds)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('pagehide', saveRemainingSeconds)
+    }
+  }, [])
 
-  const [guessedLetters, setGuessedLetters] = useState<MappedLettersBooleans>((() => {
-    const storedGuessedLetters = localStorage.getItem(STORE_VARS.GUESSED_LETTERS)
-    return storedGuessedLetters ? JSON.parse(storedGuessedLetters) as MappedLettersBooleans : {}
-  })())
-  const [wastedLetters, setWastedLetters] = useState<MappedLettersBooleans>((() => {
-    const storedWastedLetters = localStorage.getItem(STORE_VARS.WASTED_LETTERS)
-    return storedWastedLetters ? JSON.parse(storedWastedLetters) as MappedLettersBooleans : {}
-  })())
+  const isSingleMode = mode === PLAY_MODES.single
+  // Challenge rounds from a friend's link are untimed
+  const hasTimer = withTimeLimit && timeLimit > 0 && mode !== PLAY_MODES.challenge
+  const currentWordLetters = useMemo(() => splitWordToLetters(currentWord.toUpperCase()) as TWordCell[], [currentWord])
+  const wastedLettersCount = Object.keys(wastedLetters).length
+  const isWordGuessed = currentWordLetters.filter((letter) => letter !== ' ').every((letter) => guessedLetters[letter])
+  const isLost = result === 'lost' || (!isWordGuessed && wastedLettersCount > MAX_MISTAKES)
+  const isRoundOver = isWordGuessed || isLost
+  const hangmanStatus: THangmanStatus = isWordGuessed ? 'won' : isLost ? 'lost' : 'playing'
 
+  const endRound = useCallback(
+    (roundResult: TRoundResult) => {
+      const { round, finishRound } = useGameStore.getState()
+      if (round.result) return
+      finishRound(roundResult)
+      trackEvent('round_end', {
+        mode,
+        result: roundResult,
+        wordLength: currentWordLetters.length,
+        mistakes: Object.keys(round.wastedLetters).length,
+        usedHint: round.hintRevealed,
+      })
+    },
+    [currentWordLetters.length, mode]
+  )
 
-  const wastedLettersCount = useMemo(() => {
-    return Object.keys(wastedLetters).length
-  }, [wastedLetters])
+  useEffect(() => {
+    if (isWordGuessed) endRound('won')
+    else if (wastedLettersCount > MAX_MISTAKES) endRound('lost')
+  }, [endRound, isWordGuessed, wastedLettersCount])
 
-  const isWordGuessed = useMemo(() => {
-    return currentWordLettersArr.filter((letter) => letter !== ' ').every((letter) => guessedLetters[letter])
-  }, [currentWordLettersArr, guessedLetters])
-
-  const countdownDeadline = useMemo(() => {
-    // if (isWordGuessed || wastedLettersCount > 6) return Date.now()
-    const lastDeadlineValue = localStorage.getItem(STORE_VARS.COUNTDOWN_LAST_VALUE)
-
-    if (!settings.withTimeLimit || settings.timeLimit <= 0) return 0
-    if (lastDeadlineValue && !isNaN(Number(lastDeadlineValue))) return Number(lastDeadlineValue) * 1000 + Date.now()
-    return Date.now() + settings.timeLimit * 1000
-  }, [settings.timeLimit, settings.withTimeLimit])
+  // The next AI word loads while this round is played
+  useEffect(() => {
+    if (isSingleMode) prefetchWord({ minLettersCount, category, difficulty })
+  }, [category, difficulty, isSingleMode, minLettersCount])
 
   const handleAlphabetLetterClick: MouseEventHandler<HTMLButtonElement> = (e) => {
-    const letter = e.currentTarget.name.toUpperCase() as ExtendedLetters
-
-    if (!currentWordLettersArr.includes(letter)) {
-      setWastedLetters((prev) => ({ ...prev, [letter]: true }))
-      return
-    }
-
-    setGuessedLetters((prev) => ({ ...prev, [letter]: true }))
+    const letter = e.currentTarget.name as TLetter
+    const { guessLetter, wasteLetter } = useGameStore.getState()
+    if (currentWordLetters.includes(letter)) guessLetter(letter)
+    else wasteLetter(letter)
   }
 
-  const handleShowSummary = () => {
-    toNextPage()
+  const countdownOnChange = (value: StatisticTimerProps['value']) => {
+    if (typeof value === 'number') remainingSecondsRef.current = Math.max(0, Math.ceil(value / 1000))
   }
-
-  const countdownOnChange = useCallback((value: StatisticTimerProps['value']) => {
-    if (!isOpenForCountdownValueStoring.current) return
-
-    if (!value) return;
-    if (settings.timeLimit && typeof value === 'number') {
-      isOpenForCountdownValueStoring.current = false
-      localStorage.setItem(STORE_VARS.COUNTDOWN_LAST_VALUE, (Math.floor(value / 1000)).toString())
-      localStorage.setItem(STORE_VARS.GUESSED_LETTERS, JSON.stringify(guessedLetters))
-      localStorage.setItem(STORE_VARS.WASTED_LETTERS, JSON.stringify(wastedLetters))
-      timeoutRef.current = setTimeout(() => {
-        isOpenForCountdownValueStoring.current = true
-      }, 3000)
-    }
-  }, [guessedLetters, settings.timeLimit, wastedLetters])
 
   const handleTimerFinish: StatisticTimerProps['onFinish'] = () => {
-    if (!isWordGuessed) setFinishedAudioTrigger(true)
+    if (isWordGuessed) return
+    setFinishedAudioTrigger(true)
+    endRound('lost')
     setTimeout(() => {
       toNextPage()
     }, 100)
   }
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-      localStorage.removeItem(STORE_VARS.COUNTDOWN_LAST_VALUE)
-      localStorage.removeItem(STORE_VARS.GUESSED_LETTERS)
-      localStorage.removeItem(STORE_VARS.WASTED_LETTERS)
-    }
-  }, [])
-
-
-  useEffect(() => {
-    if (!isWordGuessed) return
-    dispatch(incrementCurrentPlayerPoint())
-  }, [currentWordLettersArr, dispatch, guessedLetters, isWordGuessed])
+  const showHintText = isSingleMode && !!hint && hintRevealed && !isRoundOver
 
   return (
     <div className={styles.discovery}>
-      {settings.withTimeLimit && settings.timeLimit > 0 && (
-        <Statistic.Timer
-          style={{
-            fontVariantNumeric: 'tabular-nums',
-            marginLeft: 16,
-            marginTop: 4,
-          }}
-          format='mm:ss'
-          type='countdown'
-          value={countdownDeadline}
-          onChange={countdownOnChange}
-          onFinish={handleTimerFinish}
-        />
-      )}
+      <div className={styles.info}>
+        {hasTimer && !isRoundOver && !isTimerPaused && (
+          <Statistic.Timer
+            className={styles.timer}
+            format='mm:ss'
+            type='countdown'
+            value={countdownDeadline}
+            onChange={countdownOnChange}
+            onFinish={handleTimerFinish}
+          />
+        )}
+      </div>
       <div
         className={combineClassNames(
           styles.word,
           isWordGuessed ? styles.success : undefined,
-          !isWordGuessed && wastedLettersCount > 6 ? styles.fail : undefined
+          isLost ? styles.fail : undefined
         )}
       >
-        {currentWordLettersArr.map((letter, i) => {
+        {currentWordLetters.map((letter, i) => {
           const isSpace = letter === ' '
+          const isShown = isWordGuessed || isLost || (!isSpace && guessedLetters[letter])
 
           return (
-            <span
-              key={i}
-              className={combineClassNames(
-                styles.cell,
-                isSpace && styles.space,
-                isWordGuessed || (!isWordGuessed && (guessedLetters[letter] || wastedLettersCount > 6))
-                  ? styles.guessed
-                  : undefined
-              )}
-            >
+            <span key={i} className={combineClassNames(styles.cell, isSpace && styles.space, isShown && styles.guessed)}>
               <span>{letter}</span>
             </span>
           )
         })}
       </div>
-      <Audio deps={[wastedLettersCount, currentWordLettersArr]} src='/scribble.mp3' />
+      {showHintText && <p className={styles.hintText}>💡 {hint}</p>}
+      <Audio deps={[wastedLettersCount, currentWordLetters]} src='/scribble.mp3' />
       <Audio deps={[isWordGuessed]} src='/win.mp3' />
-      <Audio deps={[!isWordGuessed && wastedLettersCount > 6, finishedAudioTrigger]} src='/loss.mp3' />
-      <Audio deps={[Object.values(guessedLetters).length]} src='/correct.mp3' />
-      <Hangman step={wastedLettersCount} />
-      <div
-        className={combineClassNames(
-          styles.alphabet,
-          isWordGuessed || wastedLettersCount > 6 ? styles.disabled : undefined
-        )}
-      >
+      <Audio deps={[isLost, finishedAudioTrigger]} src='/loss.mp3' />
+      <Audio deps={[Object.keys(guessedLetters).length]} src='/correct.mp3' />
+      <Hangman step={wastedLettersCount} status={hangmanStatus} />
+      <div className={combineClassNames(styles.alphabet, isRoundOver ? styles.disabled : undefined)}>
         {LETTERS.map((letter) => {
           return (
             <button
@@ -204,9 +202,9 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
           )
         })}
       </div>
-      {(isWordGuessed || wastedLettersCount > 6) && (
-        <CustomButton onClick={handleShowSummary}>
-          {mode === PLAY_MODES.single ? `Շարունակել` : `Անցնել հաջորդ խաղացողին`}
+      {isRoundOver && (
+        <CustomButton onClick={() => toNextPage()}>
+          {mode === PLAY_MODES.multiplayer ? 'Անցնել հաջորդ խաղացողին' : 'Շարունակել'}
         </CustomButton>
       )}
     </div>

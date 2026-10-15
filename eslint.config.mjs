@@ -1,30 +1,22 @@
-import { FlatCompat } from '@eslint/eslintrc'
+import { defineConfig, globalIgnores } from 'eslint/config'
+import nextVitals from 'eslint-config-next/core-web-vitals'
+import nextTs from 'eslint-config-next/typescript'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
-import { dirname } from 'path'
-import { fileURLToPath } from 'url'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-})
-
-const eslintConfig = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
-  {
-    ignores: [
-      'node_modules/',
-      '.next/',
-      'out/',
-      'build/',
-      'dist/',
-      'public/',
-      '*.config.js',
-      'next.config.js',
-      '.env*',
-    ],
-  },
+export default defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  globalIgnores([
+    'node_modules/',
+    '.next/',
+    'out/',
+    'build/',
+    'dist/',
+    'public/',
+    'next-env.d.ts',
+    'scripts/',
+    '.env*',
+  ]),
   {
     plugins: {
       'simple-import-sort': simpleImportSort,
@@ -65,6 +57,4 @@ const eslintConfig = [
       'simple-import-sort/exports': 'error',
     },
   },
-]
-
-export default eslintConfig
+])

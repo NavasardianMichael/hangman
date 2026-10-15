@@ -1,0 +1,35 @@
+export type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+}
+
+let deferredPrompt: BeforeInstallPromptEvent | null = null
+const listeners = new Set<() => void>()
+
+const notifyListeners = () => listeners.forEach((listener) => listener())
+
+// Registered when the bundle loads: the event can fire before the Start stage mounts
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (event) => {
+    // Prevent the mini-infobar from appearing on mobile; the app shows its own prompt
+    event.preventDefault()
+    deferredPrompt = event as BeforeInstallPromptEvent
+    notifyListeners()
+  })
+}
+
+export const subscribeToInstallPrompt = (listener: () => void) => {
+  listeners.add(listener)
+  return () => {
+    listeners.delete(listener)
+  }
+}
+
+export const getInstallPrompt = () => deferredPrompt
+
+export const getServerInstallPrompt = () => null
+
+export const clearInstallPrompt = () => {
+  deferredPrompt = null
+  notifyListeners()
+}

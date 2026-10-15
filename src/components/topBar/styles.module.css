@@ -1,0 +1,22 @@
+.topBar {
+  position: absolute;
+  top: calc(var(--ad-band-height) + 12px);
+  right: 16px;
+  z-index: 2;
+  display: flex;
+  gap: 10px;
+}
+
+.turnInfo {
+  text-align: center;
+}
+
+.turnText {
+  margin-top: 0.45rem;
+  margin-bottom: 0;
+  font-weight: 500;
+
+  &.nextTurn {
+    margin-top: 1rem;
+  }
+}

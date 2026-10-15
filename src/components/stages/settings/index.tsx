@@ -1,114 +1,146 @@
 'use client'
 
-import { MouseEventHandler, useMemo, useState } from 'react'
-import { LeftOutlined } from '@ant-design/icons'
-import { Button, Flex, Form, InputNumber, Radio, RadioGroupProps, RadioProps, Select, SelectProps, Spin } from 'antd'
+import { MouseEventHandler, useState } from 'react'
+import {
+  App,
+  Flex,
+  Form,
+  InputNumber,
+  Radio,
+  RadioGroupProps,
+  RadioProps,
+  Select,
+  SelectProps,
+  Spin,
+} from 'antd'
 import { getWord } from 'app/getWord/client'
-import { selectAppOptions, selectIsSingleMode } from 'store/app/selectors'
-import { setAppOptions, setGameSettings } from 'store/app/slice'
-import { useAppDispatch } from 'hooks/useAppDispatch'
-import { useAppSelector } from 'hooks/useAppSelector'
-import { CATEGORIES_OPTIONS, DIFFICULTY_LEVELS_OPTIONS, GAME_STAGES } from 'helpers/constants/app'
+import { useGameStore } from 'store/game'
+import {
+  CATEGORIES_OPTIONS,
+  DIFFICULTY_LEVELS_OPTIONS,
+  GAME_STAGES,
+  GET_WORD_ERROR_MESSAGE,
+  PLAY_MODES,
+} from 'helpers/constants/app'
 import { StageComponent } from 'helpers/types/stage'
+import { trackEvent } from 'helpers/utils/analytics'
+import { navigate } from 'helpers/utils/gameRouter'
 import { CustomButton } from 'components/shared/customButton'
+import { IconButton } from 'components/shared/iconButton'
+import { BackIcon } from 'components/shared/icons'
 import styles from './styles.module.css'
 
+const TIME_LIMITATION_OPTIONS: RadioGroupProps['options'] = [
+  { label: 'Ժամանակով', value: true },
+  { label: 'Անժամանակ', value: false },
+]
+
 export const Settings: StageComponent = ({ toNextPage }) => {
-  const dispatch = useAppDispatch()
-  const appState = useAppSelector(selectAppOptions)
-  const { minLettersCount, category, difficulty, pointsToWin, timeLimit, withTimeLimit } = appState.settings
-  const isSingleMode = useAppSelector(selectIsSingleMode)
+  const { message: messageApi } = App.useApp()
+  const settings = useGameStore((state) => state.settings)
+  const isSingleMode = useGameStore((state) => state.mode === PLAY_MODES.single)
+  const { minLettersCount, category, difficulty, pointsToWin, timeLimit, withTimeLimit } = settings
   const [isPending, setIsPending] = useState(false)
 
+  const { setGameSettings } = useGameStore.getState()
+
   const onTimeLimitationChange: RadioProps['onChange'] = (e) => {
-    const withTimeLimit = e.target.value
-    dispatch(setGameSettings({ timeLimit: 60, withTimeLimit }))
+    setGameSettings({ timeLimit: 60, withTimeLimit: e.target.value })
   }
 
   const handleStartGameBtnClick: MouseEventHandler<HTMLButtonElement> = async () => {
     if (isPending) return
+    const { startRound, recordGameStarted, mode } = useGameStore.getState()
     if (isSingleMode) {
       setIsPending(true)
-      const newWord = await getWord({ minLettersCount, category, difficulty })
-      dispatch(setAppOptions({ currentWord: newWord }))
-      setIsPending(false)
+      try {
+        const result = await getWord({ minLettersCount, category, difficulty })
+        startRound(result)
+      } catch {
+        messageApi.error(GET_WORD_ERROR_MESSAGE)
+        return
+      } finally {
+        setIsPending(false)
+      }
+      recordGameStarted()
     }
+    trackEvent('game_start', { mode })
     toNextPage()
   }
 
   const handleCategoryChange: SelectProps['onChange'] = (value) => {
-    dispatch(setGameSettings({ category: value }))
+    setGameSettings({ category: value })
   }
 
   const handleDifficultyChange: SelectProps['onChange'] = (value) => {
-    dispatch(setGameSettings({ difficulty: value }))
+    setGameSettings({ difficulty: value })
   }
 
-  const isStartGameDisabled = useMemo(() => {
-    return isPending || !minLettersCount || !category || !difficulty || pointsToWin < 1 || timeLimit < 1
-  }, [isPending, minLettersCount, category, difficulty, pointsToWin, timeLimit])
-
-  const timeLimitationOptions: RadioGroupProps['options'] = useMemo(() => {
-    return [
-      { label: 'Ժամանակով', value: true },
-      { label: 'Անժամանակ', value: false },
-    ]
-  }, [])
+  const isStartGameDisabled =
+    isPending || !minLettersCount || !category || !difficulty || pointsToWin < 1 || timeLimit < 1
 
   return (
     <>
-      <Button type="primary" icon={<LeftOutlined />} disabled={isPending} style={{ position: 'absolute', left: 12, top: 12, width: 24, height: 24 }} className={styles.backBtn} onClick={() => dispatch(setAppOptions({ currentStage: GAME_STAGES.start }))} />
+      <IconButton
+        disabled={isPending}
+        className={styles.backBtn}
+        aria-label='Վերադառնալ'
+        title='Վերադառնալ'
+        onClick={() => navigate(GAME_STAGES.start)}
+      >
+        <BackIcon />
+      </IconButton>
       <div className={styles.settings}>
-        <Form layout="vertical" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <Form layout='vertical' className={styles.form}>
           <Flex vertical gap={20}>
-            <Form.Item label="Ժամանակի սահմանափակում">
+            <Form.Item label='Ժամանակի սահմանափակում'>
               <Radio.Group
                 block
-                options={timeLimitationOptions}
+                options={TIME_LIMITATION_OPTIONS}
                 value={withTimeLimit}
                 onChange={onTimeLimitationChange}
-                optionType="button"
-                buttonStyle="solid"
+                optionType='button'
+                buttonStyle='solid'
                 disabled={isPending}
               />
             </Form.Item>
             {withTimeLimit && (
-              <Form.Item label="Վայրկյան">
+              <Form.Item label='Վայրկյան'>
                 <InputNumber
                   min={1}
                   max={200}
                   value={timeLimit}
-                  onChange={(value) => dispatch(setGameSettings({ timeLimit: value ?? 0 }))}
+                  onChange={(value) => setGameSettings({ timeLimit: value ?? 0 })}
                   style={{ background: 'transparent', width: '100%' }}
                   disabled={isPending}
                 />
               </Form.Item>
             )}
           </Flex>
-          <Form.Item label="Քանիսից է խաղը">
+          <Form.Item label='Քանիսից է խաղը'>
             <InputNumber
               min={1}
               max={999}
               controls
               value={pointsToWin}
-              onChange={(value) => dispatch(setGameSettings({ pointsToWin: value ?? 1 }))}
+              onChange={(value) => setGameSettings({ pointsToWin: value ?? 1 })}
               style={{ background: 'transparent', width: '100%' }}
               disabled={isPending}
             />
           </Form.Item>
-          <Form.Item label="Նվազագույն տառերի քանակը">
+          <Form.Item label='Նվազագույն տառերի քանակը'>
             <InputNumber
               min={2}
               max={8}
               controls
               value={minLettersCount}
-              onChange={(value) => dispatch(setGameSettings({ minLettersCount: value ?? 3 }))}
+              onChange={(value) => setGameSettings({ minLettersCount: value ?? 3 })}
               style={{ background: 'transparent', width: '100%' }}
               disabled={isPending}
             />
           </Form.Item>
           {isSingleMode && (
-            <Form.Item label="Թեմա">
+            <Form.Item label='Թեմա'>
               <Select
                 value={category}
                 onChange={handleCategoryChange}
@@ -119,7 +151,7 @@ export const Settings: StageComponent = ({ toNextPage }) => {
             </Form.Item>
           )}
           {isSingleMode && (
-            <Form.Item label="Բարդության մակարդակ">
+            <Form.Item label='Բարդության մակարդակ'>
               <Select
                 value={difficulty}
                 onChange={handleDifficultyChange}
@@ -129,16 +161,16 @@ export const Settings: StageComponent = ({ toNextPage }) => {
               />
             </Form.Item>
           )}
-          <CustomButton disabled={isStartGameDisabled} onClick={handleStartGameBtnClick}  >
-            <Flex align='center' justify='center' gap={12}>
-              {isPending && <Spin size='small' />}
-              <span style={{ fontSize: (isPending && isSingleMode) ? '.7rem' : '1rem' }}>
-                {(isPending && isSingleMode) ? 'Արհեստական բանականությունը մտածում է․․․' : 'Սկսել խաղը'}
-              </span>
-            </Flex>
-          </CustomButton>
         </Form>
       </div>
+      <CustomButton type='button' disabled={isStartGameDisabled} onClick={handleStartGameBtnClick}>
+        <Flex align='center' justify='center' gap={12}>
+          {isPending && <Spin size='small' />}
+          <span style={{ fontSize: isPending && isSingleMode ? '.7rem' : '1rem' }}>
+            {isPending && isSingleMode ? 'Արհեստական բանականությունը մտածում է․․․' : 'Սկսել խաղը'}
+          </span>
+        </Flex>
+      </CustomButton>
     </>
   )
 }

@@ -1,0 +1,18 @@
+/* Same text settings as the content page card */
+.content {
+  padding: 0.75rem 0.5rem 0.25rem;
+  color: #2b2b2b;
+  letter-spacing: 1px;
+  line-height: 1.6;
+  user-select: text;
+
+  & div,
+  & h2,
+  & h3 {
+    letter-spacing: inherit;
+  }
+
+  & div {
+    line-height: inherit;
+  }
+}

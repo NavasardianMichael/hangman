@@ -2,11 +2,14 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
+    id: '/',
     short_name: 'Կախաղան',
     name: 'Կախաղան | Hangman',
     theme_color: '#ffffff',
+    background_color: '#575757',
     orientation: 'portrait',
     start_url: '/',
+    scope: '/',
     display: 'standalone',
     display_override: ['fullscreen', 'minimal-ui'],
     description: 'Հայտնի ԿԱԽԱՂԱՆ (HANGMAN) Խաղի հայկական տարբերակն արդեն հասանելի է առցանց',
@@ -15,7 +18,7 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/images/screenshot1.png',
         type: 'image/png',
         sizes: '379x863',
-        form_factor: 'wide',
+        form_factor: 'narrow',
       },
       {
         src: '/images/screenshot2.png',
@@ -27,7 +30,7 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/images/screenshot3.png',
         type: 'image/png',
         sizes: '379x863',
-        form_factor: 'wide',
+        form_factor: 'narrow',
       },
     ],
     icons: [

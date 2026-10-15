@@ -1,59 +1,111 @@
 'use client'
 
-import { MouseEventHandler, useMemo, useRef } from 'react'
-import { Button, ConfigProvider, ThemeConfig } from 'antd'
-import { setAppOptions } from 'store/app/slice'
-import { TAppSlice } from 'store/app/types'
-import { useAppDispatch } from 'hooks/useAppDispatch'
-import { PLAY_MODES, STORE_VARS } from 'helpers/constants/app'
+import { useState } from 'react'
+import { BarChartOutlined } from '@ant-design/icons'
+import { Button, ConfigProvider, Modal, ThemeConfig } from 'antd'
+import Link from 'next/link'
+import { useGameStore } from 'store/game'
+import { TPlayMode } from 'store/types'
+import { useUiStore } from 'store/ui'
+import { useBackClose } from 'hooks/useBackClose'
+import { GAME_STAGES, PLAY_MODES, STORE_VARS } from 'helpers/constants/app'
 import { StageComponent } from 'helpers/types/stage'
+import { getResumeStage } from 'helpers/utils/gameFlow'
+import { navigate } from 'helpers/utils/gameRouter'
+import { combineClassNames } from 'helpers/utils/styles'
 import { DownloadAppBtn } from 'components/downloadAppBtn'
+import { StatsPanel } from 'components/stats'
 import styles from './styles.module.css'
 
 const timeoutToHintDownloadApp = 60 * 60 * 1000
 
-export const Start: StageComponent = ({ toNextPage }) => {
-  const dispatch = useAppDispatch()
-  const isAppInstalledRef = useRef((() => {
-    const pwaInstalledDate = localStorage.getItem(STORE_VARS.PWA_INSTALLED_DATE)
-    return pwaInstalledDate && !isNaN(+pwaInstalledDate) ? Date.now() - +pwaInstalledDate < timeoutToHintDownloadApp : false
-  })())
-  const handleClick: MouseEventHandler<HTMLButtonElement> = async (event) => {
-    const mode = event.currentTarget.name as TAppSlice['mode']
-    dispatch(setAppOptions({ mode }))
-    toNextPage(mode)
+const THEME_CONFIG: ThemeConfig = {
+  token: {
+    colorPrimary: '#575757',
+    borderRadius: 0,
+    colorBgContainer: '#d3d3d32e',
+    colorPrimaryBg: '#575757',
+  },
+}
+
+const MODE_LABELS: Record<TPlayMode, string> = {
+  [PLAY_MODES.single]: 'մեկ հոգով',
+  [PLAY_MODES.multiplayer]: 'երկու հոգով',
+  [PLAY_MODES.challenge]: 'մարտահրավեր',
+}
+
+// The download hint comes back an hour after install, in case the app was removed
+const wasAppInstalledRecently = () => {
+  const pwaInstalledDate = localStorage.getItem(STORE_VARS.PWA_INSTALLED_DATE)
+  return pwaInstalledDate && !isNaN(+pwaInstalledDate) ? Date.now() - +pwaInstalledDate < timeoutToHintDownloadApp : false
+}
+
+export const Start: StageComponent = () => {
+  const [isAppInstalled] = useState(wasAppInstalledRecently)
+  const [statsOpen, setStatsOpen] = useState(false)
+  useBackClose(statsOpen, () => setStatsOpen(false))
+
+  // An unfinished game saved from an earlier visit (e.g. the app was closed mid-round)
+  const resumeStage = useGameStore(getResumeStage)
+  const savedMode = useGameStore((state) => state.mode)
+
+  // Starting another game replaces the saved one, so ask first
+  const startMode = (mode: TPlayMode) => {
+    const begin = () => {
+      const { resetGame, setAppOptions } = useGameStore.getState()
+      resetGame()
+      setAppOptions({ mode })
+      navigate(mode === PLAY_MODES.challenge ? GAME_STAGES.composition : GAME_STAGES.settings)
+    }
+    if (!resumeStage) return begin()
+    useUiStore.getState().openLeaveDialog({ variant: 'new-game', onConfirm: begin })
   }
 
-  const config: ThemeConfig = useMemo(() => {
-    return {
-      token: {
-        colorPrimary: '#575757',
-        borderRadius: 0,
-        colorBgContainer: '#d3d3d32e',
-        colorPrimaryBg: '#575757',
-      },
-    }
-  }, [])
-
   return (
-    <ConfigProvider theme={config}>
+    <ConfigProvider theme={THEME_CONFIG}>
       <div className={styles.start}>
-        {!isAppInstalledRef.current && <DownloadAppBtn />}
-        <Button
-          style={{ position: 'relative' }}
-          type='primary'
-          onClick={handleClick}
-          name={PLAY_MODES.single}
-          className={styles.startBtn}
-        >
-          <span style={{ transform: 'translateY(-3px)' }}>Մեկ հոգով</span>
-          <span style={{ position: 'absolute', bottom: 9, left: '50%', fontSize: 8, transform: 'translateX(-50%)' }}>
-            արհեստական բանականության դեմ
-          </span>
+        {!isAppInstalled && <DownloadAppBtn />}
+        {resumeStage && savedMode && (
+          <Button type='primary' onClick={() => navigate(resumeStage)} className={combineClassNames(styles.startBtn, styles.continueBtn)}>
+            <span className={styles.btnTitle}>Շարունակել խաղը</span>
+            <span className={styles.btnSubtitle}>{MODE_LABELS[savedMode]}</span>
+          </Button>
+        )}
+        <Button type='primary' onClick={() => startMode(PLAY_MODES.single)} className={styles.startBtn}>
+          <span className={styles.btnTitle}>Մեկ հոգով</span>
+          <span className={styles.btnSubtitle}>արհեստական բանականության դեմ</span>
         </Button>
-        <Button type='primary' onClick={handleClick} name={PLAY_MODES.multiplayer} className={styles.startBtn}>
+        <Button type='primary' onClick={() => startMode(PLAY_MODES.multiplayer)} className={styles.startBtn}>
           Երկու հոգով
         </Button>
+        <Button type='primary' onClick={() => startMode(PLAY_MODES.challenge)} className={styles.startBtn}>
+          <span className={styles.btnTitle}>Մարտահրավեր</span>
+          <span className={styles.btnSubtitle}>ուղարկիր բառ ընկերոջդ</span>
+        </Button>
+        <Button
+          type='text'
+          icon={<BarChartOutlined />}
+          className={styles.statsBtn}
+          onClick={() => setStatsOpen(true)}
+        >
+          Վիճակագրություն
+        </Button>
+
+        <nav className={styles.links} aria-label='Տեղեկատվություն'>
+          <Link href='/rules'>Կանոններ</Link>
+          <Link href='/about'>Մեր մասին</Link>
+          <Link href='/privacy'>Գաղտնիություն</Link>
+        </nav>
+
+        <Modal
+          centered
+          title='Վիճակագրություն'
+          open={statsOpen}
+          onCancel={() => setStatsOpen(false)}
+          footer={null}
+        >
+          <StatsPanel />
+        </Modal>
       </div>
     </ConfigProvider>
   )

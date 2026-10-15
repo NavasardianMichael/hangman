@@ -1,5 +1,7 @@
 .end {
-  height: calc(100dvh - 60px);
+  min-height: calc(100dvh - var(--ad-band-height) - var(--bottom-bar-height));
+  padding: 3rem 1.5rem;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -10,5 +12,10 @@
   .winnerText {
     font-size: 1.4rem;
     font-weight: bold;
+  }
+
+  .stats {
+    width: 100%;
+    max-width: 420px;
   }
 }

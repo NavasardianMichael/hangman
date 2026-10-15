@@ -1,6 +1,8 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
+  poweredByHeader: false,
   async headers() {
     return [
       {
@@ -10,11 +12,6 @@ const nextConfig: NextConfig = {
             key: 'X-Robots-Tag',
             value: 'index, follow',
           },
-        ],
-      },
-      {
-        source: '/(.*)',
-        headers: [
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
@@ -30,6 +27,7 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // Browsers must always fetch the latest service worker
         source: '/sw.js',
         headers: [
           {
@@ -39,10 +37,6 @@ const nextConfig: NextConfig = {
           {
             key: 'Cache-Control',
             value: 'no-cache, no-store, must-revalidate',
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self'",
           },
         ],
       },

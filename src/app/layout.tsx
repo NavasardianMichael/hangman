@@ -1,7 +1,26 @@
 import { Metadata } from 'next'
+import localFont from 'next/font/local'
 import Script from 'next/script'
+import { AD_FREQUENCY_HINT, ADS_ENABLED, ADS_TEST_MODE, ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC } from 'helpers/constants/ads'
+import { SITE_URL } from 'helpers/constants/app'
+import { combineClassNames } from 'helpers/utils/styles'
+import 'styles/variables.css'
+import './app.css'
+import 'styles/commons.css'
+
+// Davel Aghvor by Levon Chkolyan (Davel Creative Agency), free for personal and commercial use: https://fonter.am/en/fonts/davel-aghvor
+const appFont = localFont({
+  src: '../assets/fonts/DavelAghvor.otf',
+  display: 'swap',
+  variable: '--font-app',
+})
+
+// Official H5 Games Ads initializer: https://developers.google.com/ad-placement/docs/example
+const AD_PLACEMENT_INIT = 'window.adsbygoogle=window.adsbygoogle||[];window.adBreak=window.adConfig=function(o){adsbygoogle.push(o);};'
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  ...(ADS_ENABLED && { other: { 'google-adsense-account': ADSENSE_CLIENT } }),
   manifest: '/manifest.webmanifest',
   title: 'Կախաղան | Hangman',
   description:
@@ -31,17 +50,17 @@ export const metadata: Metadata = {
     google: 'otJjduk66KdJqUVQWUMGb3RCg7U5NGhdFLCDpcjP5_U',
   },
   alternates: {
-    canonical: 'https://hangman-ai-ivory.vercel.app/',
+    canonical: '/',
   },
   icons: {
     icon: [
       { url: '/images/favicon.svg', type: 'image/svg+xml' },
-      { url: '/images/icon-192x192.png', sizes: '16x16', type: 'image/png' },
+      { url: '/images/icon-192x192.png', sizes: '192x192', type: 'image/png' },
     ],
-    apple: [{ url: '/images/favicon.svg', type: 'image/png' }],
+    apple: [{ url: '/images/icon-192x192.png', sizes: '192x192', type: 'image/png' }],
   },
   openGraph: {
-    url: 'https://hangman-ai-ivory.vercel.app/',
+    url: '/',
     type: 'website',
     title: 'Կախաղան | Hangman',
     description:
@@ -70,9 +89,31 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang='hy'>
-      <head>
-        <Script id='gtm-script' strategy='beforeInteractive'>
+    <html lang='hy' className={combineClassNames(appFont.variable, ADS_ENABLED && 'ads-enabled')}>
+      {ADS_ENABLED && (
+        <head>
+          {/* A plain tag: next/script adds a data-nscript attribute that AdSense warns about */}
+          <script
+            async
+            src={ADSENSE_SCRIPT_SRC}
+            crossOrigin='anonymous'
+            data-ad-frequency-hint={AD_FREQUENCY_HINT}
+            data-adbreak-test={ADS_TEST_MODE ? 'on' : undefined}
+          />
+          <script dangerouslySetInnerHTML={{ __html: AD_PLACEMENT_INIT }} />
+        </head>
+      )}
+      <body>
+        <noscript>
+          <iframe
+            src='https://www.googletagmanager.com/ns.html?id=GTM-NFWCRW7P'
+            height='0'
+            width='0'
+            style={{ display: 'none', visibility: 'hidden' }}
+          ></iframe>
+        </noscript>
+        {children}
+        <Script id='gtm-script' strategy='afterInteractive'>
           {`
     (function(w,d,s,l,i){
       w[l]=w[l]||[];
@@ -86,17 +127,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     })(window,document,'script','dataLayer','GTM-NFWCRW7P');
   `}
         </Script>
-      </head>
-      <body>
-        <noscript>
-          <iframe
-            src='https://www.googletagmanager.com/ns.html?id=GTM-NFWCRW7P'
-            height='0'
-            width='0'
-            style={{ display: 'none', visibility: 'hidden' }}
-          ></iframe>
-        </noscript>
-        {children}
       </body>
     </html>
   )

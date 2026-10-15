@@ -4,7 +4,9 @@
 
 .start {
   text-transform: uppercase;
-  height: 100svh;
+  min-height: calc(100dvh - var(--ad-band-height));
+  padding: 4.5rem 0 1.5rem;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,17 +23,67 @@
     font-size: 1rem;
     font-weight: bold;
     box-shadow: 0px 0px 5px 1px #0000003d;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    line-height: 1.3;
+
+    @media (hover: hover) {
+      &:hover {
+        filter: brightness(1.15);
+      }
+    }
   }
 
-  .logo {
-    margin: auto;
-    max-width: 300px;
+  .continueBtn {
+    background: linear-gradient(100deg, #2b2b2b, #3d3d3d);
+    box-shadow:
+      0 0 0 2px rgba(246, 243, 236, 0.9),
+      0 4px 12px rgba(0, 0, 0, 0.35);
+  }
+
+  .btnTitle {
+    line-height: 1.3;
+  }
+
+  .btnSubtitle {
+    font-size: 8px;
+    font-weight: 400;
+    line-height: 1.3;
+  }
+
+  .statsBtn {
+    color: var(--secondary-color) !important;
+    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.82) !important;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .links {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    text-align: center;
-    gap: 1rem;
-    color: #393a59;
-    flex-direction: column;
-    font-weight: bold;
+    gap: 0.5rem 1.25rem;
+    margin-top: 0.5rem;
+    padding: 0.25rem 0.9rem;
+    background-color: rgba(255, 255, 255, 0.82);
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+    text-transform: none;
+    font-size: 0.75rem;
+
+    & a {
+      color: var(--secondary-color);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+
+  @media (orientation: landscape) and (max-height: 540px) {
+    gap: 0.6rem;
+    padding-top: 4rem;
+
+    .startBtn {
+      height: 48px;
+    }
   }
 }

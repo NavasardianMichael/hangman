@@ -1,0 +1,49 @@
+# Next.js standalone server for hangman.mnavasardian.com.
+# Install to /etc/systemd/system/hangman.service. Paths assume APP_DIR=/home/michael/apps/hangman.
+#
+# WorkingDirectory points at the `current` symlink and systemd resolves it at
+# start: that resolution is what makes `systemctl restart` pick up a new release.
+
+[Unit]
+Description=Hangman (Next.js)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=michael
+Group=michael
+WorkingDirectory=/home/michael/apps/hangman/current
+
+# GEMINI_KEY. Written mode 600 by the deploy from the ENV_FILE_BASE64 secret.
+# systemd's EnvironmentFile is NOT dotenv: no `export`, no multi-line values; quotes around a value are stripped.
+# Its values would override the Environment= lines below, so the deploy strips NODE_ENV, PORT and HOSTNAME from it.
+EnvironmentFile=/home/michael/apps/hangman/shared/.env
+Environment=NODE_ENV=production
+# Must match proxy_pass in hangman.mnavasardian.com.conf and APP_PORT in deploy.yml.
+# Loopback only: the app is reachable through nginx alone.
+Environment=PORT=9005
+Environment=HOSTNAME=127.0.0.1
+
+# Node 24 LTS (the CI build's version) from nvm, while the server's other apps stay on their own Node.
+# ~/.local/node-24 is a symlink to nvm's install, so a Node update only re-points it (docs/DEPLOYMENT.md).
+# systemd reads no shell profile, so nvm's PATH doesn't apply here: the path must be absolute.
+ExecStart=/home/michael/.local/node-24/bin/node server.js
+
+Restart=always
+RestartSec=2
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+# Next writes its image-optimizer cache under the release's .next/cache; nothing else is written
+ReadWritePaths=/home/michael/apps/hangman
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

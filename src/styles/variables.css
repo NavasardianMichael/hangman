@@ -1,13 +1,29 @@
-.app {
-  /* &.light {
-    --primary-color: #5e9b9d;
-    --secondary-color: #fff;
-  } */
+/* Defined on :root so portaled UI (modals, notifications) can use them too */
+:root {
+  --primary-color: #fff;
+  --secondary-color: #575757;
+  --primary-color-rgb-components: 255, 255, 255;
+  --secondary-color-rgb-components: 87, 87, 87;
 
-  &.dark {
-    --primary-color: #fff;
-    --secondary-color: #575757;
-    --primary-color-rgb-components: 255, 255, 255;
-    --secondary-color-rgb-components: 87, 87, 87;
+  /* Layout */
+  --column-width: 600px;
+  --bottom-bar-height: 3.75rem;
+  --ad-band-height: 0px;
+  /* Google's guidance for game pages: keep display ads 150px from the game */
+  --rail-gap: 150px;
+  --keyboard-key-height: 2.4rem;
+}
+
+/* With ads on, the top band is reserved for the AdSense anchor (it overlays only this band) */
+:root.ads-enabled {
+  --ad-band-height: 3.8rem;
+}
+
+/* Short landscape screens (phones turned sideways): the column takes the full width */
+@media (orientation: landscape) and (max-height: 540px) {
+  :root {
+    --column-width: 100vw;
+    --bottom-bar-height: 3rem;
+    --keyboard-key-height: 2rem;
   }
 }

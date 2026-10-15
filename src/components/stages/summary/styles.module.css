@@ -1,7 +1,7 @@
 .summary {
   position: relative;
   display: flex;
-  height: calc(100dvh - 60px);
+  min-height: calc(100dvh - var(--ad-band-height) - var(--bottom-bar-height));
 
   .hints {
     width: 100%;
@@ -25,11 +25,32 @@
     }
 
     .currentWord {
-      font-weight: 700;
+      /* The app font has a single weight; a thin outline in the text color renders a consistent semibold */
+      font-weight: normal;
+      -webkit-text-stroke: 0.045em currentColor;
+      paint-order: stroke fill;
       word-break: break-all;
     }
     .hint {
       margin: 0;
+    }
+  }
+
+  .streak {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .linkBtn {
+    all: unset;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+
+    &:focus-visible {
+      outline: 2px solid var(--secondary-color);
+      outline-offset: 2px;
     }
   }
 

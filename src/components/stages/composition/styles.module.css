@@ -1,4 +1,10 @@
 .composition {
+  .caption {
+    margin: 4.5rem 1rem 0;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
   .word {
     display: flex;
     flex-wrap: wrap;
@@ -12,8 +18,8 @@
     font-weight: bold;
     user-select: none;
 
-    @media (orientation: landscape) {
-      margin-top: 3rem;
+    .caption + & {
+      margin-top: 2rem;
     }
 
     &::after {
@@ -23,9 +29,6 @@
       color: black;
       animation: cursor-blink 1s steps(2) infinite;
     }
-
-    .letter {
-    }
   }
 
   .alphabet {
@@ -34,13 +37,14 @@
     gap: 0.2rem;
     padding: 1rem;
     position: fixed;
-    left: 0;
-    bottom: 3.75rem;
+    left: 50%;
+    translate: -50% 0;
+    bottom: var(--bottom-bar-height);
+    width: min(100%, var(--column-width));
     color: var(--primary-color);
     font-weight: 500;
     font-size: 1.25rem;
     text-align: center;
-    width: 100%;
     box-sizing: border-box;
 
     .letter {
@@ -48,8 +52,10 @@
       background-color: rgba(var(--secondary-color-rgb-components), 0.6);
       user-select: none;
       flex-basis: calc(100% / 10 - 9 * 0.2rem / 10);
+      line-height: var(--keyboard-key-height);
       box-shadow: #b1b1b17d 0px 0px 1px 1px;
       border-radius: 2px;
+      cursor: pointer;
 
       &:active {
         background-color: rgba(var(--secondary-color-rgb-components), 0.5);
@@ -57,9 +63,41 @@
         transition: 0.3s;
       }
 
+      @media (hover: hover) {
+        &:hover:not(:disabled) {
+          background-color: rgba(var(--secondary-color-rgb-components), 0.8);
+        }
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--secondary-color);
+        outline-offset: 1px;
+      }
+
       &:disabled {
         background-color: rgba(var(--secondary-color-rgb-components), 0.4);
+        cursor: default;
       }
+    }
+  }
+
+  /* Phones turned sideways: word on the left, keyboard on the right */
+  @media (orientation: landscape) and (max-height: 540px) {
+    .caption,
+    .word {
+      width: 50%;
+    }
+
+    .word {
+      margin-top: 3rem;
+    }
+
+    .alphabet {
+      left: auto;
+      right: 0;
+      translate: none;
+      width: 50%;
+      padding: 0.5rem;
     }
   }
 }

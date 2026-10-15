@@ -1,6 +1,7 @@
 'use client'
 
 import { FC, MediaHTMLAttributes, useEffect, useRef } from 'react'
+import { useGameStore } from 'store/game'
 
 type TProps = {
   deps: unknown[]
@@ -9,6 +10,7 @@ type TProps = {
 
 export const Audio: FC<TProps> = ({ deps, src }) => {
   const audioRef = useRef<HTMLAudioElement>(null)
+  const soundEnabled = useGameStore((state) => state.soundEnabled)
 
   useEffect(() => {
     audioRef?.current?.load()
@@ -16,21 +18,29 @@ export const Audio: FC<TProps> = ({ deps, src }) => {
 
   useEffect(() => {
     const audio = audioRef?.current
-    if (!audio) return;
+    if (!audio || !useGameStore.getState().soundEnabled) return
 
     if (deps.every((dep) => !dep)) return
 
-    setTimeout(() => {
-      audio.play()
+    const timeoutId = setTimeout(() => {
+      // Muting during the short delay still wins
+      if (!useGameStore.getState().soundEnabled) return
+      // Playback can be blocked (autoplay policy, interrupted load); sounds are optional
+      audio.play().catch(() => {})
     }, 100)
 
     return () => {
-      if (!audio) return;
+      clearTimeout(timeoutId)
       audio.pause()
       audio.currentTime = 0
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)
 
-  return <audio ref={audioRef} src={src} />
+  // Muting mid-sound stops it right away
+  useEffect(() => {
+    if (!soundEnabled) audioRef.current?.pause()
+  }, [soundEnabled])
+
+  return <audio ref={audioRef} src={src} preload={soundEnabled ? 'auto' : 'none'} />
 }

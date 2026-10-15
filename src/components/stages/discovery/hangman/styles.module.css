@@ -1,10 +1,185 @@
 .hangman {
-  text-align: center;
-  display: flex;
-  justify-content: center;
-  margin: 2rem auto 1rem;
+  --ink: #232323;
+  --paper: #f6f3ec;
 
-  @media (orientation: landscape) {
-    margin-top: 0.5rem;
+  display: block;
+  width: min(80%, 340px);
+  max-height: 34dvh;
+  aspect-ratio: 1;
+  margin: 0.5rem auto 0;
+  overflow: visible;
+}
+
+.ink {
+  fill: none;
+  stroke: var(--ink);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Gallows: ink outlines draw in, then the wood grain fades in */
+.gallows {
+  .wood {
+    fill: var(--paper);
+    fill-opacity: 0;
+    stroke-width: 1.5;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    /* The outline is drawn first, then the wood is filled in */
+    animation:
+      draw 0.9s ease-out forwards,
+      fill-in 0.4s ease-out 0.6s forwards;
+  }
+
+  .grain,
+  .rope,
+  .crow {
+    opacity: 0;
+    animation: fade-in 0.5s ease-out 0.7s forwards;
+  }
+
+  &.instant {
+    .wood {
+      animation: none;
+      stroke-dashoffset: 0;
+      fill-opacity: 0.85;
+    }
+    .grain,
+    .rope,
+    .crow {
+      animation: none;
+      opacity: 1;
+    }
+  }
+}
+
+.grain {
+  stroke-width: 0.6;
+  opacity: 0.85;
+}
+
+.rope {
+  stroke-width: 1.1;
+}
+
+.crow {
+  fill: var(--ink);
+  stroke-width: 0.8;
+}
+
+/* Body parts: drawn with the pen when they first appear */
+.part {
+  stroke-width: 1.6;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+
+  &.shown {
+    opacity: 1;
+    animation: draw 0.7s ease-out forwards;
+  }
+
+  &.instant {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+.limb {
+  stroke-width: 2.2;
+}
+
+.headFill {
+  fill: var(--paper);
+  stroke: none;
+  opacity: 0;
+  transition: opacity 0.3s ease-out 0.35s;
+
+  &.shown {
+    opacity: 1;
+  }
+
+  &.instant {
+    transition: none;
+  }
+}
+
+.features {
+  stroke-width: 1.2;
+  opacity: 0;
+  transition: opacity 0.3s ease-out 0.55s;
+
+  &.shown {
+    opacity: 1;
+  }
+
+  &.instant {
+    transition: none;
+  }
+}
+
+.hair {
+  stroke-width: 1;
+}
+
+.hanging {
+  transform-box: view-box;
+  transform-origin: 166px 22px;
+  animation: sway 4.5s ease-in-out infinite alternate;
+
+  &.still {
+    animation: none;
+  }
+}
+
+.head {
+  transform-box: view-box;
+  transform-origin: 166px 102px;
+  transition: rotate 0.6s ease-out;
+
+  &.drooped {
+    rotate: 12deg;
+  }
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fill-in {
+  to {
+    fill-opacity: 0.85;
+  }
+}
+
+@keyframes fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sway {
+  from {
+    rotate: -1.6deg;
+  }
+  to {
+    rotate: 1.6deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hanging {
+    animation: none;
+  }
+
+  .gallows .wood,
+  .gallows .grain,
+  .gallows .rope,
+  .gallows .crow,
+  .part.shown {
+    animation-duration: 0.01ms;
+    animation-delay: 0s;
   }
 }
