@@ -7,6 +7,11 @@
   gap: 10px;
 }
 
+/* One more button in the corner: content beside it keeps clear */
+:global(:root):has(.installButton) {
+  --top-bar-reserve: 13rem;
+}
+
 .turnInfo {
   text-align: center;
 }

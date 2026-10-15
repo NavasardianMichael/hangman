@@ -117,7 +117,7 @@ export const Summary: StageComponent = ({ toNextPage }) => {
           {isLongText ? (
             `Բառ գրելու հերթը ${currentPlayer === PLAYERS.player1 ? 'երկրորդ' : 'առաջին'} խաղացողինն է`
           ) : (
-            <span style={{ fontSize: isPending && isSingleMode ? '.6rem' : '1rem' }}>
+            <span style={{ fontSize: isPending && isSingleMode ? '.85rem' : '1.15rem' }}>
               {isPending && isSingleMode ? 'Արհեստական բանականությունը մտածում է․․․' : 'Շարունակել'}
             </span>
           )}

@@ -142,4 +142,5 @@ export const STORE_VARS = {
   PERSIST_KEY: 'hangman-store',
   PASSED_WORDS: 'hangman-store-passedWords',
   PWA_INSTALLED_DATE: 'hangman-store-pwa-installed',
+  IOS_INSTALL_HINT_CLOSED_DATE: 'hangman-store-ios-install-hint-closed',
 } as const

@@ -12,22 +12,24 @@
 
 .title {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
 }
 
 .caption {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 1rem;
 }
 
 .link {
   width: 100%;
   max-width: 420px;
   padding: 0.6rem 0.75rem;
-  border: 1px solid var(--secondary-color);
-  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(35, 35, 35, 0.28);
+  border-radius: var(--card-radius);
+  background: var(--paper);
+  box-shadow: var(--card-shadow);
   color: var(--secondary-color);
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   text-align: center;
   box-sizing: border-box;
   user-select: all;

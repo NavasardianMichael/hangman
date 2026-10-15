@@ -166,7 +166,7 @@ export const Settings: StageComponent = ({ toNextPage }) => {
       <CustomButton type='button' disabled={isStartGameDisabled} onClick={handleStartGameBtnClick}>
         <Flex align='center' justify='center' gap={12}>
           {isPending && <Spin size='small' />}
-          <span style={{ fontSize: isPending && isSingleMode ? '.7rem' : '1rem' }}>
+          <span style={{ fontSize: isPending && isSingleMode ? '.85rem' : '1.15rem' }}>
             {isPending && isSingleMode ? 'Արհեստական բանականությունը մտածում է․․․' : 'Սկսել խաղը'}
           </span>
         </Flex>

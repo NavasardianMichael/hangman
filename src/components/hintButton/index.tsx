@@ -13,9 +13,8 @@ import { ContentModal } from 'components/contentModal'
 import { IconButton } from 'components/shared/iconButton'
 import { HintIcon } from 'components/shared/icons'
 
-// 'offer': a rewarded ad is ready; 'unavailable': today's free hint is used and no ad can be shown;
-// 'no-hint': this word came without a hint (e.g. from the built-in list)
-type THintDialog = 'offer' | 'unavailable' | 'no-hint'
+// 'offer': a rewarded ad is ready; 'unavailable': today's free hint is used and no ad can be shown
+type THintDialog = 'offer' | 'unavailable'
 
 // The round's hint (single player). Mounted for one round in progress, so its state starts fresh each round.
 export const HintButton: FC = () => {
@@ -48,7 +47,6 @@ export const HintButton: FC = () => {
   }
 
   const handleClick = () => {
-    if (!hint) return setDialog('no-hint')
     if (lastFreeHintDate !== today) return revealHint('free')
 
     setIsChecking(true)
@@ -88,6 +86,8 @@ export const HintButton: FC = () => {
       Վերադառնալ խաղին
     </Button>
   )
+
+  if (!hint) return null
 
   return (
     <>
@@ -134,19 +134,6 @@ export const HintButton: FC = () => {
             ),
           },
         ]}
-        onClose={closeDialog}
-        footer={backButton}
-      />
-
-      <ContentModal
-        open={dialog === 'no-hint'}
-        title='Այս բառը հուշում չունի'
-        intro={
-          <p>
-            Հուշումը տալիս է արհեստական բանականությունը՝ բառի հետ միասին։ Երբ այն հասանելի չէ (օրինակ՝ առանց
-            ինտերնետի), բառն ընտրվում է ներկառուցված ցանկից, որի բառերը հուշում չունեն։
-          </p>
-        }
         onClose={closeDialog}
         footer={backButton}
       />

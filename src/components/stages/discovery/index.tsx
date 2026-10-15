@@ -146,7 +146,7 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
   const showHintText = isSingleMode && !!hint && hintRevealed && !isRoundOver
 
   return (
-    <div className={styles.discovery}>
+    <div className={combineClassNames(styles.discovery, isRoundOver && styles.withBar)}>
       <div className={styles.info}>
         {hasTimer && !isRoundOver && !isTimerPaused && (
           <Statistic.Timer

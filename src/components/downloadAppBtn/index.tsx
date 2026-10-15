@@ -1,8 +1,7 @@
 'use client'
 
-import { CSSProperties, FC, useEffect, useState, useSyncExternalStore } from 'react'
-import { DownloadOutlined } from '@ant-design/icons'
-import { Button, Carousel, Modal, notification, Typography } from 'antd'
+import { CSSProperties, FC, useEffect, useState } from 'react'
+import { Carousel, Modal, Typography } from 'antd'
 import Image from 'next/image'
 import Hint1Img from 'assets/images/hint1.webp'
 import Hint2Img from 'assets/images/hint2.webp'
@@ -10,20 +9,33 @@ import Hint3Img from 'assets/images/hint3.webp'
 import { useBackClose } from 'hooks/useBackClose'
 import { STORE_VARS } from 'helpers/constants/app'
 import { trackEvent } from 'helpers/utils/analytics'
-import { isInstalledApp, isInWebView, isIos } from 'helpers/utils/commons'
-import {
-  clearInstallPrompt,
-  getInstallPrompt,
-  getServerInstallPrompt,
-  subscribeToInstallPrompt,
-} from 'helpers/utils/installPrompt'
+import { isInstalledApp, isIos } from 'helpers/utils/commons'
+import { setAppInstalled } from 'helpers/utils/installPrompt'
 
-const NOTIFICATION_KEY = 'download-app'
+const DOWNLOAD_BENEFIT = 'Տեղադրեք հավելվածը Ձեր էկրանին և ստացեք ավելի հարմար փորձառություն և հեշտ հասանելիություն'
 
-const HINT_IMAGE_STYLE: CSSProperties = { margin: 'auto', maxWidth: '100%', maxHeight: '80vh', objectFit: 'cover' }
+// Screenshots fit the screen next to the title and text, keeping their proportions
+const HINT_IMAGE_STYLE: CSSProperties = {
+  margin: 'auto',
+  width: 'auto',
+  height: 'auto',
+  maxWidth: '100%',
+  maxHeight: '55dvh',
+  objectFit: 'contain',
+}
 
-const setAppInstalled = () => {
-  localStorage.setItem(STORE_VARS.PWA_INSTALLED_DATE, Date.now().toString())
+// On short screens the body scrolls instead of running past the modal
+const MODAL_STYLES = { body: { maxHeight: 'calc(100dvh - 10rem)', overflowY: 'auto' } } as const
+
+// After the instructions are closed, they're not offered again for this long
+const IOS_HINT_COOLDOWN_MS = 3 * 24 * 60 * 60 * 1000
+
+// Set once the instructions open, so returning to the start screen doesn't reopen them until the page reloads
+let wasIosHintShownThisVisit = false
+
+const wasIosHintClosedRecently = () => {
+  const closedDate = Number(localStorage.getItem(STORE_VARS.IOS_INSTALL_HINT_CLOSED_DATE))
+  return !!closedDate && Date.now() - closedDate < IOS_HINT_COOLDOWN_MS
 }
 
 const handleAppInstalled = () => {
@@ -31,13 +43,24 @@ const handleAppInstalled = () => {
   trackEvent('pwa_installed')
 }
 
+// iOS has no install API, so it gets Add to Home Screen instructions; other browsers install from the top bar button
 export const DownloadAppBtn: FC = () => {
-  const [api, contextHolder] = notification.useNotification()
   const [isIosDevice] = useState(isIos)
   const [isInstalled] = useState(isInstalledApp)
-  const [showIosDownloadAppHintModal, setShowIosDownloadAppHintModal] = useState(() => isIosDevice && !isInstalled)
-  const installPrompt = useSyncExternalStore(subscribeToInstallPrompt, getInstallPrompt, getServerInstallPrompt)
-  useBackClose(showIosDownloadAppHintModal, () => setShowIosDownloadAppHintModal(false))
+  const [showIosDownloadAppHintModal, setShowIosDownloadAppHintModal] = useState(
+    () => isIosDevice && !isInstalled && !wasIosHintShownThisVisit && !wasIosHintClosedRecently()
+  )
+
+  const closeIosHint = () => {
+    setShowIosDownloadAppHintModal(false)
+    localStorage.setItem(STORE_VARS.IOS_INSTALL_HINT_CLOSED_DATE, Date.now().toString())
+  }
+
+  useBackClose(showIosDownloadAppHintModal, closeIosHint)
+
+  useEffect(() => {
+    if (showIosDownloadAppHintModal) wasIosHintShownThisVisit = true
+  }, [showIosDownloadAppHintModal])
 
   useEffect(() => {
     if (isInstalled) setAppInstalled()
@@ -48,75 +71,37 @@ export const DownloadAppBtn: FC = () => {
     return () => window.removeEventListener('appinstalled', handleAppInstalled)
   }, [])
 
-  // The download notification is only offered when the browser actually allows installing
-  useEffect(() => {
-    if (isIosDevice || isInstalled || !installPrompt || isInWebView()) return
-
-    const handleDownloadClick = async () => {
-      api.destroy(NOTIFICATION_KEY)
-      await installPrompt.prompt()
-      const { outcome } = await installPrompt.userChoice
-      if (outcome === 'accepted') setAppInstalled()
-      clearInstallPrompt()
-    }
-
-    const timeoutId = setTimeout(() => {
-      trackEvent('pwa_prompt_shown')
-      api.info({
-        key: NOTIFICATION_KEY,
-        title: (
-          <div style={{ textAlign: 'center' }}>
-            <b>Ներբեռնե՞լ հավելվածը</b>
-            <Typography style={{ fontSize: '8px', textAlign: 'center' }}>* Ինկոգնիտո ռեժիմում կարող է չաշխատել</Typography>
-          </div>
-        ),
-        duration: 0,
-        icon: ' ',
-        description: (
-          <Button type='primary' style={{ width: '100%' }} onClick={handleDownloadClick} icon={<DownloadOutlined />}>
-            Ներբեռնել
-          </Button>
-        ),
-        placement: 'top',
-      })
-    }, 1000)
-
-    return () => clearTimeout(timeoutId)
-  }, [api, installPrompt, isInstalled, isIosDevice])
-
   if (isInstalled) return null
 
   return (
-    <>
-      <Modal
-        title='Ինչպե՞ս ներբեռնել հավելվածը'
-        centered
-        width='min(80vw, 420px)'
-        open={showIosDownloadAppHintModal}
-        onCancel={() => setShowIosDownloadAppHintModal(false)}
-        okButtonProps={{
-          style: { display: 'none' },
-        }}
-        cancelButtonProps={{
-          style: { display: 'none' },
-        }}
-      >
-        <div style={{ maxHeight: '80vh', boxSizing: 'border-box' }}>
-          <Typography style={{ fontSize: '8px', textAlign: 'center' }}>* Ինկոգնիտո ռեժիմում կարող է չաշխատել</Typography>
-          <Carousel autoplay arrows dots dotPlacement='bottom'>
-            <div>
-              <Image src={Hint1Img} alt='Hint 1' style={HINT_IMAGE_STYLE} />
-            </div>
-            <div>
-              <Image src={Hint2Img} alt='Hint 2' style={HINT_IMAGE_STYLE} />
-            </div>
-            <div>
-              <Image src={Hint3Img} alt='Hint 3' style={HINT_IMAGE_STYLE} />
-            </div>
-          </Carousel>
-        </div>
-      </Modal>
-      {contextHolder}
-    </>
+    <Modal
+      title='Ինչպե՞ս ներբեռնել հավելվածը'
+      centered
+      width='min(80vw, 420px)'
+      styles={MODAL_STYLES}
+      open={showIosDownloadAppHintModal}
+      onCancel={closeIosHint}
+      okButtonProps={{
+        style: { display: 'none' },
+      }}
+      cancelButtonProps={{
+        style: { display: 'none' },
+      }}
+    >
+      <div>
+        <Typography style={{ fontSize: '0.75rem', textAlign: 'center' }}>{DOWNLOAD_BENEFIT}</Typography>
+        <Carousel autoplay arrows dots dotPlacement='bottom'>
+          <div>
+            <Image src={Hint1Img} alt='Hint 1' style={HINT_IMAGE_STYLE} />
+          </div>
+          <div>
+            <Image src={Hint2Img} alt='Hint 2' style={HINT_IMAGE_STYLE} />
+          </div>
+          <div>
+            <Image src={Hint3Img} alt='Hint 3' style={HINT_IMAGE_STYLE} />
+          </div>
+        </Carousel>
+      </div>
+    </Modal>
   )
 }

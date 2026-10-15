@@ -1,6 +1,6 @@
 'use client'
 
-import { FC, useState } from 'react'
+import { FC, useState, useSyncExternalStore } from 'react'
 import { Modal } from 'antd'
 import { useShallow } from 'zustand/react/shallow'
 import { useGameStore } from 'store/game'
@@ -8,27 +8,38 @@ import { useBackClose } from 'hooks/useBackClose'
 import { useStage } from 'hooks/useStage'
 import { GAME_STAGES, PLAY_MODES, PLAYERS, STAGES_HIDE_BREADCRUMB } from 'helpers/constants/app'
 import { trackEvent } from 'helpers/utils/analytics'
+import { isInstalledApp, isInWebView } from 'helpers/utils/commons'
 import { requestHome } from 'helpers/utils/gameFlow'
+import {
+  getInstallPrompt,
+  getServerInstallPrompt,
+  promptInstall,
+  subscribeToInstallPrompt,
+} from 'helpers/utils/installPrompt'
 import { combineClassNames } from 'helpers/utils/styles'
 import { HintButton } from 'components/hintButton'
 import { IconButton } from 'components/shared/iconButton'
-import { HomeIcon, PlayersIcon, SoundOffIcon, SoundOnIcon } from 'components/shared/icons'
+import { DownloadIcon, HomeIcon, InfoIcon, SoundOffIcon, SoundOnIcon } from 'components/shared/icons'
 import styles from './styles.module.css'
 
-// Turn info (multiplayer), home (asks first when a game would be lost), hint (single-player round) and sound buttons
-// in the top-right corner
+// Install (when the browser offers it), turn info (multiplayer), home (asks first when a game would be lost),
+// hint (single-player round) and sound buttons in the top-right corner
 export const TopBar: FC = () => {
   const stage = useStage()
-  const { currentPlayer, mode, soundEnabled, isRoundInProgress } = useGameStore(
+  const { currentPlayer, mode, soundEnabled, isRoundInProgress, hasHint } = useGameStore(
     useShallow((state) => ({
       currentPlayer: state.currentPlayer,
       mode: state.mode,
       soundEnabled: state.soundEnabled,
       isRoundInProgress: !!state.currentWord && !state.round.result,
+      // Only the AI sends a hint; player-written and built-in words have none
+      hasHint: !!state.round.hint,
     }))
   )
   const [infoModalOpen, setInfoModalOpen] = useState(false)
   useBackClose(infoModalOpen, () => setInfoModalOpen(false))
+  // Only Chromium browsers offer an install prompt (none once installed); Safari and Firefox never do
+  const installPrompt = useSyncExternalStore(subscribeToInstallPrompt, getInstallPrompt, getServerInstallPrompt)
 
   const isFirstPlayer = currentPlayer === PLAYERS.player1
   const isDiscovery = stage === GAME_STAGES.discovery
@@ -47,7 +58,13 @@ export const TopBar: FC = () => {
 
   const showHome = !STAGES_HIDE_BREADCRUMB.includes(stage)
   const showInfo = showHome && mode === PLAY_MODES.multiplayer && stage !== GAME_STAGES.summary
-  const showHint = stage === GAME_STAGES.discovery && mode === PLAY_MODES.single && isRoundInProgress
+  const showHint = stage === GAME_STAGES.discovery && mode === PLAY_MODES.single && isRoundInProgress && hasHint
+  const showInstall = !!installPrompt && !isInstalledApp() && !isInWebView()
+
+  const handleInstallClick = () => {
+    trackEvent('pwa_prompt_shown', { source: 'header' })
+    promptInstall()
+  }
 
   const handleSoundClick = () => {
     trackEvent('sound_toggled', { enabled: !soundEnabled })
@@ -56,9 +73,19 @@ export const TopBar: FC = () => {
 
   return (
     <div className={styles.topBar}>
+      {showInstall && (
+        <IconButton
+          className={styles.installButton}
+          aria-label='Ներբեռնել հավելվածը'
+          title='Ներբեռնել հավելվածը'
+          onClick={handleInstallClick}
+        >
+          <DownloadIcon />
+        </IconButton>
+      )}
       {showInfo && (
         <IconButton aria-label='Ով է խաղում' title='Ով է խաղում' onClick={() => setInfoModalOpen(true)}>
-          <PlayersIcon />
+          <InfoIcon />
         </IconButton>
       )}
       {showHome && (

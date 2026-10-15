@@ -1,6 +1,6 @@
 'use client'
 
-import { MouseEventHandler, useState } from 'react'
+import { CSSProperties, MouseEventHandler, useState } from 'react'
 import { useGameStore } from 'store/game'
 import { LETTERS, PLAY_MODES, SPACE_CHAR } from 'helpers/constants/app'
 import { StageComponent } from 'helpers/types/stage'
@@ -46,11 +46,12 @@ export const Composition: StageComponent = ({ toNextPage }) => {
   return (
     <div className={styles.composition}>
       {isChallenge && <p className={styles.caption}>Գրեք բառ, որը ընկերը պետք է գուշակի</p>}
-      <div className={styles.word}>
+      {/* The tile count (plus the cursor) lets CSS size the tiles to the available width */}
+      <div className={styles.word} style={{ '--cells': Array.from(word).length + 1 } as CSSProperties}>
         {Array.from(word).map((letter, i) => {
           return (
-            <span key={i} className={styles.letter}>
-              {letter}
+            <span key={i} className={letter === ' ' ? styles.gap : styles.tile}>
+              {letter === ' ' ? '' : letter}
             </span>
           )
         })}

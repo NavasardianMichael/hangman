@@ -12,6 +12,21 @@
   /* Google's guidance for game pages: keep display ads 150px from the game */
   --rail-gap: 150px;
   --keyboard-key-height: 2.4rem;
+  /* Room the top-right buttons take: up to three of them, four with the install button */
+  --top-bar-reserve: 10.5rem;
+
+  /* Paper cards and raised keys, shared with the gallows art */
+  --paper: #f6f3ec;
+  --ink: #232323;
+  --card-radius: 4px;
+  --card-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    0 2px 0 rgba(35, 35, 35, 0.16),
+    0 4px 8px rgba(0, 0, 0, 0.12);
+  --key-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 2px 0 rgba(0, 0, 0, 0.28),
+    0 3px 6px rgba(0, 0, 0, 0.16);
 }
 
 /* With ads on, the top band is reserved for the AdSense anchor (it overlays only this band) */

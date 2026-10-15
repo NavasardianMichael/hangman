@@ -2,8 +2,13 @@
 .discovery {
   display: flex;
   flex-direction: column;
-  height: calc(100dvh - var(--ad-band-height) - var(--bottom-bar-height));
+  height: calc(100dvh - var(--ad-band-height));
   box-sizing: border-box;
+
+  /* The continue button takes the bottom bar once the round is over */
+  &.withBar {
+    height: calc(100dvh - var(--ad-band-height) - var(--bottom-bar-height));
+  }
 
   & > svg {
     flex: 1 1 0;
@@ -23,17 +28,27 @@
     min-height: 2.5rem;
     padding: 4px 16px 0;
     /* Leaves room for the top-right buttons */
-    padding-right: 10.5rem;
+    padding-right: var(--top-bar-reserve);
   }
 
   .timer {
     font-variant-numeric: tabular-nums;
+
+    :global(.ant-statistic-content) {
+      display: inline-block;
+      padding: 0.05rem 0.55rem 0.15rem;
+      border-radius: var(--card-radius);
+      background-color: rgba(246, 243, 236, 0.92);
+      box-shadow: var(--card-shadow);
+      font-size: 1.35rem;
+      line-height: 1.4;
+    }
   }
 
   .hintText {
     flex: none;
     margin: 0 1rem;
-    font-size: 0.85rem;
+    font-size: 1rem;
     text-align: center;
   }
 
@@ -46,7 +61,8 @@
     text-align: center;
     margin-top: 0.5rem;
     padding: 1rem;
-    font-size: 1.5rem;
+    font-size: 1.75rem;
+    line-height: 1;
     /* The app font has a single weight; a thin outline in the text color renders a consistent semibold */
     font-weight: normal;
     -webkit-text-stroke: 0.045em currentColor;
@@ -56,21 +72,31 @@
       flex-basis: calc(100% / 10 - 9 * 0.5rem / 10);
 
       &:not(.space) {
-        outline: 1px solid var(--secondary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        min-height: 2.35rem;
+        border-radius: var(--card-radius);
+        background-color: var(--paper);
+        border: 1px solid rgba(35, 35, 35, 0.28);
+        box-shadow: var(--card-shadow);
+      }
+
+      & > span {
+        display: block;
+        line-height: 1;
+        transition: scale 0.2s ease;
       }
 
       &:not(.guessed) {
         & > span {
-          display: block;
           scale: 0;
         }
       }
 
       &.guessed {
         & > span {
-          display: block;
-          width: 100%;
-          height: 100%;
           scale: 1;
         }
       }
@@ -98,7 +124,7 @@
     width: 100%;
     color: var(--primary-color);
     font-weight: 500;
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     text-align: center;
     box-sizing: border-box;
 
@@ -112,17 +138,24 @@
 
     .letter {
       all: unset;
-      background-color: rgba(var(--secondary-color-rgb-components), 0.6);
+      box-sizing: border-box;
+      background-color: rgba(var(--secondary-color-rgb-components), 0.72);
+      border-radius: var(--card-radius);
+      box-shadow: var(--key-shadow);
       user-select: none;
       flex-basis: calc(100% / 10 - 9 * 0.2rem / 10);
       line-height: var(--keyboard-key-height);
       position: relative;
       cursor: pointer;
+      transition:
+        transform 0.12s ease,
+        box-shadow 0.12s ease,
+        background-color 0.12s ease;
 
-      &:active {
-        background-color: rgba(var(--secondary-color-rgb-components), 0.4);
-        transform: scale(0.9);
-        transition: 0.3s;
+      &:active:not(:disabled) {
+        background-color: rgba(var(--secondary-color-rgb-components), 0.55);
+        transform: translateY(2px);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 1px 2px rgba(0, 0, 0, 0.2);
       }
 
       @media (hover: hover) {
@@ -138,6 +171,11 @@
 
       &:disabled {
         cursor: default;
+      }
+
+      &.wasted,
+      &.guessed {
+        box-shadow: none;
       }
 
       &.wasted {
