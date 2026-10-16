@@ -147,9 +147,13 @@ Push to `master`, or Actions → **Deploy to Production** → **Run workflow**. 
 | `ci.yml` | Pull request into `master`: install, lint, build. |
 | `deploy.yml` | Push to `master` (changes only to `*.md`, `docs/` or `deployment/` don't deploy), or a manual run. |
 
-What `deploy.yml` does:
+What `deploy.yml` does, in two jobs:
 
-1. Installs, lints and builds. Type checking is part of the build.
+**build** (steps 1–3) leaves the checked bundle as a run artifact. **deploy** (steps 4–7) ships it. When the server side
+fails, fix it and use **Re-run failed jobs**: only `deploy` runs again, with the same bundle, for up to 3 days.
+
+1. Installs, lints and builds. Type checking is part of the build. `.next/cache` (Turbopack's build cache) is kept
+   between runs with `actions/cache`, so builds after the first start warm.
 2. Copies `public/` and `.next/static` into `.next/standalone` and packs it.
 3. **Boots the bundle** and requires `GET /` → 200 and `POST /getWord {}` → 400. The 400 proves the word route loads,
    without calling Gemini. A tracing gap would otherwise surface only on the server.

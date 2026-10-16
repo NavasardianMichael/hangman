@@ -44,9 +44,11 @@ concurrency:
   group: deploy-production
   cancel-in-progress: false
 
+# Two jobs, so a failure on the server side can be retried alone: "Re-run failed jobs" repeats only
+# `deploy`, with the bundle `build` already made and checked.
 jobs:
-  deploy:
-    name: Build and deploy
+  build:
+    name: Build and verify
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -67,6 +69,17 @@ jobs:
 
       - name: Lint
         run: pnpm lint
+
+      # Turbopack's build cache (.next/cache, ~90 MB): a warm build skips most compilation.
+      # A new entry when dependencies or sources change; otherwise the newest one with the same
+      # lockfile is restored. Pull requests can restore entries saved on master.
+      - name: Restore Next.js build cache
+        uses: actions/cache@v6
+        with:
+          path: .next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('src/**', 'public/**', 'next.config.ts', 'tsconfig.json') }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
 
       # Type checking runs as part of the build
       - name: Build
@@ -125,6 +138,24 @@ jobs:
             exit 1
           fi
           echo "POST /getWord rejects an invalid request (400)"
+
+      - name: Upload bundle
+        uses: actions/upload-artifact@v6
+        with:
+          name: build
+          path: build.tar.gz
+          # Long enough to re-run a failed deploy after fixing the server
+          retention-days: 3
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download bundle
+        uses: actions/download-artifact@v7
+        with:
+          name: build
 
       # Strips stray quotes/whitespace from the secret
       - name: Resolve deployment directory

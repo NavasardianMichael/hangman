@@ -39,6 +39,17 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      # Turbopack's build cache (.next/cache, ~90 MB): a warm build skips most compilation.
+      # A new entry when dependencies or sources change; otherwise the newest one with the same
+      # lockfile is restored. Pull requests can restore entries saved on master.
+      - name: Restore Next.js build cache
+        uses: actions/cache@v6
+        with:
+          path: .next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('src/**', 'public/**', 'next.config.ts', 'tsconfig.json') }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}-
+
       # Type checking runs as part of the build
       - name: Build
         run: pnpm build
