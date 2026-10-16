@@ -1,4 +1,5 @@
 import { GenerateContentConfig, GoogleGenAI, ThinkingLevel, Type } from '@google/genai'
+import * as Sentry from '@sentry/nextjs'
 import { CATEGORIES, DIFFICULTY_LEVELS, GET_WORD_ERROR_MESSAGE, MAX_PASSED_WORDS } from 'helpers/constants/app'
 import { sanitizeWord } from 'helpers/utils/words'
 import { GetWordAPI } from './types'
@@ -247,6 +248,10 @@ export async function POST(request: Request) {
     return errorResponse(502, `Models returned no playable word in ${MAX_ATTEMPTS} attempts`, { rejectedAnswers })
   } catch (error) {
     console.error('Error generating word:', error)
+    // Handled here, so Next.js's onRequestError never sees it
+    Sentry.captureException(error, {
+      extra: error instanceof AllModelsFailedError ? { failures: error.failures } : undefined,
+    })
     if (error instanceof AllModelsFailedError) {
       return errorResponse(502, `All Gemini models failed (${error.message})`, { failures: error.failures })
     }

@@ -125,6 +125,12 @@ Repository → Settings → Secrets and variables → Actions → **Secrets**:
 | `SSH_PORT` | optional, defaults to 22 |
 | `APP_DIR` | `/home/michael/apps/hangman` |
 | `ENV_FILE_BASE64` | output of `pnpm -s envtob64` (see below) |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | optional: GA4 Measurement ID (see [GOOGLE_ANALYTICS.md](GOOGLE_ANALYTICS.md)) |
+| `NEXT_PUBLIC_SENTRY_DSN` | optional: Sentry DSN (see [SENTRY.md](SENTRY.md)) |
+| `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` | optional: source map upload to Sentry |
+
+The optional secrets are used by the build step only: `NEXT_PUBLIC_*` values are inlined into the bundle, so they
+don't belong in `ENV_FILE_BASE64`. A service stays off when its secret is missing.
 
 ```bash
 pnpm -s envtob64 | clip      # Windows: base64 of .env straight to the clipboard

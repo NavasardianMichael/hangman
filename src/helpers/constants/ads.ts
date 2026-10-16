@@ -1,12 +1,7 @@
 // AdSense setup. Every ad feature stays off while ADSENSE_CLIENT is empty.
-// Fill these in from the AdSense account (see README → Ads).
-export const ADSENSE_CLIENT = '' // e.g. 'ca-pub-1234567890123456'
-
-// Display ad units for the desktop side rails
-export const RAIL_SLOTS = {
-  left: '',
-  right: '',
-} as const
+// Auto ads (top anchor, side rails, vignettes) are placed by Google; their settings live in the AdSense account
+// (see docs/ADSENSE.md).
+export const ADSENSE_CLIENT = 'pub-7566016209532706' // e.g. 'ca-pub-1234567890123456'
 
 // H5 Games Ads (interstitials between rounds, rewarded hints) is a beta that Google approves separately.
 // Set to true once approved; until then those calls are skipped so rounds don't wait for ads that can't come.
@@ -24,6 +19,3 @@ export const ADS_ENABLED = ADSENSE_CLIENT.length > 0
 export const H5_ADS_ACTIVE = ADS_ENABLED && (H5_GAMES_ADS_APPROVED || ADS_TEST_MODE)
 
 export const ADSENSE_SCRIPT_SRC = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`
-
-// Rails need 150px clear of the 600px game column on both sides (Google's game-page guidance)
-export const RAIL_MEDIA_QUERY = '(min-width: 1232px) and (min-height: 720px)'

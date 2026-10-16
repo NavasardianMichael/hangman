@@ -1,3 +1,5 @@
+import { GA_ENABLED } from 'helpers/constants/analytics'
+
 type TAnalyticsEvent =
   | 'game_start'
   | 'round_end'
@@ -14,12 +16,28 @@ type TAnalyticsEvent =
   | 'pwa_installed'
   | 'interstitial_shown'
 
-type TDataLayerWindow = Window & { dataLayer?: Record<string, unknown>[] }
+type TDataLayerWindow = Window & { dataLayer?: unknown[] }
 
-// Pushes a custom event to the GTM dataLayer (tags and triggers are configured in GTM)
-export const trackEvent = (event: TAnalyticsEvent, params: Record<string, unknown> = {}) => {
-  if (typeof window === 'undefined') return
+// Queues a gtag command; gtag.js reads the queue once it loads. It must push the real `arguments` object.
+const gtag: (...args: unknown[]) => void = function () {
   const analyticsWindow = window as TDataLayerWindow
   analyticsWindow.dataLayer = analyticsWindow.dataLayer || []
-  analyticsWindow.dataLayer.push({ event, ...params })
+  // eslint-disable-next-line prefer-rest-params
+  analyticsWindow.dataLayer.push(arguments)
+}
+
+// Sends a custom event to GA4 (docs/GOOGLE_ANALYTICS.md lists them)
+export const trackEvent = (event: TAnalyticsEvent, params: Record<string, unknown> = {}) => {
+  if (!GA_ENABLED || typeof window === 'undefined') return
+  gtag('event', event, params)
+}
+
+// The path only: a challenge link's ?c= token holds the word and stays out of GA
+export const trackPageView = (path: string) => {
+  if (!GA_ENABLED || typeof window === 'undefined') return
+  gtag('event', 'page_view', {
+    page_path: path,
+    page_title: document.title,
+    page_location: `${window.location.origin}${path}`,
+  })
 }

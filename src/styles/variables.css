@@ -9,8 +9,6 @@
   --column-width: 600px;
   --bottom-bar-height: 3.75rem;
   --ad-band-height: 0px;
-  /* Google's guidance for game pages: keep display ads 150px from the game */
-  --rail-gap: 150px;
   --keyboard-key-height: 2.4rem;
   /* Room the top-right buttons take: up to three of them, four with the install button */
   --top-bar-reserve: 10.5rem;

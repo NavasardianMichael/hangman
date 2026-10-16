@@ -8,6 +8,7 @@ import { trackEvent } from 'helpers/utils/analytics'
 import { createChallengeLink } from 'helpers/utils/challenge'
 import { normalizeSpaces } from 'helpers/utils/commons'
 import { combineClassNames } from 'helpers/utils/styles'
+import { splitWordToLetters } from 'helpers/utils/words'
 import { CustomButton } from 'components/shared/customButton'
 import styles from './styles.module.css'
 
@@ -27,7 +28,7 @@ export const Composition: StageComponent = ({ toNextPage }) => {
   }
 
   const handleRemoveCharClick: MouseEventHandler<HTMLButtonElement> = () => {
-    setWord((prev) => prev.substring(0, prev.length - 1))
+    setWord((prev) => splitWordToLetters(prev).slice(0, -1).join(''))
   }
 
   const handleSubmit: MouseEventHandler<HTMLButtonElement> = () => {
@@ -43,12 +44,16 @@ export const Composition: StageComponent = ({ toNextPage }) => {
     toNextPage()
   }
 
+  // 'ՈՒ' is two code points and one keyboard letter, same as on the guessing screen
+  const letters = splitWordToLetters(word)
+  const letterCount = splitWordToLetters(normalizeSpaces(word)).filter((letter) => letter !== ' ').length
+
   return (
     <div className={styles.composition}>
       {isChallenge && <p className={styles.caption}>Գրեք բառ, որը ընկերը պետք է գուշակի</p>}
       {/* The tile count (plus the cursor) lets CSS size the tiles to the available width */}
-      <div className={styles.word} style={{ '--cells': Array.from(word).length + 1 } as CSSProperties}>
-        {Array.from(word).map((letter, i) => {
+      <div className={styles.word} style={{ '--cells': letters.length + 1 } as CSSProperties}>
+        {letters.map((letter, i) => {
           return (
             <span key={i} className={letter === ' ' ? styles.gap : styles.tile}>
               {letter === ' ' ? '' : letter}
@@ -83,7 +88,7 @@ export const Composition: StageComponent = ({ toNextPage }) => {
           ✕
         </button>
       </div>
-      <CustomButton disabled={normalizeSpaces(word).length < minLettersCount} onClick={handleSubmit}>
+      <CustomButton disabled={letterCount < minLettersCount} onClick={handleSubmit}>
         {isChallenge ? 'Ստեղծել հղումը' : 'Անցնել գուշակելուն'}
       </CustomButton>
     </div>

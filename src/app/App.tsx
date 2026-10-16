@@ -13,7 +13,6 @@ import { trackEvent } from 'helpers/utils/analytics'
 import { CHALLENGE_PARAM, decodeChallengeToken } from 'helpers/utils/challenge'
 import { getResumeStage, handleUserBack, handleUserForward, isStageAllowed } from 'helpers/utils/gameFlow'
 import { initGameRouter } from 'helpers/utils/gameRouter'
-import { AdRails } from 'components/adRails'
 import { Background } from 'components/background'
 import { LeaveGameDialog } from 'components/leaveGameDialog'
 import { Stages } from 'components/stages/Stages'
@@ -91,7 +90,6 @@ export const App: FC = () => {
           <TopBar />
           <Stages />
         </div>
-        <AdRails />
         <LeaveGameDialog />
       </AntdApp>
     </AntdRegistry>

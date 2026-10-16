@@ -1,9 +1,10 @@
 import { Metadata } from 'next'
 import localFont from 'next/font/local'
-import Script from 'next/script'
 import { AD_FREQUENCY_HINT, ADS_ENABLED, ADS_TEST_MODE, ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC } from 'helpers/constants/ads'
+import { GA_ENABLED, GA_INIT_SCRIPT, GA_SCRIPT_SRC } from 'helpers/constants/analytics'
 import { SITE_URL } from 'helpers/constants/app'
 import { combineClassNames } from 'helpers/utils/styles'
+import { PageViewTracker } from 'components/pageViewTracker'
 import 'styles/variables.css'
 import './app.css'
 import 'styles/commons.css'
@@ -90,43 +91,31 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang='hy' className={combineClassNames(appFont.variable, ADS_ENABLED && 'ads-enabled')}>
-      {ADS_ENABLED && (
-        <head>
-          {/* A plain tag: next/script adds a data-nscript attribute that AdSense warns about */}
-          <script
-            async
-            src={ADSENSE_SCRIPT_SRC}
-            crossOrigin='anonymous'
-            data-ad-frequency-hint={AD_FREQUENCY_HINT}
-            data-adbreak-test={ADS_TEST_MODE ? 'on' : undefined}
-          />
-          <script dangerouslySetInnerHTML={{ __html: AD_PLACEMENT_INIT }} />
-        </head>
-      )}
+      <head>
+        {/* Plain tags so gtag exists before the app hydrates and sends its first page view */}
+        {GA_ENABLED && (
+          <>
+            <script dangerouslySetInnerHTML={{ __html: GA_INIT_SCRIPT }} />
+            <script async src={GA_SCRIPT_SRC} />
+          </>
+        )}
+        {ADS_ENABLED && (
+          <>
+            {/* A plain tag: next/script adds a data-nscript attribute that AdSense warns about */}
+            <script
+              async
+              src={ADSENSE_SCRIPT_SRC}
+              crossOrigin='anonymous'
+              data-ad-frequency-hint={AD_FREQUENCY_HINT}
+              data-adbreak-test={ADS_TEST_MODE ? 'on' : undefined}
+            />
+            <script dangerouslySetInnerHTML={{ __html: AD_PLACEMENT_INIT }} />
+          </>
+        )}
+      </head>
       <body>
-        <noscript>
-          <iframe
-            src='https://www.googletagmanager.com/ns.html?id=GTM-NFWCRW7P'
-            height='0'
-            width='0'
-            style={{ display: 'none', visibility: 'hidden' }}
-          ></iframe>
-        </noscript>
         {children}
-        <Script id='gtm-script' strategy='afterInteractive'>
-          {`
-    (function(w,d,s,l,i){
-      w[l]=w[l]||[];
-      w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
-      var f=d.getElementsByTagName(s)[0],
-          j=d.createElement(s),
-          dl=l!='dataLayer'?'&l='+l:'';
-      j.async=true;
-      j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
-      f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-NFWCRW7P');
-  `}
-        </Script>
+        {GA_ENABLED && <PageViewTracker />}
       </body>
     </html>
   )

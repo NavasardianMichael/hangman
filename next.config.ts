@@ -1,3 +1,4 @@
+import { withSentryConfig } from '@sentry/nextjs/config'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
@@ -44,4 +45,14 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+// Source maps upload only when CI provides SENTRY_AUTH_TOKEN (docs/SENTRY.md); the SDK runs either way
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  sourcemaps: { disable: !process.env.SENTRY_AUTH_TOKEN },
+  widenClientFileUpload: true,
+  silent: !process.env.CI,
+  // Error reports go through this app's own URL, so ad blockers don't drop them
+  tunnelRoute: '/monitoring',
+})

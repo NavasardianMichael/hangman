@@ -12,6 +12,7 @@ type TStage = (typeof GAME_STAGES)[keyof typeof GAME_STAGES]
  */
 
 const LEVEL_KEY = 'hangmanLevel'
+const VIGNETTE_HASH = '#google_vignette'
 
 type TRouterOptions = {
   // Decides the first screen from the URL (validating it against the saved game)
@@ -69,6 +70,9 @@ const goBack = () =>
   })
 
 const handlePopState = () => {
+  // An AdSense vignette marks the URL with this hash while it shows; it's not a player's back step
+  if (window.location.hash === VIGNETTE_HASH) return
+
   const ownBack = pendingBacks.shift()
   if (ownBack) return ownBack()
 

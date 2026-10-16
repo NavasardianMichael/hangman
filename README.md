@@ -25,7 +25,7 @@ Stack: Next.js 16 (App Router, standalone output) · React 19 · TypeScript 6 ·
 - **Responsive layout:**
   - a full-width game on phones;
   - a two-pane layout on short landscape screens;
-  - a centered 600px column on larger screens, with AdSense side rails in the free space.
+  - a centered 600px column on larger screens, with AdSense Auto ads side rails in the free space.
 - **Ink-style SVG hangman** that is drawn stroke by stroke with each mistake.
 - **Routing and back gestures** (`src/helpers/utils/gameRouter.ts`, `src/helpers/utils/gameFlow.ts`):
   - Every screen has its own URL: `/`, `/settings`, `/composition`, `/discovery`, `/summary`, `/share`, `/end`. The URL is the source of truth for the current screen, and reloads keep you on it.
@@ -67,37 +67,50 @@ The service worker is registered in production builds only.
 | Variable | Required | Description |
 |---|---|---|
 | `GEMINI_KEY` | yes | Google Gemini API key. Used server-side only by `POST /getWord`. |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | no | GA4 Measurement ID (`G-…`). Build time. Empty: analytics off. |
+| `NEXT_PUBLIC_SENTRY_DSN` | no | Sentry DSN. Build time. Empty: error tracking off. |
+| `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` | no | Source map upload to Sentry. Build time, CI only. |
 
-The build needs no env vars; they're read at runtime. Without a key, single player still works with the built-in words.
+`GEMINI_KEY` is read at runtime. Without a key, single player still works with the built-in words. The other variables
+are optional and read by `pnpm build` (`NEXT_PUBLIC_*` values are inlined into the bundle); in production they come
+from GitHub secrets, not the server `.env`.
 
 A free-tier key is enough. `/getWord` tries `gemini-3.5-flash-lite`, then `gemini-3.6-flash`, then `gemini-3.8-flash`. Free quotas are per model, so the fallback also adds capacity. After a quota (429) or overload (503) error, that model is skipped for the wait time Google returns.
 
 ## Ads (Google AdSense)
 
-All ad code is inactive until `ADSENSE_CLIENT` in `src/helpers/constants/ads.ts` is set: no script, no meta tag, no reserved band and no rails. When it's set:
-- **Verification:** `<meta name="google-adsense-account">` and the AdSense script (with the H5 Games Ads initializer) are added to `<head>`.
-- **Top band:** a band at the top is reserved for the AdSense **top anchor** ad.
-- **Desktop side rails:** display units appear at 1232px wide and up (160×600) and at 1520px and up (300×600), always at least 150px from the game, as Google recommends for game pages.
+Ads are served by **AdSense Auto ads**: Google places them, so the code holds no ad units or slot IDs. All ad code is inactive until `ADSENSE_CLIENT` in `src/helpers/constants/ads.ts` is set: no script, no meta tag and no reserved band. When it's set:
+- **Verification and Auto ads:** `<meta name="google-adsense-account">` and the AdSense script (with the H5 Games Ads initializer) are added to `<head>`.
+- **Top anchor:** a band at the top is reserved for the Auto ads **top anchor**, on phones and desktops, so it never covers the game or the keyboard.
+- **Side rails:** on wide screens, Auto ads puts its own side rails in the free space beside the 600px column.
+- **Vignettes:** full-screen ads between page loads (e.g. start screen → Rules). The game router ignores the `#google_vignette` URL hash they add, so it isn't taken for a back gesture.
+- **In-page ads are off**, since they would be injected into the fixed-height game column.
 - **H5 Games Ads**, when `H5_GAMES_ADS_APPROVED = true`:
   - an interstitial between rounds (`adBreak` `next`);
   - rewarded ads that unlock extra hints (`adBreak` `reward`).
 
   Development builds use Google's test ads.
 
-Setup in the AdSense account:
-1. Deploy first: the content pages (`/rules`, `/about`, `/privacy`) should be live for the review.
-2. Add the site **`mnavasardian.com`** in AdSense → Sites.
-3. Put the ads.txt line on the **root domain**: `google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0` goes in the portfolio-new repo's `public/ads.txt`, served at https://mnavasardian.com/ads.txt. AdSense reads the root domain's file.
-4. Create two **display ad units**, then put the publisher ID and the two slot IDs into `src/helpers/constants/ads.ts`.
-5. **Auto ads** settings for the site:
-   - in-page formats **off**;
-   - anchor ads **on, position "Top only"**;
-   - vignette ads **off**;
-   - side rails **off** (the app has its own).
-6. **Privacy & messaging:** publish the European regulations message. It's the Google-certified CMP required for EEA, UK and Swiss visitors.
-7. Apply for **H5 Games Ads** (beta) with Google's interest form. After approval, set `H5_GAMES_ADS_APPROVED = true` and deploy.
+The step-by-step AdSense account setup (site, ads.txt, review, consent message, Auto ads settings) is in
+[docs/ADSENSE.md](docs/ADSENSE.md).
 
 A plain "watch an ad to unlock" modal built on a normal display unit isn't used: AdSense policy forbids rewarding users for viewing non-rewarded ads.
+
+## Analytics and error tracking
+
+Both are off unless their build-time variable is set.
+
+- **Google Analytics 4** (`NEXT_PUBLIC_GA_MEASUREMENT_ID`): `gtag.js` is loaded in `<head>` (`src/app/layout.tsx`).
+  - Every screen change sends a `page_view` (`src/components/pageViewTracker`), because the game screens change the
+    URL without a page load.
+  - `trackEvent` (`src/helpers/utils/analytics.ts`) sends the game events.
+  - Setup and the event list: [docs/GOOGLE_ANALYTICS.md](docs/GOOGLE_ANALYTICS.md).
+- **Sentry** (`NEXT_PUBLIC_SENTRY_DSN`), via `@sentry/nextjs`:
+  - Browser errors, with a replay of the session when an error happens (`src/instrumentation-client.ts`).
+  - Server errors (`src/instrumentation.ts`), plus failed Gemini calls in `/getWord`.
+  - Crashes caught by `src/app/global-error.tsx`.
+  - Reports go through the app's own `/monitoring` route, so ad blockers don't drop them.
+  - Setup: [docs/SENTRY.md](docs/SENTRY.md).
 
 ## Deployment
 
