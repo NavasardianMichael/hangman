@@ -1,6 +1,9 @@
 .startGameBtn {
   position: fixed !important;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
   z-index: 1;
   left: 50%;
   translate: -50% 0;
@@ -42,4 +45,15 @@
     opacity: 0.6;
     cursor: default;
   }
+}
+
+.label,
+.label span {
+  line-height: 1;
+}
+
+.arrow {
+  flex: none;
+  width: 1.35em;
+  height: 1.35em;
 }

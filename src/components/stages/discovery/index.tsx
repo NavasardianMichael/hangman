@@ -136,11 +136,9 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
 
   const handleTimerFinish: StatisticTimerProps['onFinish'] = () => {
     if (isWordGuessed) return
+    // Stay on the round, same as losing by mistakes, so the loss sound can play
     setFinishedAudioTrigger(true)
     endRound('lost')
-    setTimeout(() => {
-      toNextPage()
-    }, 100)
   }
 
   const showHintText = isSingleMode && !!hint && hintRevealed && !isRoundOver
@@ -179,8 +177,8 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
       </div>
       {showHintText && <p className={styles.hintText}>💡 {hint}</p>}
       <Audio deps={[wastedLettersCount, currentWordLetters]} src='/scribble.mp3' />
-      <Audio deps={[isWordGuessed]} src='/win.mp3' />
-      <Audio deps={[isLost, finishedAudioTrigger]} src='/loss.mp3' />
+      <Audio deps={[isWordGuessed]} src='/win.mp3' volume={0.7} />
+      <Audio deps={[isLost, finishedAudioTrigger]} src='/loss.mp3' volume={0.7} />
       <Audio deps={[Object.keys(guessedLetters).length]} src='/correct.mp3' />
       <Hangman step={wastedLettersCount} status={hangmanStatus} />
       <div className={combineClassNames(styles.alphabet, isRoundOver ? styles.disabled : undefined)}>

@@ -14,6 +14,9 @@ const appFont = localFont({
   src: '../assets/fonts/DavelAghvor.otf',
   display: 'swap',
   variable: '--font-app',
+  adjustFontFallback: false,
+  // Everything except A–Z and a–z, so English words fall through to the math family
+  declarations: [{ prop: 'unicode-range', value: 'U+0000-0040, U+005B-0060, U+007B-10FFFF' }],
 })
 
 // Official H5 Games Ads initializer: https://developers.google.com/ad-placement/docs/example

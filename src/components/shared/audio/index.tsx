@@ -6,9 +6,10 @@ import { useGameStore } from 'store/game'
 type TProps = {
   deps: unknown[]
   src: MediaHTMLAttributes<HTMLAudioElement>['src']
+  volume?: number
 }
 
-export const Audio: FC<TProps> = ({ deps, src }) => {
+export const Audio: FC<TProps> = ({ deps, src, volume = 1 }) => {
   const audioRef = useRef<HTMLAudioElement>(null)
   const soundEnabled = useGameStore((state) => state.soundEnabled)
 
@@ -25,6 +26,7 @@ export const Audio: FC<TProps> = ({ deps, src }) => {
     const timeoutId = setTimeout(() => {
       // Muting during the short delay still wins
       if (!useGameStore.getState().soundEnabled) return
+      audio.volume = volume
       // Playback can be blocked (autoplay policy, interrupted load); sounds are optional
       audio.play().catch(() => {})
     }, 100)

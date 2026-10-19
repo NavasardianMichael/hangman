@@ -83,3 +83,11 @@ export const BackIcon: FC<TIconProps> = (props) => (
     <path d='M14.6 5.4 8.2 12l6.4 6.6' />
   </Icon>
 )
+
+// Points forward: the bottom bar moves the game ahead
+export const ArrowIcon: FC<TIconProps> = (props) => (
+  <Icon {...props}>
+    <path d='M4.4 12h13.2' />
+    <path d='m12.2 6.2 5.8 5.8-5.8 5.8' />
+  </Icon>
+)

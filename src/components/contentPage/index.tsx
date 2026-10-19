@@ -27,22 +27,24 @@ export const ContentPage: FC<TProps> = ({ title, intro, sections, footnote }) =>
       <Link href='/' className={styles.back}>
         ← Վերադառնալ խաղին
       </Link>
-      <h1 className={styles.title}>{title}</h1>
-      {intro && <div className={styles.intro}>{intro}</div>}
-      {sections.map(({ title: sectionTitle, body }) => (
-        <section key={sectionTitle} className={styles.section}>
-          <h2 className={styles.sectionTitle}>{sectionTitle}</h2>
-          <div className={styles.body}>{body}</div>
-        </section>
-      ))}
-      {footnote && <p className={styles.footnote}>{footnote}</p>}
-      <nav className={styles.links} aria-label='Տեղեկատվություն'>
-        {PAGE_LINKS.map(({ href, label }) => (
-          <Link key={href} href={href}>
-            {label}
-          </Link>
+      <div className={styles.scroll}>
+        <h1 className={styles.title}>{title}</h1>
+        {intro && <div className={styles.intro}>{intro}</div>}
+        {sections.map(({ title: sectionTitle, body }) => (
+          <section key={sectionTitle} className={styles.section}>
+            <h2 className={styles.sectionTitle}>{sectionTitle}</h2>
+            <div className={styles.body}>{body}</div>
+          </section>
         ))}
-      </nav>
+        {footnote && <p className={styles.footnote}>{footnote}</p>}
+        <nav className={styles.links} aria-label='Տեղեկատվություն'>
+          {PAGE_LINKS.map(({ href, label }) => (
+            <Link key={href} href={href}>
+              {label}
+            </Link>
+          ))}
+        </nav>
+      </div>
     </article>
   </main>
 )

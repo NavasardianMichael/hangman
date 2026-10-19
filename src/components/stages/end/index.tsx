@@ -45,7 +45,7 @@ export const End: StageComponent = () => {
         </div>
       )}
       <CustomButton onClick={() => leaveGame(GAME_STAGES.end)}>Խաղալ նորից</CustomButton>
-      <Audio deps={[playerWon]} src={'/win.mp3'} />
+      <Audio deps={[playerWon]} src={'/win.mp3'} volume={0.7} />
     </div>
   )
 }
