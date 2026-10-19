@@ -72,8 +72,8 @@ The service worker is registered in production builds only.
 | `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` | no | Source map upload to Sentry. Build time, CI only. |
 
 `GEMINI_KEY` is read at runtime. Without a key, single player still works with the built-in words. The other variables
-are optional and read by `pnpm build` (`NEXT_PUBLIC_*` values are inlined into the bundle); in production they come
-from GitHub secrets, not the server `.env`.
+are optional and read by `pnpm build` (`NEXT_PUBLIC_*` values are inlined into the bundle); in production the
+build job reads them from the `ENV_FILE_BASE64` secret, and they're kept out of the server `.env`.
 
 A free-tier key is enough. `/getWord` tries `gemini-3.5-flash-lite`, then `gemini-3.6-flash`, then `gemini-3.8-flash`. Free quotas are per model, so the fallback also adds capacity. After a quota (429) or overload (503) error, that model is skipped for the wait time Google returns.
 

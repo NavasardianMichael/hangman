@@ -125,12 +125,15 @@ Repository → Settings → Secrets and variables → Actions → **Secrets**:
 | `SSH_PORT` | optional, defaults to 22 |
 | `APP_DIR` | `/home/michael/apps/hangman` |
 | `ENV_FILE_BASE64` | output of `pnpm -s envtob64` (see below) |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | optional: GA4 Measurement ID (see [GOOGLE_ANALYTICS.md](GOOGLE_ANALYTICS.md)) |
-| `NEXT_PUBLIC_SENTRY_DSN` | optional: Sentry DSN (see [SENTRY.md](SENTRY.md)) |
-| `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` | optional: source map upload to Sentry |
 
-The optional secrets are used by the build step only: `NEXT_PUBLIC_*` values are inlined into the bundle, so they
-don't belong in `ENV_FILE_BASE64`. A service stays off when its secret is missing.
+`ENV_FILE_BASE64` is the whole production `.env`, and the workflow splits it:
+- **Build job:** takes `NEXT_PUBLIC_GA_MEASUREMENT_ID`, `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT` and
+  `SENTRY_AUTH_TOKEN` (see [GOOGLE_ANALYTICS.md](GOOGLE_ANALYTICS.md) and [SENTRY.md](SENTRY.md)). `NEXT_PUBLIC_*`
+  values are inlined into the bundle, so they must be there when `pnpm build` runs. The "Load build-time env" step
+  logs each one as set or not set. A service stays off when its key is empty.
+- **Deploy job:** writes the rest (`GEMINI_KEY`) to the server `.env`. The build-time keys are stripped from it.
+
+Any change to these values needs a new secret and a full run: re-running only the Deploy job reuses the old bundle.
 
 ```bash
 pnpm -s envtob64 | clip      # Windows: base64 of .env straight to the clipboard

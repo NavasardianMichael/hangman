@@ -44,19 +44,24 @@ Without source maps, stack traces point into minified bundles. The upload is opt
 4. Note your **organization slug** (from the URL `sentry.io/organizations/<slug>/`) and the **project slug**
    (`hangman`).
 
-## 3. Add the GitHub secrets
+## 3. Add the values to the deploy secret
 
-GitHub → repository → **Settings → Secrets and variables → Actions → New repository secret**:
+Add these to the production `.env`:
 
-| Secret | Value |
+| Key | Value |
 |---|---|
 | `NEXT_PUBLIC_SENTRY_DSN` | the DSN from step 1 |
 | `SENTRY_ORG` | organization slug |
 | `SENTRY_PROJECT` | `hangman` |
 | `SENTRY_AUTH_TOKEN` | the token from step 2 |
 
-Then push to `master`, or re-run **Deploy to Production**.
-- The DSN is baked in at build time, so any change needs a new build.
+Run `pnpm -s envtob64` and save the output as the `ENV_FILE_BASE64` secret (GitHub → repository → **Settings → Secrets
+and variables → Actions**). The build job reads these four keys from it; the server `.env` doesn't get them.
+
+Then push to `master`, or run **Deploy to Production**.
+- The DSN is baked in at build time, so any change needs a new build. Re-running only the Deploy job reuses the old
+  bundle.
+- The deploy log's "Load build-time env" step shows each key as set or not set.
 - The build uploads source maps, tags them with the commit as the release, and deletes the map files, so they're
   never served publicly.
 
@@ -101,7 +106,7 @@ The free plan has a monthly allowance of errors, spans (traces) and replays.
 
 | Symptom | Check |
 |---|---|
-| No `/monitoring` request when an error is thrown | Is the secret set, and was the build run after it was set? The DSN must be a `*.sentry.io` URL. |
+| No `/monitoring` request when an error is thrown | Does the deploy log's "Load build-time env" step show the DSN as set, and was the build run after it was set? The DSN must be a `*.sentry.io` URL. |
 | `/monitoring` returns 4xx | The DSN key is wrong or was revoked: compare it with Project Settings → Client Keys. |
 | Minified stack traces | Check `SENTRY_ORG`, `SENTRY_PROJECT` and `SENTRY_AUTH_TOKEN`; the deploy log's Build step shows the upload. |
 | Errors from extensions or bots | Use Project Settings → Inbound Filters. |

@@ -39,10 +39,11 @@ twice.
 
 ## 3. Set the ID and deploy
 
-1. Go to GitHub → repository → **Settings → Secrets and variables → Actions → New repository secret**.
-2. Name it `NEXT_PUBLIC_GA_MEASUREMENT_ID`, with the `G-…` ID as the value.
-3. Push to `master`, or re-run the **Deploy to Production** workflow. The ID is baked in at build time, so
-   changing it always needs a new build.
+1. Add `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-…` to the production `.env`.
+2. Run `pnpm -s envtob64` and save the output as the `ENV_FILE_BASE64` secret (GitHub → repository → **Settings →
+   Secrets and variables → Actions**).
+3. Push to `master`, or run the **Deploy to Production** workflow. The ID is baked in at build time, so
+   changing it always needs a new build. Re-running only the Deploy job reuses the old bundle.
 
 For local testing, put the same line in `.env.local` and run `pnpm dev`. Dev builds set `debug_mode`.
 
@@ -124,7 +125,7 @@ personal data or the guessed word.
 
 | Symptom | Check |
 |---|---|
-| No `collect` requests | Is the secret set? Did the build run after it was set? Is an ad blocker on? Does the head contain `gtag/js?id=G-…`? |
+| No `collect` requests | Does the deploy log's "Load build-time env" step show the ID as set? Did the build run after it was set? Is an ad blocker on? Does the head contain `gtag/js?id=G-…`? |
 | Every screen counted twice | Step 2: "browser history events" is still on. |
 | Parameters missing in reports | Step 5: register them. They fill in from that point on. |
 | Few or no EU users | Expected until they accept consent, as long as the consent message is published. |
