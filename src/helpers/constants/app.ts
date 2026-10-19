@@ -32,6 +32,9 @@ export const GAME_STAGES = {
 // The figure is complete after this many mistakes; one more ends the round
 export const MAX_MISTAKES = 6
 
+// Free hints in single-player, counted on the local calendar day
+export const FREE_HINTS_PER_DAY = 3
+
 export const CATEGORIES = {
   ցանկացած: 'ցանկացած',
   քաղաքներ: 'քաղաքներ',

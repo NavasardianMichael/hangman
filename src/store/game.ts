@@ -48,6 +48,7 @@ const initialPreferences: TPreferences = {
     bestStreak: 0,
   },
   lastFreeHintDate: null,
+  freeHintsUsed: 0,
 }
 
 export const useGameStore = create<TGameStore>()(
@@ -114,7 +115,11 @@ export const useGameStore = create<TGameStore>()(
 
       revealHint: () => set((state) => ({ round: { ...state.round, hintRevealed: true } })),
 
-      markFreeHintUsed: (date) => set({ lastFreeHintDate: date }),
+      markFreeHintUsed: (date) =>
+        set((state) => ({
+          lastFreeHintDate: date,
+          freeHintsUsed: state.lastFreeHintDate === date ? state.freeHintsUsed + 1 : 1,
+        })),
 
       recordGameStarted: () =>
         set((state) => ({ stats: { ...state.stats, gamesPlayed: state.stats.gamesPlayed + 1 } })),
@@ -129,11 +134,13 @@ export const useGameStore = create<TGameStore>()(
     {
       name: STORE_VARS.PERSIST_KEY,
       storage: createJSONStorage(() => localStorage),
-      version: 2,
+      version: 3,
       // v2: the current screen moved from the store to the URL
-      migrate: (persisted) => {
+      // v3: free hints are counted per day; a saved date without a count was the old single daily hint
+      migrate: (persisted, version) => {
         const state: Record<string, unknown> = { roundsPlayed: 0, ...(persisted as Record<string, unknown>) }
         delete state.currentStage
+        if (version < 3) state.freeHintsUsed = state.lastFreeHintDate ? 1 : 0
         return state as unknown as TGameStore
       },
     }

@@ -41,12 +41,10 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
       difficulty: state.settings.difficulty,
     }))
   )
-  const { guessedLetters, wastedLetters, hint, hintRevealed, result } = useGameStore(
+  const { guessedLetters, wastedLetters, result } = useGameStore(
     useShallow((state) => ({
       guessedLetters: state.round.guessedLetters,
       wastedLetters: state.round.wastedLetters,
-      hint: state.round.hint,
-      hintRevealed: state.round.hintRevealed,
       result: state.round.result,
     }))
   )
@@ -58,7 +56,7 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
   // it's saved only when the page is hidden, closed or reloaded.
   const remainingSecondsRef = useRef<number | null>(null)
 
-  // During the leave question, a hint dialog or the rewarded ad, the countdown pauses and then resumes where it stopped
+  // During the leave question or a hint dialog, the countdown pauses and then resumes where it stopped
   useEffect(
     () =>
       useUiStore.subscribe((state, previous) => {
@@ -141,8 +139,6 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
     endRound('lost')
   }
 
-  const showHintText = isSingleMode && !!hint && hintRevealed && !isRoundOver
-
   return (
     <div className={combineClassNames(styles.discovery, isRoundOver && styles.withBar)}>
       <div className={styles.info}>
@@ -175,7 +171,6 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
           )
         })}
       </div>
-      {showHintText && <p className={styles.hintText}>💡 {hint}</p>}
       <Audio deps={[wastedLettersCount, currentWordLetters]} src='/scribble.mp3' />
       <Audio deps={[isWordGuessed]} src='/win.mp3' volume={0.7} />
       <Audio deps={[isLost, finishedAudioTrigger]} src='/loss.mp3' volume={0.7} />

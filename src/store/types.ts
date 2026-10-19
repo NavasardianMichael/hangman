@@ -55,8 +55,10 @@ export type TAppSlice = {
 export type TPreferences = {
   soundEnabled: boolean
   stats: TStats
-  // Local date (YYYY-MM-DD) of the last free hint
+  // Local date (YYYY-MM-DD) the free-hint count belongs to
   lastFreeHintDate: string | null
+  // Free hints used on lastFreeHintDate
+  freeHintsUsed: number
 }
 
 export type TWordInfo = {
