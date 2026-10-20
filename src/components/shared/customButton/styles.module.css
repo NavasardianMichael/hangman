@@ -3,47 +3,55 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
+  gap: 0.55rem;
   z-index: 1;
   left: 50%;
   translate: -50% 0;
-  bottom: 0;
-  width: min(100%, var(--column-width));
-  height: var(--bottom-bar-height) !important;
-  color: #ececec !important;
-  border-radius: 0;
-  background-color: rgba(87, 87, 87, 0.94) !important;
-  font-size: 1.15rem !important;
+  bottom: 0.55rem;
+  width: min(calc(100% - 1.6rem), calc(var(--column-width) - 1.6rem));
+  height: calc(var(--bottom-bar-height) - 1.1rem) !important;
+  padding: 0 1rem;
+  box-sizing: border-box;
+  color: var(--paper) !important;
+  border: none;
+  border-radius: var(--card-radius);
+  background: linear-gradient(100deg, #575757, #575757b9);
+  font-size: 1.05rem !important;
+  font-weight: 700;
   text-transform: uppercase;
   outline: 0;
-  border: none;
   cursor: pointer;
+  text-shadow: none;
+  box-shadow:
+    0 3px 0 rgba(0, 0, 0, 0.28),
+    0 8px 16px rgba(0, 0, 0, 0.22) !important;
   transition:
-    background-color 0.2s ease,
-    box-shadow 0.2s ease;
-  text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.2);
-  box-shadow: 0 -8px 18px rgba(0, 0, 0, 0.22) !important;
+    translate 0.12s ease,
+    filter 0.12s ease,
+    box-shadow 0.12s ease;
 
   &:active:not(:disabled) {
-    color: #ececec !important;
-    background-color: #454545 !important;
+    translate: -50% 2px;
+    box-shadow:
+      0 1px 0 rgba(0, 0, 0, 0.28),
+      0 3px 8px rgba(0, 0, 0, 0.2) !important;
   }
 
   @media (hover: hover) {
     &:hover:not(:disabled) {
-      color: #ffffff !important;
-      background-color: #4e4e4e !important;
+      filter: brightness(1.12);
     }
   }
 
   &:focus-visible {
-    outline: 2px solid #ececec;
-    outline-offset: -4px;
+    outline: 2px solid var(--paper);
+    outline-offset: 3px;
   }
 
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.55;
     cursor: default;
+    filter: none;
   }
 }
 
@@ -54,6 +62,6 @@
 
 .arrow {
   flex: none;
-  width: 1.35em;
-  height: 1.35em;
+  width: 1.15em;
+  height: 1.15em;
 }

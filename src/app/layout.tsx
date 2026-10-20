@@ -3,6 +3,7 @@ import localFont from 'next/font/local'
 import { AD_FREQUENCY_HINT, ADS_ENABLED, ADS_TEST_MODE, ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC } from 'helpers/constants/ads'
 import { GA_ENABLED, GA_INIT_SCRIPT, GA_SCRIPT_SRC } from 'helpers/constants/analytics'
 import { SITE_URL } from 'helpers/constants/app'
+import { AUTHOR_NAME, AUTHOR_URL, SITE_DESCRIPTION, SITE_TITLE } from 'helpers/constants/seo'
 import { combineClassNames } from 'helpers/utils/styles'
 import { PageViewTracker } from 'components/pageViewTracker'
 import 'styles/variables.css'
@@ -26,29 +27,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   ...(ADS_ENABLED && { other: { 'google-adsense-account': ADSENSE_CLIENT } }),
   manifest: '/manifest.webmanifest',
-  title: 'Կախաղան | Hangman',
-  description:
-    'Գուշակիր արհեստական բանականության մտապահած բառը: Հայտնի ԿԱԽԱՂԱՆ (HANGMAN) Խաղի հայկական տարբերակն արդեն հասանելի է առցանց',
-  keywords: [
-    'Hangman',
-    'Armenian',
-    'game',
-    'online',
-    'multiplayer',
-    'виселица',
-    'на армянском',
-    'армянский',
-    'игра',
-    'կախաղան',
-    'խաղ',
-    'Միքայել Նավասարդյան',
-    'հայերեն',
-    'գուշակել բառ',
-    'երկու հոգանոց խաղ',
-    'կախամարդ',
-    'կախաղան խաղ',
-    'հայկական խաղ',
-  ],
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  keywords: ['կախաղան', 'կախաղան խաղ', 'հայերեն կախաղան', 'hangman հայերեն', 'բառ գուշակել', 'виселица на армянском'],
   robots: 'index, follow',
   verification: {
     google: ['otJjduk66KdJqUVQWUMGb3RCg7U5NGhdFLCDpcjP5_U', '37FrbEo3yZ80_N8a0HtvFYWKmuSX9SKqme96v1pG1AM'],
@@ -66,10 +47,10 @@ export const metadata: Metadata = {
   openGraph: {
     url: '/',
     type: 'website',
-    title: 'Կախաղան | Hangman',
-    description:
-      'Գուշակիր արհեստական բանականության մտապահած բառը: Հայտնի ԿԱԽԱՂԱՆ (HANGMAN) Խաղի հայկական տարբերակն արդեն հասանելի է առցանց',
-    siteName: 'Կախաղան | Hangman',
+    locale: 'hy_AM',
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    siteName: 'Կախաղան',
     images: [
       {
         url: '/images/icon-192x192.png',
@@ -77,16 +58,10 @@ export const metadata: Metadata = {
       },
     ],
   },
-  creator: 'Միքայել Նավասարդյան',
+  creator: AUTHOR_NAME,
   authors: [
-    {
-      name: 'Michael Navasardyan',
-      url: 'https://www.linkedin.com/in/michael-navasardyan/',
-    },
-    {
-      name: 'Միքայել Նավասարդյան',
-      url: 'https://www.linkedin.com/in/michael-navasardyan/',
-    },
+    { name: 'Michael Navasardyan', url: AUTHOR_URL },
+    { name: AUTHOR_NAME, url: AUTHOR_URL },
   ],
   category: 'game',
 }

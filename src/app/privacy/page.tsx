@@ -1,11 +1,13 @@
 import { Metadata } from 'next'
 import { CONTACT_EMAIL } from 'helpers/constants/app'
+import { infoPageRobots } from 'helpers/constants/seo'
 import { ContentPage } from 'components/contentPage'
 
 export const metadata: Metadata = {
   title: 'Գաղտնիության քաղաքականություն | Կախաղան',
   description: 'Ինչ տվյալներ է օգտագործում «Կախաղան» խաղը, ինչպես են աշխատում վերլուծության և գովազդի ծառայությունները։',
   alternates: { canonical: '/privacy' },
+  robots: infoPageRobots,
 }
 
 const LAST_UPDATED = '17 հոկտեմբերի, 2026թ.'
@@ -16,8 +18,8 @@ export default function PrivacyPage() {
       title='Գաղտնիության քաղաքականություն'
       intro={
         <p>
-          Այս էջը նկարագրում է, թե ինչ տվյալներ է օգտագործում «Կախաղան» խաղը (hangman.mnavasardian.com) և ինչ երրորդ
-          կողմի ծառայություններ են գործում կայքում։
+          «Կախաղան»-ը (hangman.mnavasardian.com) չի պահանջում գրանցում և անձնական տվյալներ չի հավաքում։ Խաղի ընթացքը
+          պահվում է միայն ձեր սարքում։ Ստորև նկարագրված է, թե ինչ երրորդ կողմի ծառայություններ են գործում կայքում։
         </p>
       }
       sections={[

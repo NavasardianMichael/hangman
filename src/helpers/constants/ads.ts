@@ -13,7 +13,10 @@ export const AD_FREQUENCY_HINT = '120s'
 // Google serves test ads for interstitials/rewarded outside production
 export const ADS_TEST_MODE = process.env.NODE_ENV !== 'production'
 
-export const ADS_ENABLED = ADSENSE_CLIENT.length > 0
+// Temporary: hide Auto ads and the ad band without removing the client id. Set back to false to show them.
+const ADS_PAUSED = true
+
+export const ADS_ENABLED = !ADS_PAUSED && ADSENSE_CLIENT.length > 0
 
 // Test ads still work in development before approval
 export const H5_ADS_ACTIVE = ADS_ENABLED && (H5_GAMES_ADS_APPROVED || ADS_TEST_MODE)

@@ -14,12 +14,6 @@ type TProps = {
   footnote?: ReactNode
 }
 
-const PAGE_LINKS = [
-  { href: '/rules', label: 'Կանոններ' },
-  { href: '/about', label: 'Մեր մասին' },
-  { href: '/privacy', label: 'Գաղտնիություն' },
-]
-
 // Static text pages (rules, about, privacy) in the same column as the game
 export const ContentPage: FC<TProps> = ({ title, intro, sections, footnote }) => (
   <main className={styles.page}>
@@ -37,13 +31,6 @@ export const ContentPage: FC<TProps> = ({ title, intro, sections, footnote }) =>
           </section>
         ))}
         {footnote && <p className={styles.footnote}>{footnote}</p>}
-        <nav className={styles.links} aria-label='Տեղեկատվություն'>
-          {PAGE_LINKS.map(({ href, label }) => (
-            <Link key={href} href={href}>
-              {label}
-            </Link>
-          ))}
-        </nav>
       </div>
     </article>
   </main>

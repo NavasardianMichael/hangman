@@ -3,12 +3,11 @@
 import { useState } from 'react'
 import { BarChartOutlined } from '@ant-design/icons'
 import { Button, ConfigProvider, Modal, ThemeConfig } from 'antd'
-import Link from 'next/link'
 import { useGameStore } from 'store/game'
 import { TPlayMode } from 'store/types'
 import { useUiStore } from 'store/ui'
 import { useBackClose } from 'hooks/useBackClose'
-import { GAME_STAGES, PLAY_MODES, STORE_VARS } from 'helpers/constants/app'
+import { GAME_STAGES, PLAY_MODES, STORE_VARS, SUPPORT_URL } from 'helpers/constants/app'
 import { StageComponent } from 'helpers/types/stage'
 import { getResumeStage } from 'helpers/utils/gameFlow'
 import { navigate } from 'helpers/utils/gameRouter'
@@ -91,11 +90,9 @@ export const Start: StageComponent = () => {
           Վիճակագրություն
         </Button>
 
-        <nav className={styles.links} aria-label='Տեղեկատվություն'>
-          <Link href='/rules'>Կանոններ</Link>
-          <Link href='/about'>Մեր մասին</Link>
-          <Link href='/privacy'>Գաղտնիություն</Link>
-        </nav>
+        <a className={styles.support} href={SUPPORT_URL} target='_blank' rel='noopener noreferrer'>
+          Աջակցել ծրագրին
+        </a>
 
         <Modal
           centered

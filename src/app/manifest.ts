@@ -12,7 +12,7 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: '/',
     display: 'standalone',
     display_override: ['fullscreen', 'minimal-ui'],
-    description: 'Հայտնի ԿԱԽԱՂԱՆ (HANGMAN) Խաղի հայկական տարբերակն արդեն հասանելի է առցանց',
+    description: 'Հայտնի ԿԱԽԱՂԱՆ (HANGMAN) Խաղի հայերեն տարբերակն արդեն հասանելի է առցանց',
     screenshots: [
       {
         src: '/images/screenshot-narrow-home.png',

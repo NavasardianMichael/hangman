@@ -6,6 +6,8 @@ export const MAX_PASSED_WORDS = 50
 
 export const CONTACT_EMAIL = 'navasardianmichael@gmail.com'
 
+export const SUPPORT_URL = 'https://buymeacoffee.com/navasardian'
+
 export const GET_WORD_ERROR_MESSAGE = 'Չհաջողվեց ստանալ բառը։ Խնդրում ենք կրկին փորձել։'
 
 export const PLAYERS = {

@@ -1,4 +1,7 @@
-// The start screen; the game itself renders from the layout
+import { homeJsonLd } from 'helpers/constants/seo'
+import { JsonLd } from 'components/jsonLd'
+
+// The start screen. The game itself renders from the layout.
 export default function StartPage() {
-  return null
+  return <JsonLd data={homeJsonLd} />
 }
