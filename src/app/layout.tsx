@@ -25,7 +25,7 @@ const AD_PLACEMENT_INIT = 'window.adsbygoogle=window.adsbygoogle||[];window.adBr
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  ...(ADS_ENABLED && { other: { 'google-adsense-account': ADSENSE_CLIENT } }),
+  ...(ADS_ENABLED ? { other: { 'google-adsense-account': ADSENSE_CLIENT } } : {}),
   manifest: '/manifest.webmanifest',
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
