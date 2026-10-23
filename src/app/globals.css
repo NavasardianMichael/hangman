@@ -128,7 +128,7 @@
   }
 }
 
-/* A sheet of paper studded onto the page: fine grain over the paper colour, edges a little darker, lifted off the page */
+/* A sheet of paper pinned onto the page: fine grain over the paper colour, edges a little darker, lifted off the page */
 @utility paper-sheet {
   position: relative;
   background-color: var(--paper);
@@ -139,19 +139,24 @@
     0 1px 1px rgba(0, 0, 0, 0.12),
     0 6px 14px rgba(0, 0, 0, 0.22);
 
-  /* A metal stud in each corner */
+  /* A drawing pin in each corner: a head in the buttons' grey with a shine on its upper left */
   &::before {
-    --stud: radial-gradient(circle closest-side, #e2e2e2, #9a9a9a 55%, #4a4a4a 88%, transparent);
+    --pin: radial-gradient(circle closest-side, #7a7a7a, var(--secondary-color) 60%, #2b2b2b 88%, transparent);
+    --shine: radial-gradient(circle closest-side, rgba(246, 243, 236, 0.7), transparent);
     content: '';
     position: absolute;
-    inset: 0.35rem;
+    inset: 0.3rem;
     pointer-events: none;
     background:
-      var(--stud) top left / 0.55rem 0.55rem no-repeat,
-      var(--stud) top right / 0.55rem 0.55rem no-repeat,
-      var(--stud) bottom left / 0.55rem 0.55rem no-repeat,
-      var(--stud) bottom right / 0.55rem 0.55rem no-repeat;
-    filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.45));
+      var(--shine) left 0.15rem top 0.15rem / 0.3rem 0.3rem no-repeat,
+      var(--shine) right 0.35rem top 0.15rem / 0.3rem 0.3rem no-repeat,
+      var(--shine) left 0.15rem bottom 0.35rem / 0.3rem 0.3rem no-repeat,
+      var(--shine) right 0.35rem bottom 0.35rem / 0.3rem 0.3rem no-repeat,
+      var(--pin) top left / 0.8rem 0.8rem no-repeat,
+      var(--pin) top right / 0.8rem 0.8rem no-repeat,
+      var(--pin) bottom left / 0.8rem 0.8rem no-repeat,
+      var(--pin) bottom right / 0.8rem 0.8rem no-repeat;
+    filter: drop-shadow(1px 2px 1.5px rgba(0, 0, 0, 0.45));
   }
 }
 

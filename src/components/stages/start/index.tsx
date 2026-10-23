@@ -67,7 +67,7 @@ export const Start: StageComponent = () => {
       className='relative box-border flex min-h-[calc(100dvh-var(--ad-band-height))] flex-col items-center justify-center gap-[0.85rem] pt-18 pb-[1.35rem] phone-landscape:gap-[0.6rem] phone-landscape:pt-16'
     >
       {/* Sits just under the title band; it and the stats button share the free space, so the buttons stay centred below it */}
-      <p className='m-0 mb-auto box-border w-4/5 max-w-100 paper-sheet -rotate-1 px-5 py-1.5 text-center text-[0.95rem] leading-[1.35] font-semibold text-[#2b2b2b] phone-landscape:text-[0.85rem]'>
+      <p className='m-0 mb-auto box-border w-4/5 max-w-100 paper-sheet -rotate-1 px-6 py-1.5 text-center text-[0.95rem] leading-[1.35] font-semibold text-[#2b2b2b] phone-landscape:text-[0.85rem]'>
         Գուշակի՛ր մտապահած հայերեն բառն ըստ նախընտրած թեմայի
       </p>
       {isClient && <DownloadAppBtn />}
