@@ -106,6 +106,13 @@ export const StatsIcon: FC<TIconProps> = (props) => (
   </Icon>
 )
 
+// A heart: supporting the project
+export const HeartIcon: FC<TIconProps> = (props) => (
+  <Icon {...props}>
+    <path d='M12 19.6s-7.4-4.4-7.4-9.6A4.1 4.1 0 0 1 12 7.6a4.1 4.1 0 0 1 7.4 2.4c0 5.2-7.4 9.6-7.4 9.6z' />
+  </Icon>
+)
+
 export const CopyIcon: FC<TIconProps> = (props) => (
   <Icon {...props}>
     <rect x='8.4' y='8.4' width='11.4' height='11.4' rx='1.6' />

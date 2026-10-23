@@ -13,7 +13,7 @@ import { navigate } from 'helpers/utils/gameRouter'
 import { combineClassNames } from 'helpers/utils/styles'
 import { DownloadAppBtn } from 'components/downloadAppBtn'
 import { Dialog } from 'components/shared/dialog'
-import { StatsIcon } from 'components/shared/icons'
+import { HeartIcon, StatsIcon } from 'components/shared/icons'
 import { StatsPanel } from 'components/stats'
 
 const MODE_LABELS: Record<TPlayMode, string> = {
@@ -34,6 +34,10 @@ const CONTINUE_BTN_CLASSES = combineClassNames(
   START_BTN_CLASSES,
   'bg-[linear-gradient(100deg,#2b2b2b,#3d3d3d)] shadow-[0_0_0_2px_rgba(246,243,236,0.9),0_3px_0_rgba(0,0,0,0.28),0_8px_16px_rgba(0,0,0,0.22)] active:shadow-[0_0_0_2px_rgba(246,243,236,0.9),0_1px_0_rgba(0,0,0,0.28),0_3px_8px_rgba(0,0,0,0.2)]'
 )
+
+// The light buttons under the modes: statistics and the support link
+const SMALL_BTN_CLASSES =
+  'box-border inline-flex h-8 cursor-pointer items-center justify-center gap-2 rounded-card border border-solid border-transparent bg-[rgba(246,243,236,0.92)] px-3.75 text-[14px] font-semibold text-secondary shadow-card'
 
 const BTN_TITLE_CLASSES = 'leading-[1.3]'
 const BTN_SUBTITLE_CLASSES = 'text-[0.72rem] leading-[1.3] font-normal'
@@ -66,7 +70,7 @@ export const Start: StageComponent = () => {
       data-start-screen
       className='relative box-border flex min-h-[calc(100dvh-var(--top-inset)-var(--safe-bottom))] flex-col items-center justify-center gap-[0.85rem] pt-18 pb-[1.35rem] phone-landscape:gap-[0.6rem] phone-landscape:pt-16'
     >
-      {/* Sits just under the title band; it and the stats button share the free space, so the buttons stay centred below it */}
+      {/* Sits just under the title band; it and the support link share the free space, so the buttons stay centred below it */}
       <p className='m-0 mb-auto box-border w-4/5 max-w-100 paper-sheet -rotate-1 px-6 py-1.5 text-center text-[0.95rem] leading-[1.35] font-semibold text-[#2b2b2b] phone-landscape:text-[0.85rem]'>
         Գուշակի՛ր մտապահած հայերեն բառն ըստ նախընտրած թեմայի
       </p>
@@ -89,21 +93,17 @@ export const Start: StageComponent = () => {
         <span className={BTN_TITLE_CLASSES}>Մարտահրավեր</span>
         <span className={BTN_SUBTITLE_CLASSES}>ուղարկիր բառ ընկերոջդ</span>
       </button>
-      <button
-        type='button'
-        className='mb-auto box-border inline-flex h-8 cursor-pointer items-center justify-center gap-2 rounded-card border border-solid border-transparent bg-[rgba(246,243,236,0.92)] px-[15px] text-[14px] font-semibold text-secondary shadow-card'
-        onClick={() => setStatsOpen(true)}
-      >
+      <button type='button' className={SMALL_BTN_CLASSES} onClick={() => setStatsOpen(true)}>
         <StatsIcon />
         Վիճակագրություն
       </button>
-
       <a
-        className='absolute right-[0.7rem] bottom-[0.45rem] z-2 m-0 rounded-card bg-[rgba(246,243,236,0.92)] px-[0.45rem] py-[0.15rem] text-[0.62rem] leading-[1.2] font-normal tracking-[0.2px] text-secondary normal-case underline underline-offset-2 shadow-card'
+        className={combineClassNames(SMALL_BTN_CLASSES, 'mb-auto no-underline')}
         href={SUPPORT_URL}
         target='_blank'
         rel='noopener noreferrer'
       >
+        <HeartIcon />
         Աջակցել ծրագրին
       </a>
 
