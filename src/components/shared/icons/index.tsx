@@ -84,10 +84,68 @@ export const BackIcon: FC<TIconProps> = (props) => (
   </Icon>
 )
 
+export const ForwardIcon: FC<TIconProps> = (props) => (
+  <Icon {...props}>
+    <path d='m9.4 5.4 6.4 6.6-6.4 6.6' />
+  </Icon>
+)
+
 // Points forward: the bottom bar moves the game ahead
 export const ArrowIcon: FC<TIconProps> = (props) => (
   <Icon {...props}>
     <path d='M4.4 12h13.2' />
     <path d='m12.2 6.2 5.8 5.8-5.8 5.8' />
+  </Icon>
+)
+
+// Three bars on a baseline: the statistics
+export const StatsIcon: FC<TIconProps> = (props) => (
+  <Icon {...props}>
+    <path d='M3.6 20.2h16.8' />
+    <path d='M6.6 20.2v-6.4M12 20.2V6.6M17.4 20.2v-9.8' strokeWidth={2.6} />
+  </Icon>
+)
+
+export const CopyIcon: FC<TIconProps> = (props) => (
+  <Icon {...props}>
+    <rect x='8.4' y='8.4' width='11.4' height='11.4' rx='1.6' />
+    <path d='M15.6 8.4V5.8a1.6 1.6 0 0 0-1.6-1.6H5.8a1.6 1.6 0 0 0-1.6 1.6V14a1.6 1.6 0 0 0 1.6 1.6h2.6' />
+  </Icon>
+)
+
+// Three linked dots: send the link
+export const ShareIcon: FC<TIconProps> = (props) => (
+  <Icon {...props}>
+    <circle cx='17.6' cy='5.8' r='2.4' />
+    <circle cx='6.4' cy='12' r='2.4' />
+    <circle cx='17.6' cy='18.2' r='2.4' />
+    <path d='m8.5 10.8 7-3.8M8.5 13.2l7 3.8' />
+  </Icon>
+)
+
+export const CloseIcon: FC<TIconProps> = (props) => (
+  <Icon {...props}>
+    <path d='m6.4 6.4 11.2 11.2M17.6 6.4 6.4 17.6' />
+  </Icon>
+)
+
+export const ChevronDownIcon: FC<TIconProps> = (props) => (
+  <Icon {...props}>
+    <path d='m6.4 9.4 5.6 5.6 5.6-5.6' />
+  </Icon>
+)
+
+// Filled marks for toasts, readable at a small size
+export const SuccessIcon: FC<TIconProps> = (props) => (
+  <Icon {...props} stroke='none'>
+    <circle cx='12' cy='12' r='10' fill='currentColor' />
+    <path d='m7.6 12.2 3 3 5.8-6' fill='none' stroke='#fff' strokeWidth={2.2} />
+  </Icon>
+)
+
+export const ErrorIcon: FC<TIconProps> = (props) => (
+  <Icon {...props} stroke='none'>
+    <circle cx='12' cy='12' r='10' fill='currentColor' />
+    <path d='m8.6 8.6 6.8 6.8M15.4 8.6l-6.8 6.8' fill='none' stroke='#fff' strokeWidth={2.2} />
   </Icon>
 )

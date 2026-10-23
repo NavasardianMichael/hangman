@@ -1,7 +1,6 @@
 'use client'
 
 import { FC, useEffect, useState } from 'react'
-import { Button } from 'antd'
 import { useShallow } from 'zustand/react/shallow'
 import { useGameStore } from 'store/game'
 import { useUiStore } from 'store/ui'
@@ -10,6 +9,7 @@ import { FREE_HINTS_PER_DAY } from 'helpers/constants/app'
 import { trackEvent } from 'helpers/utils/analytics'
 import { getLocalDateKey } from 'helpers/utils/date'
 import { ContentModal } from 'components/contentModal'
+import { Button } from 'components/shared/button'
 import { IconButton } from 'components/shared/iconButton'
 import { HintIcon } from 'components/shared/icons'
 
@@ -75,7 +75,7 @@ export const HintButton: FC = () => {
         intro={<p>{hint}</p>}
         onClose={closeDialog}
         footer={
-          <Button type='primary' onClick={closeDialog}>
+          <Button square onClick={closeDialog}>
             Վերադառնալ խաղին
           </Button>
         }
@@ -89,7 +89,7 @@ export const HintButton: FC = () => {
         }
         onClose={closeDialog}
         footer={
-          <Button type='primary' onClick={closeDialog}>
+          <Button square onClick={closeDialog}>
             Վերադառնալ խաղին
           </Button>
         }

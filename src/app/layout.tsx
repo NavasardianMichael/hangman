@@ -4,11 +4,10 @@ import { AD_FREQUENCY_HINT, ADS_ENABLED, ADS_TEST_MODE, ADSENSE_CLIENT, ADSENSE_
 import { GA_ENABLED, GA_INIT_SCRIPT, GA_SCRIPT_SRC } from 'helpers/constants/analytics'
 import { SITE_URL } from 'helpers/constants/app'
 import { AUTHOR_NAME, AUTHOR_URL, SITE_DESCRIPTION, SITE_TITLE } from 'helpers/constants/seo'
+import { CHALLENGE_OPENING_SCRIPT } from 'helpers/utils/challenge'
 import { combineClassNames } from 'helpers/utils/styles'
 import { PageViewTracker } from 'components/pageViewTracker'
-import 'styles/variables.css'
-import './app.css'
-import 'styles/commons.css'
+import './globals.css'
 
 // Davel Aghvor by Levon Chkolyan (Davel Creative Agency), free for personal and commercial use: https://fonter.am/en/fonts/davel-aghvor
 const appFont = localFont({
@@ -68,8 +67,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang='hy' className={combineClassNames(appFont.variable, ADS_ENABLED && 'ads-enabled')}>
+    // The challenge script below may add an attribute to <html> before React takes over the page
+    <html lang='hy' className={combineClassNames(appFont.variable, ADS_ENABLED && 'ads-enabled')} suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: CHALLENGE_OPENING_SCRIPT }} />
         {/* Plain tags so gtag exists before the app hydrates and sends its first page view */}
         {GA_ENABLED && (
           <>

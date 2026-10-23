@@ -1,28 +1,27 @@
 'use client'
 
-import { CopyOutlined, ShareAltOutlined } from '@ant-design/icons'
-import { App, Button, Flex } from 'antd'
 import { useGameStore } from 'store/game'
 import { GAME_STAGES } from 'helpers/constants/app'
 import { StageComponent } from 'helpers/types/stage'
 import { leaveGame } from 'helpers/utils/gameFlow'
+import { toast } from 'helpers/utils/toast'
+import { Button } from 'components/shared/button'
 import { CustomButton } from 'components/shared/customButton'
-import styles from './styles.module.css'
+import { CopyIcon, ShareIcon } from 'components/shared/icons'
 
 const SHARE_TEXT = 'Գուշակիր իմ բառը «Կախաղան» խաղում'
 
 // Shown to the challenge creator: the link to send to a friend
 export const Share: StageComponent = () => {
-  const { message: messageApi } = App.useApp()
   const challengeLink = useGameStore((state) => state.challengeLink)
   const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function'
 
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(challengeLink)
-      messageApi.success('Հղումը պատճենվեց')
+      toast.success('Հղումը պատճենվեց')
     } catch {
-      messageApi.error('Չհաջողվեց պատճենել, պատճենեք հղումը ձեռքով')
+      toast.error('Չհաջողվեց պատճենել, պատճենեք հղումը ձեռքով')
     }
   }
 
@@ -35,20 +34,25 @@ export const Share: StageComponent = () => {
   }
 
   return (
-    <div className={styles.share}>
-      <h2 className={styles.title}>Մարտահրավերը պատրաստ է</h2>
-      <p className={styles.caption}>Ուղարկեք այս հղումը ընկերոջը, որ գուշակի ձեր բառը</p>
-      <input className={styles.link} value={challengeLink} readOnly onFocus={(e) => e.currentTarget.select()} />
-      <Flex gap={12} justify='center' wrap>
+    <div className='box-border flex min-h-[calc(100dvh_-_var(--ad-band-height)_-_var(--bottom-bar-height))] flex-col items-center justify-center gap-5 px-6 py-16 text-center'>
+      <h2 className='m-0 text-[1.6rem]'>Մարտահրավերը պատրաստ է</h2>
+      <p className='m-0 text-[1rem]'>Ուղարկեք այս հղումը ընկերոջը, որ գուշակի ձեր բառը</p>
+      <input
+        className='box-border w-full max-w-[420px] rounded-card border border-solid border-[rgba(35,35,35,0.28)] bg-paper px-3 py-[0.6rem] text-center text-[0.95rem] text-secondary shadow-card select-all'
+        value={challengeLink}
+        readOnly
+        onFocus={(e) => e.currentTarget.select()}
+      />
+      <div className='flex flex-wrap justify-center gap-3'>
         {canShare && (
-          <Button type='primary' icon={<ShareAltOutlined />} className={styles.actionBtn} onClick={shareLink}>
+          <Button icon={<ShareIcon />} className='min-w-[140px]' onClick={shareLink}>
             Կիսվել
           </Button>
         )}
-        <Button type='primary' icon={<CopyOutlined />} className={styles.actionBtn} onClick={copyLink}>
+        <Button icon={<CopyIcon />} className='min-w-[140px]' onClick={copyLink}>
           Պատճենել
         </Button>
-      </Flex>
+      </div>
       <CustomButton onClick={() => leaveGame(GAME_STAGES.share)}>Գլխավոր էջ</CustomButton>
     </div>
   )

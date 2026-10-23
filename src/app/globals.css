@@ -1,0 +1,164 @@
+/* Tailwind without its preflight reset: the design builds on the browser's default element styles */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+/* Short landscape screens (phones turned sideways) */
+@custom-variant phone-landscape (@media (orientation: landscape) and (max-height: 540px));
+
+/* Utilities for the design tokens below, e.g. bg-paper, shadow-card, rounded-card */
+@theme inline {
+  --color-primary: var(--primary-color);
+  --color-secondary: var(--secondary-color);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --radius-card: var(--card-radius);
+  --shadow-card: var(--card-shadow);
+  --shadow-key: var(--key-shadow);
+}
+
+@layer base {
+  /* Defined on :root so dialogs and toasts can use them too */
+  :root {
+    --primary-color: #fff;
+    --secondary-color: #575757;
+    --primary-color-rgb-components: 255, 255, 255;
+    --secondary-color-rgb-components: 87, 87, 87;
+
+    /* Layout */
+    --column-width: 600px;
+    --bottom-bar-height: 3.75rem;
+    --ad-band-height: 0px;
+    --keyboard-key-height: 2.4rem;
+    /* Room the top-right buttons take: up to three of them, four with the install button */
+    --top-bar-reserve: 10.5rem;
+
+    /* Paper cards and raised keys, shared with the gallows art */
+    --paper: #f6f3ec;
+    --ink: #232323;
+    --card-radius: 4px;
+    --card-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 2px 0 rgba(35, 35, 35, 0.16), 0 4px 8px rgba(0, 0, 0, 0.12);
+    --key-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 2px 0 rgba(0, 0, 0, 0.28), 0 3px 6px rgba(0, 0, 0, 0.16);
+  }
+
+  /* With ads on, the top band is reserved for the AdSense anchor (it overlays only this band) */
+  :root.ads-enabled {
+    --ad-band-height: 3.8rem;
+  }
+
+  /* One more button in the top bar: content beside it keeps clear */
+  :root:has([data-install-button]) {
+    --top-bar-reserve: 13rem;
+  }
+
+  /* Short landscape screens: the column takes the full width */
+  @media (orientation: landscape) and (max-height: 540px) {
+    :root {
+      --column-width: 100vw;
+      --bottom-bar-height: 3rem;
+      --keyboard-key-height: 2rem;
+    }
+  }
+
+  /*
+    Root size drives every rem in the game. Steps follow common screens:
+    small phones, large phones, the 600px column, tablets, desktops.
+  */
+  html {
+    font-size: 17px;
+
+    @media (min-width: 390px) {
+      font-size: 18px;
+    }
+    @media (min-width: 600px) {
+      font-size: 20px;
+    }
+    @media (min-width: 768px) {
+      font-size: 22px;
+    }
+    @media (min-width: 1200px) {
+      font-size: 24px;
+    }
+  }
+
+  /* The content pages stay put. Only they opt into that, so the game can still scroll. */
+  html:has([data-content-page]),
+  body:has([data-content-page]) {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /* An open dialog keeps the page behind it still */
+  html:has(dialog[open]) {
+    overflow: hidden;
+  }
+
+  body {
+    margin: 0;
+    background-color: #8c8c8c;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    touch-action: manipulation;
+    user-select: none;
+  }
+
+  body,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  button,
+  select,
+  div,
+  span,
+  a {
+    letter-spacing: 2px;
+    line-height: 1.8;
+    font-family: var(--font-app), math;
+  }
+
+  /* Keyboard users get a visible focus ring (game buttons reset their outline) */
+  button:focus-visible,
+  a:focus-visible {
+    outline: 2px solid var(--secondary-color);
+    outline-offset: 2px;
+  }
+}
+
+/* The ink drawing of the guessing screen */
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fill-in {
+  to {
+    fill-opacity: 0.85;
+  }
+}
+
+@keyframes fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sway {
+  from {
+    rotate: -1.6deg;
+  }
+  to {
+    rotate: 1.6deg;
+  }
+}
+
+/* The cursor after the word being written */
+@keyframes cursor-blink {
+  0% {
+    opacity: 0;
+  }
+}

@@ -1,31 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import { BarChartOutlined } from '@ant-design/icons'
-import { Button, ConfigProvider, Modal, ThemeConfig } from 'antd'
 import { useGameStore } from 'store/game'
 import { TPlayMode } from 'store/types'
 import { useUiStore } from 'store/ui'
 import { useBackClose } from 'hooks/useBackClose'
-import { GAME_STAGES, PLAY_MODES, STORE_VARS, SUPPORT_URL } from 'helpers/constants/app'
+import { useIsClient } from 'hooks/useIsClient'
+import { GAME_STAGES, PLAY_MODES, SUPPORT_URL } from 'helpers/constants/app'
 import { StageComponent } from 'helpers/types/stage'
 import { getResumeStage } from 'helpers/utils/gameFlow'
 import { navigate } from 'helpers/utils/gameRouter'
 import { combineClassNames } from 'helpers/utils/styles'
 import { DownloadAppBtn } from 'components/downloadAppBtn'
+import { Dialog } from 'components/shared/dialog'
+import { StatsIcon } from 'components/shared/icons'
 import { StatsPanel } from 'components/stats'
-import styles from './styles.module.css'
-
-const timeoutToHintDownloadApp = 60 * 60 * 1000
-
-const THEME_CONFIG: ThemeConfig = {
-  token: {
-    colorPrimary: '#575757',
-    borderRadius: 0,
-    colorBgContainer: '#d3d3d32e',
-    colorPrimaryBg: '#575757',
-  },
-}
 
 const MODE_LABELS: Record<TPlayMode, string> = {
   [PLAY_MODES.single]: 'մեկ հոգով',
@@ -33,14 +22,26 @@ const MODE_LABELS: Record<TPlayMode, string> = {
   [PLAY_MODES.challenge]: 'մարտահրավեր',
 }
 
-// The download hint comes back an hour after install, in case the app was removed
-const wasAppInstalledRecently = () => {
-  const pwaInstalledDate = localStorage.getItem(STORE_VARS.PWA_INSTALLED_DATE)
-  return pwaInstalledDate && !isNaN(+pwaInstalledDate) ? Date.now() - +pwaInstalledDate < timeoutToHintDownloadApp : false
-}
+const START_BTN_CLASSES =
+  'box-border flex w-4/5 min-w-[200px] max-w-[400px] cursor-pointer flex-col items-center justify-center gap-0 rounded-card border border-solid border-transparent px-[15px] py-2 text-[1.2rem] leading-[1.3] font-bold whitespace-nowrap text-white transition-[translate,filter,box-shadow] duration-[120ms] ease-[ease] hover:brightness-115 active:translate-y-[2px] phone-landscape:min-h-[2.75rem] phone-landscape:text-[1rem]'
 
+const MODE_BTN_CLASSES = combineClassNames(
+  START_BTN_CLASSES,
+  'bg-[linear-gradient(100deg,#575757,#575757b9)] shadow-[0_3px_0_rgba(0,0,0,0.28),0_8px_16px_rgba(0,0,0,0.22)] active:shadow-[0_1px_0_rgba(0,0,0,0.28),0_3px_8px_rgba(0,0,0,0.2)]'
+)
+
+const CONTINUE_BTN_CLASSES = combineClassNames(
+  START_BTN_CLASSES,
+  'bg-[linear-gradient(100deg,#2b2b2b,#3d3d3d)] shadow-[0_0_0_2px_rgba(246,243,236,0.9),0_3px_0_rgba(0,0,0,0.28),0_8px_16px_rgba(0,0,0,0.22)] active:shadow-[0_0_0_2px_rgba(246,243,236,0.9),0_1px_0_rgba(0,0,0,0.28),0_3px_8px_rgba(0,0,0,0.2)]'
+)
+
+const BTN_TITLE_CLASSES = 'leading-[1.3]'
+const BTN_SUBTITLE_CLASSES = 'text-[0.72rem] leading-[1.3] font-normal'
+
+// The server renders this screen. What depends on this device (a saved game, the install hint) shows once the
+// page has loaded in the browser.
 export const Start: StageComponent = () => {
-  const [isAppInstalled] = useState(wasAppInstalledRecently)
+  const isClient = useIsClient()
   const [statsOpen, setStatsOpen] = useState(false)
   useBackClose(statsOpen, () => setStatsOpen(false))
 
@@ -61,49 +62,50 @@ export const Start: StageComponent = () => {
   }
 
   return (
-    <ConfigProvider theme={THEME_CONFIG}>
-      <div className={styles.start}>
-        {!isAppInstalled && <DownloadAppBtn />}
-        {resumeStage && savedMode && (
-          <Button type='primary' onClick={() => navigate(resumeStage)} className={combineClassNames(styles.startBtn, styles.continueBtn)}>
-            <span className={styles.btnTitle}>Շարունակել խաղը</span>
-            <span className={styles.btnSubtitle}>{MODE_LABELS[savedMode]}</span>
-          </Button>
-        )}
-        <Button type='primary' onClick={() => startMode(PLAY_MODES.single)} className={styles.startBtn}>
-          <span className={styles.btnTitle}>Մեկ հոգով</span>
-          <span className={styles.btnSubtitle}>արհեստական բանականության դեմ</span>
-        </Button>
-        <Button type='primary' onClick={() => startMode(PLAY_MODES.multiplayer)} className={styles.startBtn}>
-          Երկու հոգով
-        </Button>
-        <Button type='primary' onClick={() => startMode(PLAY_MODES.challenge)} className={styles.startBtn}>
-          <span className={styles.btnTitle}>Մարտահրավեր</span>
-          <span className={styles.btnSubtitle}>ուղարկիր բառ ընկերոջդ</span>
-        </Button>
-        <Button
-          type='text'
-          icon={<BarChartOutlined />}
-          className={styles.statsBtn}
-          onClick={() => setStatsOpen(true)}
-        >
-          Վիճակագրություն
-        </Button>
+    <div
+      data-start-screen
+      className='relative box-border flex min-h-[calc(100dvh_-_var(--ad-band-height))] flex-col items-center justify-center gap-[0.85rem] pt-18 pb-[1.35rem] phone-landscape:gap-[0.6rem] phone-landscape:pt-16'
+    >
+      {isClient && <DownloadAppBtn />}
+      {isClient && resumeStage && savedMode && (
+        <button type='button' onClick={() => navigate(resumeStage)} className={CONTINUE_BTN_CLASSES}>
+          <span className={BTN_TITLE_CLASSES}>Շարունակել խաղը</span>
+          <span className={BTN_SUBTITLE_CLASSES}>{MODE_LABELS[savedMode]}</span>
+        </button>
+      )}
+      <button type='button' onClick={() => startMode(PLAY_MODES.single)} className={MODE_BTN_CLASSES}>
+        <span className={BTN_TITLE_CLASSES}>Մեկ հոգով</span>
+        <span className={BTN_SUBTITLE_CLASSES}>արհեստական բանականության դեմ</span>
+      </button>
+      <button type='button' onClick={() => startMode(PLAY_MODES.multiplayer)} className={MODE_BTN_CLASSES}>
+        {/* A one-line label keeps the full line height, so this button stays as tall as the two-line ones */}
+        <span>Երկու հոգով</span>
+      </button>
+      <button type='button' onClick={() => startMode(PLAY_MODES.challenge)} className={MODE_BTN_CLASSES}>
+        <span className={BTN_TITLE_CLASSES}>Մարտահրավեր</span>
+        <span className={BTN_SUBTITLE_CLASSES}>ուղարկիր բառ ընկերոջդ</span>
+      </button>
+      <button
+        type='button'
+        className='box-border inline-flex h-8 cursor-pointer items-center justify-center gap-2 rounded-card border border-solid border-transparent bg-[rgba(246,243,236,0.92)] px-[15px] text-[14px] font-semibold text-secondary shadow-card'
+        onClick={() => setStatsOpen(true)}
+      >
+        <StatsIcon />
+        Վիճակագրություն
+      </button>
 
-        <a className={styles.support} href={SUPPORT_URL} target='_blank' rel='noopener noreferrer'>
-          Աջակցել ծրագրին
-        </a>
+      <a
+        className='absolute right-[0.7rem] bottom-[0.45rem] z-2 m-0 rounded-card bg-[rgba(246,243,236,0.92)] px-[0.45rem] py-[0.15rem] text-[0.62rem] leading-[1.2] font-normal tracking-[0.2px] text-secondary normal-case underline underline-offset-2 shadow-card'
+        href={SUPPORT_URL}
+        target='_blank'
+        rel='noopener noreferrer'
+      >
+        Աջակցել ծրագրին
+      </a>
 
-        <Modal
-          centered
-          title='Վիճակագրություն'
-          open={statsOpen}
-          onCancel={() => setStatsOpen(false)}
-          footer={null}
-        >
-          <StatsPanel />
-        </Modal>
-      </div>
-    </ConfigProvider>
+      <Dialog variant='square' title='Վիճակագրություն' open={statsOpen} onClose={() => setStatsOpen(false)}>
+        <StatsPanel />
+      </Dialog>
+    </div>
   )
 }

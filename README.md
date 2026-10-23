@@ -7,7 +7,7 @@ The Armenian version of Hangman, playable on phones, tablets and desktops (and i
 
 Live: **https://hangman.mnavasardian.com**
 
-Stack: Next.js 16 (App Router, standalone output) · React 19 · TypeScript 6 · antd 6 · Zustand · `@google/genai`.
+Stack: Next.js 16 (App Router, standalone output) · React 19 · TypeScript 6 · Tailwind CSS 4 · Zustand · `@google/genai`.
 
 ## Features
 

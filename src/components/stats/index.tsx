@@ -2,7 +2,6 @@
 
 import { FC } from 'react'
 import { useGameStore } from 'store/game'
-import styles from './styles.module.css'
 
 // Single-player rounds against the AI
 export const StatsPanel: FC = () => {
@@ -20,11 +19,14 @@ export const StatsPanel: FC = () => {
   ]
 
   return (
-    <dl className={styles.stats}>
+    <dl className='m-0 grid grid-cols-2 gap-3'>
       {items.map(({ label, value }) => (
-        <div key={label} className={styles.item}>
-          <dt className={styles.label}>{label}</dt>
-          <dd className={styles.value}>{value}</dd>
+        <div
+          key={label}
+          className='flex flex-col items-center rounded-card border border-solid border-[rgba(35,35,35,0.22)] bg-paper p-2 text-center shadow-card'
+        >
+          <dt className='text-[0.85rem]'>{label}</dt>
+          <dd className='m-0 text-[1.45rem] font-bold'>{value}</dd>
         </div>
       ))}
     </dl>

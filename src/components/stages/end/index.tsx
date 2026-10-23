@@ -10,7 +10,6 @@ import { leaveGame } from 'helpers/utils/gameFlow'
 import { Audio } from 'components/shared/audio'
 import { CustomButton } from 'components/shared/customButton'
 import { StatsPanel } from 'components/stats'
-import styles from './styles.module.css'
 
 export const End: StageComponent = () => {
   const { playerWon, mode } = useGameStore(useShallow((state) => ({ playerWon: state.playerWon, mode: state.mode })))
@@ -21,13 +20,13 @@ export const End: StageComponent = () => {
   }, [mode, playerWon])
 
   return (
-    <div className={styles.end}>
+    <div className='box-border flex min-h-[calc(100dvh_-_var(--ad-band-height)_-_var(--bottom-bar-height))] flex-col items-center justify-center gap-4 px-6 py-12 text-center'>
       <h3>
         Խաղն ավարտվեց
         <br />
         🥇Շնորհավորում ենք🥇
       </h3>
-      <p className={styles.winnerText}>
+      <p className='text-[1.65rem] font-bold'>
         🏆
         {isSingleMode
           ? `Դուք հաղթեցիք`
@@ -40,7 +39,7 @@ export const End: StageComponent = () => {
             } `}
       </p>
       {isSingleMode && (
-        <div className={styles.stats}>
+        <div className='w-full max-w-[420px]'>
           <StatsPanel />
         </div>
       )}

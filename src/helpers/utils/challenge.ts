@@ -3,6 +3,14 @@ import { sanitizeWord } from './words'
 
 export const CHALLENGE_PARAM = 'c'
 
+// Set on <html> while a challenge link opens: the start screen in the page's HTML stays hidden until the round shows
+export const CHALLENGE_OPENING_ATTR = 'data-challenge-opening'
+
+// Runs before the first paint (see the root layout)
+export const CHALLENGE_OPENING_SCRIPT = `if(new URLSearchParams(location.search).has('${CHALLENGE_PARAM}'))document.documentElement.setAttribute('${CHALLENGE_OPENING_ATTR}','')`
+
+export const endChallengeOpening = () => document.documentElement.removeAttribute(CHALLENGE_OPENING_ATTR)
+
 // Obfuscation only: keeps the word out of plain sight in the link, not a secret
 const KEY = [0x4b, 0x61, 0x78, 0x61, 0x67, 0x68, 0x61, 0x6e]
 

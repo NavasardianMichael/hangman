@@ -1,7 +1,6 @@
 'use client'
 
 import { MouseEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Statistic, StatisticTimerProps } from 'antd'
 import { prefetchWord } from 'app/getWord/client'
 import { useShallow } from 'zustand/react/shallow'
 import { useGameStore } from 'store/game'
@@ -14,8 +13,12 @@ import { combineClassNames } from 'helpers/utils/styles'
 import { splitWordToLetters } from 'helpers/utils/words'
 import { Audio } from 'components/shared/audio'
 import { CustomButton } from 'components/shared/customButton'
+import { LetterKey } from 'components/shared/letterKey'
+import { Countdown } from './countdown'
 import { Hangman, THangmanStatus } from './hangman'
-import styles from './styles.module.css'
+
+const CELL_CLASSES =
+  'box-border flex min-h-[2.35rem] items-center justify-center rounded-card border border-solid border-[rgba(35,35,35,0.28)] shadow-card'
 
 type TWordCell = TLetter | ' '
 
@@ -128,11 +131,11 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
     else wasteLetter(letter)
   }
 
-  const countdownOnChange = (value: StatisticTimerProps['value']) => {
-    if (typeof value === 'number') remainingSecondsRef.current = Math.max(0, Math.ceil(value / 1000))
+  const countdownOnChange = (msLeft: number) => {
+    remainingSecondsRef.current = Math.ceil(msLeft / 1000)
   }
 
-  const handleTimerFinish: StatisticTimerProps['onFinish'] = () => {
+  const handleTimerFinish = () => {
     if (isWordGuessed) return
     // Stay on the round, same as losing by mistakes, so the loss sound can play
     setFinishedAudioTrigger(true)
@@ -140,33 +143,49 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
   }
 
   return (
-    <div className={combineClassNames(styles.discovery, isRoundOver && styles.withBar)}>
-      <div className={styles.info}>
+    // Column layout: the drawing takes whatever height is left between the word and the keyboard.
+    // Phones turned sideways: word and drawing on the left, keyboard on the right.
+    <div
+      className={combineClassNames(
+        'box-border flex flex-col phone-landscape:grid phone-landscape:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] phone-landscape:grid-rows-[auto_auto_auto_minmax(0,1fr)] phone-landscape:gap-x-2',
+        // The continue button takes the bottom bar once the round is over
+        isRoundOver
+          ? 'h-[calc(100dvh_-_var(--ad-band-height)_-_var(--bottom-bar-height))]'
+          : 'h-[calc(100dvh_-_var(--ad-band-height))]'
+      )}
+    >
+      {/* Leaves room for the top-right buttons */}
+      <div className='flex min-h-[2.5rem] flex-none items-center gap-3 pt-[4px] pr-(--top-bar-reserve) pb-0 pl-[16px] phone-landscape:col-start-1 phone-landscape:pr-[16px]'>
         {hasTimer && !isRoundOver && !isTimerPaused && (
-          <Statistic.Timer
-            className={styles.timer}
-            format='mm:ss'
-            type='countdown'
-            value={countdownDeadline}
-            onChange={countdownOnChange}
-            onFinish={handleTimerFinish}
-          />
+          <Countdown deadline={countdownDeadline} onChange={countdownOnChange} onFinish={handleTimerFinish} />
         )}
       </div>
-      <div
-        className={combineClassNames(
-          styles.word,
-          isWordGuessed ? styles.success : undefined,
-          isLost ? styles.fail : undefined
-        )}
-      >
+      {/* The app font has a single weight; a thin outline in the text color renders a consistent semibold */}
+      <div className='mt-2 flex flex-none flex-wrap justify-center gap-2 p-4 text-center text-[1.75rem] leading-none font-normal [-webkit-text-stroke:0.045em_currentColor] [paint-order:stroke_fill] phone-landscape:col-start-1 phone-landscape:py-1 phone-landscape:text-[1.2rem]'>
         {currentWordLetters.map((letter, i) => {
           const isSpace = letter === ' '
           const isShown = isWordGuessed || isLost || (!isSpace && guessedLetters[letter])
 
           return (
-            <span key={i} className={combineClassNames(styles.cell, isSpace && styles.space, isShown && styles.guessed)}>
-              <span>{letter}</span>
+            <span
+              key={i}
+              className={combineClassNames(
+                'basis-[calc(100%/10_-_9*0.5rem/10)]',
+                !isSpace &&
+                  combineClassNames(
+                    CELL_CLASSES,
+                    isWordGuessed ? 'bg-[rgba(30,221,30,0.4)]' : isLost ? 'bg-[rgba(255,0,0,0.3)]' : 'bg-paper'
+                  )
+              )}
+            >
+              <span
+                className={combineClassNames(
+                  'block leading-none transition-[scale] duration-200 ease-[ease]',
+                  isShown ? 'scale-100' : 'scale-0'
+                )}
+              >
+                {letter}
+              </span>
             </span>
           )
         })}
@@ -175,23 +194,29 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
       <Audio deps={[isWordGuessed]} src='/win.mp3' volume={0.7} />
       <Audio deps={[isLost, finishedAudioTrigger]} src='/loss.mp3' volume={0.7} />
       <Audio deps={[Object.keys(guessedLetters).length]} src='/correct.mp3' />
-      <Hangman step={wastedLettersCount} status={hangmanStatus} />
-      <div className={combineClassNames(styles.alphabet, isRoundOver ? styles.disabled : undefined)}>
+      <Hangman
+        className='mx-auto my-1 block h-auto min-h-[80px] w-[min(100%,340px)] flex-[1_1_0] phone-landscape:col-start-1 phone-landscape:row-start-4 phone-landscape:size-full phone-landscape:min-h-0'
+        step={wastedLettersCount}
+        status={hangmanStatus}
+      />
+      <div
+        className={combineClassNames(
+          'box-border flex w-full flex-none flex-wrap gap-[0.2rem] p-4 text-center text-[1.35rem] font-medium text-primary phone-landscape:col-start-2 phone-landscape:row-[1/span_4] phone-landscape:self-center phone-landscape:px-2 phone-landscape:pt-[3.25rem] phone-landscape:pb-2',
+          isRoundOver && 'pointer-events-none'
+        )}
+      >
         {LETTERS.map((letter) => {
           return (
-            <button
+            <LetterKey
               key={letter}
               name={letter}
               disabled={guessedLetters[letter] || wastedLetters[letter]}
-              className={combineClassNames(
-                styles.letter,
-                guessedLetters[letter] ? styles.guessed : undefined,
-                wastedLetters[letter] ? styles.wasted : undefined
-              )}
+              state={guessedLetters[letter] ? 'guessed' : wastedLetters[letter] ? 'wasted' : 'idle'}
+              className={isRoundOver ? 'opacity-60' : undefined}
               onClick={handleAlphabetLetterClick}
             >
               {letter}
-            </button>
+            </LetterKey>
           )
         })}
       </div>

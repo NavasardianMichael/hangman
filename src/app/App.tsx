@@ -1,28 +1,30 @@
 'use client'
 
 import { FC, useEffect } from 'react'
-import { AntdRegistry } from '@ant-design/nextjs-registry'
-import { App as AntdApp } from 'antd'
 import { useGameStore } from 'store/game'
 import { TGameStage } from 'store/types'
 import { useUiStore } from 'store/ui'
-import { useIsClient } from 'hooks/useIsClient'
+import { useStage } from 'hooks/useStage'
 import { GAME_STAGES, PLAY_MODES } from 'helpers/constants/app'
 import { configureAds } from 'helpers/utils/ads'
 import { trackEvent } from 'helpers/utils/analytics'
-import { CHALLENGE_PARAM, decodeChallengeToken } from 'helpers/utils/challenge'
+import { CHALLENGE_PARAM, decodeChallengeToken, endChallengeOpening } from 'helpers/utils/challenge'
 import { getResumeStage, handleUserBack, handleUserForward, isStageAllowed } from 'helpers/utils/gameFlow'
 import { initGameRouter } from 'helpers/utils/gameRouter'
-import { Background } from 'components/background'
 import { LeaveGameDialog } from 'components/leaveGameDialog'
 import { Stages } from 'components/stages/Stages'
+import { Toaster } from 'components/toaster'
 import { TopBar } from 'components/topBar'
 
 // A challenge link (?c=…) opens straight into its round; the router drops the parameter from the URL
 const startChallengeFromUrl = () => {
   const token = new URL(window.location.href).searchParams.get(CHALLENGE_PARAM)
   const word = token && decodeChallengeToken(token)
-  if (!word) return false
+  if (!word) {
+    // Not a playable link: the start screen shows after all
+    endChallengeOpening()
+    return false
+  }
 
   const { resetGame, setAppOptions, startRound } = useGameStore.getState()
   resetGame()
@@ -53,8 +55,7 @@ const registerServiceWorker = async () => {
 }
 
 export const App: FC = () => {
-  // The store is restored from localStorage, which the server can't see, so the game renders on the client only
-  const isClient = useIsClient()
+  const stage = useStage()
   const isRouterReady = useUiStore((state) => state.isRouterReady)
   const soundEnabled = useGameStore((state) => state.soundEnabled)
 
@@ -79,20 +80,26 @@ export const App: FC = () => {
     configureAds(soundEnabled)
   }, [soundEnabled])
 
-  if (!isClient || !isRouterReady) return null
+  // The challenge round from a link is on screen
+  useEffect(() => {
+    if (stage !== GAME_STAGES.start) endChallengeOpening()
+  }, [stage])
+
+  // The start screen is the same for everyone, so the server renders it. Every other screen depends on the game
+  // saved on this device, so it waits for the router to check the URL against that game.
+  const isScreenKnown = isRouterReady || stage === GAME_STAGES.start
 
   return (
-    <AntdRegistry>
-      {/* Hosts toasts at the root so they outlive the stage that showed them */}
-      <AntdApp component={false}>
-        <Background />
-        <div className='app dark'>
+    <>
+      {isScreenKnown && (
+        <div className='relative box-border min-h-dvh w-[min(100%,var(--column-width))] mx-auto pt-(--ad-band-height) text-secondary [[data-challenge-opening]_&]:invisible'>
           <TopBar />
           <Stages />
         </div>
-        <LeaveGameDialog />
-      </AntdApp>
-    </AntdRegistry>
+      )}
+      <LeaveGameDialog />
+      <Toaster />
+    </>
   )
 }
 

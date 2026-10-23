@@ -1,9 +1,10 @@
 'use client'
 
 import { FC } from 'react'
-import { Modal } from 'antd'
 import { TLeaveDialogVariant, useUiStore } from 'store/ui'
 import { useBackClose } from 'hooks/useBackClose'
+import { Button } from 'components/shared/button'
+import { Dialog } from 'components/shared/dialog'
 
 const TEXTS: Record<TLeaveDialogVariant, { title: string; body: string; confirm: string; cancel: string }> = {
   game: {
@@ -41,18 +42,22 @@ export const LeaveGameDialog: FC = () => {
   }
 
   return (
-    <Modal
-      centered
+    <Dialog
       open={!!leaveDialog}
       title={texts.title}
-      onOk={handleConfirm}
-      onCancel={closeLeaveDialog}
-      okText={texts.confirm}
-      cancelText={texts.cancel}
-      okButtonProps={{ danger: true, style: { minWidth: 100 } }}
-      cancelButtonProps={{ style: { minWidth: 100 } }}
+      onClose={closeLeaveDialog}
+      footer={
+        <>
+          <Button variant='default' className='min-w-[100px]' onClick={closeLeaveDialog}>
+            {texts.cancel}
+          </Button>
+          <Button variant='danger' className='min-w-[100px]' onClick={handleConfirm}>
+            {texts.confirm}
+          </Button>
+        </>
+      }
     >
-      <p style={{ textAlign: 'center' }}>{texts.body}</p>
-    </Modal>
+      <p className='text-center'>{texts.body}</p>
+    </Dialog>
   )
 }

@@ -1,10 +1,10 @@
 'use client'
 
 import { FC, useState, useSyncExternalStore } from 'react'
-import { Modal } from 'antd'
 import { useShallow } from 'zustand/react/shallow'
 import { useGameStore } from 'store/game'
 import { useBackClose } from 'hooks/useBackClose'
+import { useIsClient } from 'hooks/useIsClient'
 import { useStage } from 'hooks/useStage'
 import { GAME_STAGES, PLAY_MODES, PLAYERS, STAGES_HIDE_BREADCRUMB } from 'helpers/constants/app'
 import { trackEvent } from 'helpers/utils/analytics'
@@ -16,11 +16,10 @@ import {
   promptInstall,
   subscribeToInstallPrompt,
 } from 'helpers/utils/installPrompt'
-import { combineClassNames } from 'helpers/utils/styles'
 import { HintButton } from 'components/hintButton'
+import { Dialog } from 'components/shared/dialog'
 import { IconButton } from 'components/shared/iconButton'
 import { DownloadIcon, HomeIcon, InfoIcon, SoundOffIcon, SoundOnIcon } from 'components/shared/icons'
-import styles from './styles.module.css'
 
 // Install (when the browser offers it), turn info (multiplayer), home (asks first when a game would be lost),
 // hint (single-player round) and sound buttons in the top-right corner
@@ -36,6 +35,8 @@ export const TopBar: FC = () => {
       hasHint: !!state.round.hint,
     }))
   )
+  // The server paints the start screen with sound on; the saved choice applies once the page loads
+  const isSoundOn = !useIsClient() || soundEnabled
   const [infoModalOpen, setInfoModalOpen] = useState(false)
   useBackClose(infoModalOpen, () => setInfoModalOpen(false))
   // Only Chromium browsers offer an install prompt (none once installed); Safari and Firefox never do
@@ -72,10 +73,10 @@ export const TopBar: FC = () => {
   }
 
   return (
-    <div className={styles.topBar}>
+    <div className='absolute top-[calc(var(--ad-band-height)_+_12px)] right-[16px] z-2 flex gap-[10px]'>
       {showInstall && (
         <IconButton
-          className={styles.installButton}
+          data-install-button
           aria-label='Ներբեռնել հավելվածը'
           title='Ներբեռնել հավելվածը'
           onClick={handleInstallClick}
@@ -95,27 +96,20 @@ export const TopBar: FC = () => {
       )}
       {showHint && <HintButton />}
       <IconButton
-        aria-label={soundEnabled ? 'Անջատել ձայնը' : 'Միացնել ձայնը'}
-        title={soundEnabled ? 'Անջատել ձայնը' : 'Միացնել ձայնը'}
-        aria-pressed={!soundEnabled}
+        aria-label={isSoundOn ? 'Անջատել ձայնը' : 'Միացնել ձայնը'}
+        title={isSoundOn ? 'Անջատել ձայնը' : 'Միացնել ձայնը'}
+        aria-pressed={!isSoundOn}
         onClick={handleSoundClick}
       >
-        {soundEnabled ? <SoundOnIcon /> : <SoundOffIcon />}
+        {isSoundOn ? <SoundOnIcon /> : <SoundOffIcon />}
       </IconButton>
 
-      <Modal
-        centered
-        open={infoModalOpen}
-        onOk={() => setInfoModalOpen(false)}
-        onCancel={() => setInfoModalOpen(false)}
-        okButtonProps={{ style: { display: 'none' } }}
-        cancelButtonProps={{ style: { display: 'none' } }}
-      >
-        <div className={styles.turnInfo}>
-          <p className={styles.turnText}>{turnText}</p>
-          <p className={combineClassNames(styles.turnText, styles.nextTurn)}>{nextTurnText}</p>
+      <Dialog open={infoModalOpen} onClose={() => setInfoModalOpen(false)}>
+        <div className='text-center'>
+          <p className='mt-[0.45rem] mb-0 font-medium'>{turnText}</p>
+          <p className='mt-4 mb-0 font-medium'>{nextTurnText}</p>
         </div>
-      </Modal>
+      </Dialog>
     </div>
   )
 }

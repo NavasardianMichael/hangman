@@ -1,4 +1,5 @@
-import type { SelectProps } from 'antd'
+// A choice in a form control
+export type TOption<T> = { label: string; value: T }
 
 export const SITE_URL = 'https://hangman.mnavasardian.com'
 
@@ -72,7 +73,9 @@ export const CATEGORIES = {
   ['մինչև 8 տարեկանների համար']: 'մինչև 10 տարեկանների համար',
 } as const
 
-export const CATEGORIES_OPTIONS: SelectProps['options'] = Object.entries(CATEGORIES).map(([label, value]) => ({
+export const CATEGORIES_OPTIONS: TOption<(typeof CATEGORIES)[keyof typeof CATEGORIES]>[] = Object.entries(
+  CATEGORIES
+).map(([label, value]) => ({
   label,
   value,
 }))
@@ -85,14 +88,11 @@ export const DIFFICULTY_LEVELS = {
   ['շատ դժվար']: 'շատ դժվար',
 } as const
 
-export const DIFFICULTY_LEVELS_OPTIONS: SelectProps['options'] = Object.entries(DIFFICULTY_LEVELS).map(
-  ([label, value]) => ({
+export const DIFFICULTY_LEVELS_OPTIONS: TOption<(typeof DIFFICULTY_LEVELS)[keyof typeof DIFFICULTY_LEVELS]>[] =
+  Object.entries(DIFFICULTY_LEVELS).map(([label, value]) => ({
     label,
     value,
-  })
-)
-
-export const STAGES_WITH_CLEAR_BACKGROUND: (keyof typeof GAME_STAGES)[] = [GAME_STAGES.start]
+  }))
 
 export const STAGES_HIDE_BREADCRUMB: (keyof typeof GAME_STAGES)[] = [
   GAME_STAGES.start,

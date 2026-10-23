@@ -1,42 +1,139 @@
 'use client'
 
-import { MouseEventHandler, useState } from 'react'
-import {
-  App,
-  Flex,
-  Form,
-  InputNumber,
-  Radio,
-  RadioGroupProps,
-  RadioProps,
-  Select,
-  SelectProps,
-  Spin,
-} from 'antd'
+import { ChangeEventHandler, FC, MouseEventHandler, ReactNode, useState } from 'react'
 import { getWord } from 'app/getWord/client'
 import { useGameStore } from 'store/game'
+import { TSettings } from 'store/types'
 import {
   CATEGORIES_OPTIONS,
   DIFFICULTY_LEVELS_OPTIONS,
   GAME_STAGES,
   GET_WORD_ERROR_MESSAGE,
   PLAY_MODES,
+  TOption,
 } from 'helpers/constants/app'
 import { StageComponent } from 'helpers/types/stage'
 import { trackEvent } from 'helpers/utils/analytics'
 import { navigate } from 'helpers/utils/gameRouter'
+import { combineClassNames } from 'helpers/utils/styles'
+import { toast } from 'helpers/utils/toast'
 import { CustomButton } from 'components/shared/customButton'
 import { IconButton } from 'components/shared/iconButton'
-import { BackIcon } from 'components/shared/icons'
-import styles from './styles.module.css'
+import { BackIcon, ChevronDownIcon } from 'components/shared/icons'
+import { Spinner } from 'components/shared/spinner'
 
-const TIME_LIMITATION_OPTIONS: RadioGroupProps['options'] = [
+const TIME_LIMITATION_OPTIONS: TOption<boolean>[] = [
   { label: 'Ժամանակով', value: true },
   { label: 'Անժամանակ', value: false },
 ]
 
+const LABEL_CLASSES = 'block p-0 pb-2 text-[1rem] leading-[1.5715] text-black/88'
+
+// What the form controls share; the height follows the text size, like the line it holds
+const CONTROL_CLASSES =
+  'box-border h-[calc(1rem*1.5714_+_10px)] w-full rounded-md border border-solid px-[11px] text-[1rem] text-black/88 outline-hidden focus-visible:shadow-[0_0_0_1px_var(--secondary-color)] disabled:cursor-not-allowed disabled:bg-black/4 disabled:text-black/25'
+
+// Numbers: an outline in the game's gray on the background art, digits in the system font
+const NUMBER_INPUT_CLASSES = combineClassNames(CONTROL_CLASSES, 'border-secondary bg-transparent font-sans')
+
+// Lists: a white field with a light outline and the app font
+const SELECT_CLASSES = combineClassNames(
+  CONTROL_CLASSES,
+  'cursor-pointer appearance-none border-[#d9d9d9] bg-white pr-8 [font-family:inherit]'
+)
+
+// The label wraps its control, so a tap on the label focuses it
+const Field: FC<{ label: string; children: ReactNode }> = ({ label, children }) => (
+  <label className='block'>
+    <span className={LABEL_CLASSES}>{label}</span>
+    {children}
+  </label>
+)
+
+type TNumberInputProps = {
+  value: number
+  min: number
+  max: number
+  // Reported while the field is empty
+  emptyValue: number
+  disabled?: boolean
+  onChange: (value: number) => void
+}
+
+// Reports numbers within range while typing and settles on one when the field loses focus
+const NumberInput: FC<TNumberInputProps> = ({ value, min, max, emptyValue, disabled, onChange }) => {
+  const [text, setText] = useState(String(value))
+  // The value this field last reported or showed; another one coming in (e.g. a reset) replaces the text
+  const [shownValue, setShownValue] = useState(value)
+  if (value !== shownValue) {
+    setShownValue(value)
+    setText(String(value))
+  }
+
+  const report = (next: number) => {
+    setShownValue(next)
+    onChange(next)
+  }
+
+  const handleChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+    const nextText = event.target.value
+    setText(nextText)
+    if (nextText === '') return report(emptyValue)
+    const next = Number(nextText)
+    if (Number.isInteger(next) && next >= min && next <= max) report(next)
+  }
+
+  const handleBlur = () => {
+    if (text === '') return
+    const next = Math.min(max, Math.max(min, Math.round(Number(text)) || min))
+    setText(String(next))
+    report(next)
+  }
+
+  return (
+    <input
+      type='number'
+      inputMode='numeric'
+      min={min}
+      max={max}
+      value={text}
+      disabled={disabled}
+      className={NUMBER_INPUT_CLASSES}
+      onChange={handleChange}
+      onBlur={handleBlur}
+    />
+  )
+}
+
+type TSelectProps<T extends string> = {
+  value: T
+  options: TOption<T>[]
+  disabled?: boolean
+  loading?: boolean
+  onChange: (value: T) => void
+}
+
+const Select = <T extends string>({ value, options, disabled, loading, onChange }: TSelectProps<T>) => (
+  <span className='relative block'>
+    <select
+      value={value}
+      disabled={disabled}
+      className={SELECT_CLASSES}
+      onChange={(event) => onChange(event.target.value as T)}
+    >
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+    <span className='pointer-events-none absolute top-1/2 right-[11px] flex -translate-y-1/2 text-[14px] text-black/25'>
+      {loading ? <Spinner size='small' /> : <ChevronDownIcon />}
+    </span>
+  </span>
+)
+
 export const Settings: StageComponent = ({ toNextPage }) => {
-  const { message: messageApi } = App.useApp()
   const settings = useGameStore((state) => state.settings)
   const isSingleMode = useGameStore((state) => state.mode === PLAY_MODES.single)
   const { minLettersCount, category, difficulty, pointsToWin, timeLimit, withTimeLimit } = settings
@@ -44,8 +141,8 @@ export const Settings: StageComponent = ({ toNextPage }) => {
 
   const { setGameSettings } = useGameStore.getState()
 
-  const onTimeLimitationChange: RadioProps['onChange'] = (e) => {
-    setGameSettings({ timeLimit: 60, withTimeLimit: e.target.value })
+  const onTimeLimitationChange = (value: boolean) => {
+    setGameSettings({ timeLimit: 60, withTimeLimit: value })
   }
 
   const handleStartGameBtnClick: MouseEventHandler<HTMLButtonElement> = async () => {
@@ -57,7 +154,7 @@ export const Settings: StageComponent = ({ toNextPage }) => {
         const result = await getWord({ minLettersCount, category, difficulty })
         startRound(result)
       } catch {
-        messageApi.error(GET_WORD_ERROR_MESSAGE)
+        toast.error(GET_WORD_ERROR_MESSAGE)
         return
       } finally {
         setIsPending(false)
@@ -68,14 +165,6 @@ export const Settings: StageComponent = ({ toNextPage }) => {
     toNextPage()
   }
 
-  const handleCategoryChange: SelectProps['onChange'] = (value) => {
-    setGameSettings({ category: value })
-  }
-
-  const handleDifficultyChange: SelectProps['onChange'] = (value) => {
-    setGameSettings({ difficulty: value })
-  }
-
   const isStartGameDisabled =
     isPending || !minLettersCount || !category || !difficulty || pointsToWin < 1 || timeLimit < 1
 
@@ -83,93 +172,104 @@ export const Settings: StageComponent = ({ toNextPage }) => {
     <>
       <IconButton
         disabled={isPending}
-        className={styles.backBtn}
+        className='absolute top-[12px] left-[16px] z-2'
         aria-label='Վերադառնալ'
         title='Վերադառնալ'
         onClick={() => navigate(GAME_STAGES.start)}
       >
         <BackIcon />
       </IconButton>
-      <div className={styles.settings}>
-        <Form layout='vertical' className={styles.form}>
-          <Flex vertical gap={20}>
-            <Form.Item label='Ժամանակի սահմանափակում'>
-              <Radio.Group
-                block
-                options={TIME_LIMITATION_OPTIONS}
-                value={withTimeLimit}
-                onChange={onTimeLimitationChange}
-                optionType='button'
-                buttonStyle='solid'
-                disabled={isPending}
-              />
-            </Form.Item>
+      <div className='box-border flex min-h-[calc(100dvh_-_var(--ad-band-height)_-_var(--bottom-bar-height))] flex-col justify-center px-6 py-16 phone-landscape:justify-start phone-landscape:pt-12 phone-landscape:pb-[calc(var(--bottom-bar-height)_+_1rem)]'>
+        <form
+          className='flex flex-col gap-5 phone-landscape:grid phone-landscape:grid-cols-2 phone-landscape:gap-x-8 phone-landscape:gap-y-3'
+          onSubmit={(event) => event.preventDefault()}
+        >
+          <div className='flex flex-col gap-5'>
+            <fieldset className='m-0 min-w-0 border-0 p-0'>
+              <legend className={LABEL_CLASSES}>Ժամանակի սահմանափակում</legend>
+              <div className='flex'>
+                {TIME_LIMITATION_OPTIONS.map(({ label, value }) => (
+                  <label
+                    key={label}
+                    className='box-border flex h-[32px] flex-1 cursor-pointer items-center justify-center border border-solid border-secondary bg-transparent px-[15px] text-[1rem] leading-[30px] text-secondary transition-colors first:rounded-l-md last:rounded-r-md not-first:border-l-0 has-checked:bg-secondary has-checked:text-white has-disabled:cursor-not-allowed has-disabled:opacity-60 has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-secondary'
+                  >
+                    <input
+                      type='radio'
+                      name='withTimeLimit'
+                      className='sr-only'
+                      checked={withTimeLimit === value}
+                      disabled={isPending}
+                      onChange={() => onTimeLimitationChange(value)}
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
             {withTimeLimit && (
-              <Form.Item label='Վայրկյան'>
-                <InputNumber
+              <Field label='Վայրկյան'>
+                <NumberInput
                   min={1}
                   max={200}
+                  emptyValue={0}
                   value={timeLimit}
-                  onChange={(value) => setGameSettings({ timeLimit: value ?? 0 })}
-                  style={{ background: 'transparent', width: '100%' }}
+                  onChange={(value) => setGameSettings({ timeLimit: value })}
                   disabled={isPending}
                 />
-              </Form.Item>
+              </Field>
             )}
-          </Flex>
-          <Form.Item label='Քանիսից է խաղը'>
-            <InputNumber
+          </div>
+          <Field label='Քանիսից է խաղը'>
+            <NumberInput
               min={1}
               max={999}
-              controls
+              emptyValue={1}
               value={pointsToWin}
-              onChange={(value) => setGameSettings({ pointsToWin: value ?? 1 })}
-              style={{ background: 'transparent', width: '100%' }}
+              onChange={(value) => setGameSettings({ pointsToWin: value })}
               disabled={isPending}
             />
-          </Form.Item>
-          <Form.Item label='Նվազագույն տառերի քանակը'>
-            <InputNumber
+          </Field>
+          <Field label='Նվազագույն տառերի քանակը'>
+            <NumberInput
               min={2}
               max={8}
-              controls
+              emptyValue={3}
               value={minLettersCount}
-              onChange={(value) => setGameSettings({ minLettersCount: value ?? 3 })}
-              style={{ background: 'transparent', width: '100%' }}
+              onChange={(value) => setGameSettings({ minLettersCount: value })}
               disabled={isPending}
             />
-          </Form.Item>
+          </Field>
           {isSingleMode && (
-            <Form.Item label='Թեմա'>
-              <Select
+            <Field label='Թեմա'>
+              <Select<TSettings['category']>
                 value={category}
-                onChange={handleCategoryChange}
                 options={CATEGORIES_OPTIONS}
+                onChange={(value) => setGameSettings({ category: value })}
                 disabled={isPending}
                 loading={isPending}
               />
-            </Form.Item>
+            </Field>
           )}
           {isSingleMode && (
-            <Form.Item label='Բարդության մակարդակ'>
-              <Select
+            <Field label='Բարդության մակարդակ'>
+              <Select<TSettings['difficulty']>
                 value={difficulty}
-                onChange={handleDifficultyChange}
                 options={DIFFICULTY_LEVELS_OPTIONS}
+                onChange={(value) => setGameSettings({ difficulty: value })}
                 disabled={isPending}
                 loading={isPending}
               />
-            </Form.Item>
+            </Field>
           )}
-        </Form>
+        </form>
       </div>
       <CustomButton type='button' disabled={isStartGameDisabled} onClick={handleStartGameBtnClick}>
-        <Flex align='center' justify='center' gap={12}>
-          {isPending && <Spin size='small' />}
-          <span style={{ fontSize: isPending && isSingleMode ? '.85rem' : '1.15rem' }}>
+        <span className='flex items-center justify-center gap-3'>
+          {isPending && <Spinner size='small' />}
+          <span className={isPending && isSingleMode ? 'text-[.85rem]' : 'text-[1.15rem]'}>
             {isPending && isSingleMode ? 'Արհեստական բանականությունը մտածում է․․․' : 'Սկսել խաղը'}
           </span>
-        </Flex>
+        </span>
       </CustomButton>
     </>
   )
