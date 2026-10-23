@@ -34,7 +34,7 @@ export const Share: StageComponent = () => {
   }
 
   return (
-    <div className='box-border flex min-h-[calc(100dvh-var(--ad-band-height)-var(--bottom-bar-height))] flex-col items-center justify-center gap-5 px-6 py-16 text-center'>
+    <div className='box-border flex min-h-[calc(100dvh-var(--top-inset)-var(--bottom-inset))] flex-col items-center justify-center gap-5 px-6 py-16 text-center'>
       <h2 className='m-0 text-[1.6rem]'>Մարտահրավերը պատրաստ է</h2>
       <p className='m-0 text-[1rem]'>Ուղարկեք այս հղումը ընկերոջը, որ գուշակի ձեր բառը</p>
       <input

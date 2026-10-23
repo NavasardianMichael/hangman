@@ -73,7 +73,7 @@ export const TopBar: FC = () => {
   }
 
   return (
-    <div className='absolute top-[calc(var(--ad-band-height)_+_12px)] right-[16px] z-2 flex gap-[10px]'>
+    <div className='absolute top-[calc(var(--top-inset)_+_12px)] right-[16px] z-2 flex gap-[10px]'>
       {showInstall && (
         <IconButton
           data-install-button

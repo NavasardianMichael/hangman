@@ -5,13 +5,17 @@ export default function manifest(): MetadataRoute.Manifest {
     id: '/',
     short_name: 'Կախաղան',
     name: 'Կախաղան | Hangman',
-    theme_color: '#ffffff',
+    theme_color: '#575757',
     background_color: '#575757',
     orientation: 'portrait',
     start_url: '/',
     scope: '/',
-    display: 'standalone',
-    display_override: ['fullscreen', 'minimal-ui'],
+    // Fullscreen where the browser offers it (Chromium and Firefox on Android); standalone elsewhere, Safari included.
+    // Set here rather than in display_override, which Firefox and Safari ignore.
+    display: 'fullscreen',
+    lang: 'hy',
+    dir: 'ltr',
+    categories: ['games', 'entertainment'],
     description: 'Հայտնի ԿԱԽԱՂԱՆ (HANGMAN) Խաղի հայերեն տարբերակն արդեն հասանելի է առցանց',
     screenshots: [
       {

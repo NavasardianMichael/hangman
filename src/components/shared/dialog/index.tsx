@@ -58,7 +58,7 @@ const OpenDialog: FC<TOpenDialogProps> = ({
       ref={dialogRef}
       style={{ width }}
       className={combineClassNames(
-        'm-auto max-h-[calc(100dvh_-_32px)] max-w-[calc(100vw_-_16px)] overflow-visible border-0 p-0 text-black/88 min-[768px]:max-w-[calc(100vw_-_32px)]',
+        'm-auto max-h-[calc(100dvh_-_32px_-_var(--safe-top)_-_var(--safe-bottom))] max-w-[calc(100vw_-_16px)] overflow-visible border-0 p-0 text-black/88 min-[768px]:max-w-[calc(100vw_-_32px)]',
         'shadow-[0_6px_16px_0_rgba(0,0,0,0.08),0_3px_6px_-4px_rgba(0,0,0,0.12),0_9px_28px_8px_rgba(0,0,0,0.05)]',
         'transition-[opacity,scale] duration-200 backdrop:bg-black/45 starting:scale-90 starting:opacity-0',
         VARIANT_CLASSES[variant]

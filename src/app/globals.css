@@ -30,6 +30,14 @@
     --bottom-bar-height: 3.75rem;
     --ad-band-height: 0px;
     --keyboard-key-height: 2.4rem;
+    /* Room the notch, status bar and home indicator take now that the page draws edge to edge; 0 on plain screens */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    /* Room every screen keeps clear above and below its content */
+    --top-inset: calc(var(--ad-band-height) + var(--safe-top));
+    --bottom-inset: calc(var(--bottom-bar-height) + var(--safe-bottom));
     /* Room the top-right buttons take: up to three of them, four with the install button */
     --top-bar-reserve: 10.5rem;
 
@@ -52,10 +60,10 @@
     --top-bar-reserve: 13rem;
   }
 
-  /* Short landscape screens: the column takes the full width */
+  /* Short landscape screens: the column takes the full width beside the notch */
   @media (orientation: landscape) and (max-height: 540px) {
     :root {
-      --column-width: 100vw;
+      --column-width: calc(100vw - var(--safe-left) - var(--safe-right));
       --bottom-bar-height: 3rem;
       --keyboard-key-height: 2rem;
     }

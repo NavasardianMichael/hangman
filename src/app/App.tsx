@@ -92,7 +92,7 @@ export const App: FC = () => {
   return (
     <>
       {isScreenKnown && (
-        <div className='relative box-border min-h-dvh w-[min(100%,var(--column-width))] mx-auto pt-(--ad-band-height) text-secondary [[data-challenge-opening]_&]:invisible'>
+        <div className='relative box-border min-h-dvh w-[min(100%,var(--column-width))] mx-auto pt-(--top-inset) text-secondary in-data-challenge-opening:invisible'>
           <TopBar />
           <Stages />
         </div>

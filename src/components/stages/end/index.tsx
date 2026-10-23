@@ -20,7 +20,7 @@ export const End: StageComponent = () => {
   }, [mode, playerWon])
 
   return (
-    <div className='box-border flex min-h-[calc(100dvh_-_var(--ad-band-height)_-_var(--bottom-bar-height))] flex-col items-center justify-center gap-4 px-6 py-12 text-center'>
+    <div className='box-border flex min-h-[calc(100dvh_-_var(--top-inset)_-_var(--bottom-inset))] flex-col items-center justify-center gap-4 px-6 py-12 text-center'>
       <h3>
         Խաղն ավարտվեց
         <br />

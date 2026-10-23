@@ -1,4 +1,4 @@
-import { Metadata } from 'next'
+import { Metadata, Viewport } from 'next'
 import localFont from 'next/font/local'
 import { AD_FREQUENCY_HINT, ADS_ENABLED, ADS_TEST_MODE, ADSENSE_CLIENT, ADSENSE_SCRIPT_SRC } from 'helpers/constants/ads'
 import { GA_ENABLED, GA_INIT_SCRIPT, GA_SCRIPT_SRC } from 'helpers/constants/analytics'
@@ -63,6 +63,19 @@ export const metadata: Metadata = {
     { name: AUTHOR_NAME, url: AUTHOR_URL },
   ],
   category: 'game',
+  // iOS has no fullscreen mode: the installed app draws under a see-through status bar instead
+  appleWebApp: {
+    capable: true,
+    title: 'Կախաղան',
+    statusBarStyle: 'black-translucent',
+  },
+}
+
+// The page draws edge to edge, under the notch, status bar and home indicator; the --safe-* insets keep content clear
+export const viewport: Viewport = {
+  viewportFit: 'cover',
+  // The browser bar takes the grey of the title band and buttons (--secondary-color)
+  themeColor: '#575757',
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -93,6 +106,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         )}
       </head>
       <body>
+        {/* Behind the status bar, so its white text stays readable over the white game column */}
+        <div className='pointer-events-none fixed inset-x-0 top-0 z-40 h-(--safe-top) bg-secondary' aria-hidden='true' />
         {children}
         {GA_ENABLED && <PageViewTracker />}
       </body>

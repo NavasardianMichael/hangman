@@ -12,7 +12,7 @@ export const Toaster: FC = () => {
     <div
       role='status'
       aria-live='polite'
-      className='pointer-events-none fixed inset-x-0 top-2 z-50 flex flex-col items-center gap-2 px-4'
+      className='pointer-events-none fixed inset-x-0 top-[calc(var(--safe-top)+0.5rem)] z-50 flex flex-col items-center gap-2 px-4'
     >
       {toasts.map(({ id, type, text }) => (
         <div

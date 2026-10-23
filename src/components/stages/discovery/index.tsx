@@ -150,8 +150,8 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
         'box-border flex flex-col phone-landscape:grid phone-landscape:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] phone-landscape:grid-rows-[auto_auto_auto_minmax(0,1fr)] phone-landscape:gap-x-2',
         // The continue button takes the bottom bar once the round is over
         isRoundOver
-          ? 'h-[calc(100dvh_-_var(--ad-band-height)_-_var(--bottom-bar-height))]'
-          : 'h-[calc(100dvh_-_var(--ad-band-height))]'
+          ? 'h-[calc(100dvh_-_var(--top-inset)_-_var(--bottom-inset))]'
+          : 'h-[calc(100dvh_-_var(--top-inset)_-_var(--safe-bottom))]'
       )}
     >
       {/* Leaves room for the top-right buttons */}

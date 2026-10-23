@@ -179,7 +179,7 @@ export const Settings: StageComponent = ({ toNextPage }) => {
       >
         <BackIcon />
       </IconButton>
-      <div className='box-border flex min-h-[calc(100dvh_-_var(--ad-band-height)_-_var(--bottom-bar-height))] flex-col justify-center px-6 py-16 phone-landscape:justify-start phone-landscape:pt-12 phone-landscape:pb-[calc(var(--bottom-bar-height)_+_1rem)]'>
+      <div className='box-border flex min-h-[calc(100dvh_-_var(--top-inset)_-_var(--bottom-inset))] flex-col justify-center px-6 py-16 phone-landscape:justify-start phone-landscape:pt-12 phone-landscape:pb-[calc(var(--bottom-inset)_+_1rem)]'>
         <form
           className='flex flex-col gap-5 phone-landscape:grid phone-landscape:grid-cols-2 phone-landscape:gap-x-8 phone-landscape:gap-y-3'
           onSubmit={(event) => event.preventDefault()}

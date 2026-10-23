@@ -98,7 +98,7 @@ export const Composition: StageComponent = ({ toNextPage }) => {
           )
         })}
       </div>
-      <div className='fixed bottom-(--bottom-bar-height) left-1/2 box-border flex w-[min(100%,var(--column-width))] -translate-x-1/2 flex-wrap gap-[0.2rem] p-4 text-center text-[1.35rem] font-medium text-primary phone-landscape:right-0 phone-landscape:left-auto phone-landscape:w-1/2 phone-landscape:translate-none phone-landscape:p-2'>
+      <div className='fixed bottom-(--bottom-inset) left-1/2 box-border flex w-[min(100%,var(--column-width))] -translate-x-1/2 flex-wrap gap-[0.2rem] p-4 text-center text-[1.35rem] font-medium text-primary phone-landscape:right-(--safe-right) phone-landscape:left-auto phone-landscape:w-[calc(var(--column-width)/2)] phone-landscape:translate-none phone-landscape:p-2'>
         {LETTERS.map((letter) => {
           return (
             <LetterKey key={letter} name={letter} onClick={handleAlphabetLetterClick}>
