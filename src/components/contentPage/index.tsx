@@ -15,7 +15,7 @@ type TProps = {
 
 // Text styles shared with the content dialogs (components/contentModal)
 export const CONTENT_CLASSES = {
-  title: 'mx-0 mt-3 mb-2 text-[1.45rem] leading-[1.3] tracking-[1px]',
+  title: 'mx-0 mt-0 mb-1 text-[1.45rem] leading-[1.3] tracking-[1px]',
   intro: 'text-[0.95rem]',
   section: 'mt-5',
   sectionTitle: 'mx-0 mt-0 mb-[0.4rem] text-[1.1rem] leading-[1.4] tracking-[1px]',
@@ -27,7 +27,7 @@ export const CONTENT_CLASSES = {
 export const ContentPage: FC<TProps> = ({ title, intro, sections, footnote }) => (
   <main
     data-content-page
-    className='fixed inset-0 box-border flex h-dvh max-h-dvh justify-center overflow-hidden overscroll-none bg-[linear-gradient(160deg,#9a9a9a,#6f6f6f)] px-4 pt-[calc(var(--ad-band-height)_+_1rem)] pb-4 select-text'
+    className='fixed inset-0 box-border flex h-dvh max-h-dvh justify-center overflow-hidden overscroll-none bg-[linear-gradient(160deg,#9a9a9a,#6f6f6f)] px-4 pt-[calc(var(--ad-band-height)+1rem)] pb-4 select-text'
   >
     <article className='box-border flex h-full min-h-0 w-[min(100%,var(--column-width))] flex-col overflow-hidden bg-paper px-5 pt-5 pb-6 leading-[1.6] tracking-[1px] text-[#2b2b2b] shadow-[0_0_48px_8px_rgba(0,0,0,0.25)] [&_a]:leading-[inherit] [&_a]:tracking-[inherit] [&_div]:leading-[inherit] [&_div]:tracking-[inherit]'>
       <Link href='/' className='flex-none text-[0.85rem] text-secondary no-underline hover:underline'>

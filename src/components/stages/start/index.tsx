@@ -64,8 +64,12 @@ export const Start: StageComponent = () => {
   return (
     <div
       data-start-screen
-      className='relative box-border flex min-h-[calc(100dvh_-_var(--ad-band-height))] flex-col items-center justify-center gap-[0.85rem] pt-18 pb-[1.35rem] phone-landscape:gap-[0.6rem] phone-landscape:pt-16'
+      className='relative box-border flex min-h-[calc(100dvh-var(--ad-band-height))] flex-col items-center justify-center gap-[0.85rem] pt-18 pb-[1.35rem] phone-landscape:gap-[0.6rem] phone-landscape:pt-16'
     >
+      {/* Sits just under the title band; it and the stats button share the free space, so the buttons stay centred below it */}
+      <p className='m-0 mb-auto box-border w-4/5 max-w-100 paper-sheet -rotate-1 px-5 py-1.5 text-center text-[0.95rem] leading-[1.35] font-semibold text-[#2b2b2b] phone-landscape:text-[0.85rem]'>
+        Գուշակի՛ր մտապահած հայերեն բառն ըստ նախընտրած թեմայի
+      </p>
       {isClient && <DownloadAppBtn />}
       {isClient && resumeStage && savedMode && (
         <button type='button' onClick={() => navigate(resumeStage)} className={CONTINUE_BTN_CLASSES}>
@@ -87,7 +91,7 @@ export const Start: StageComponent = () => {
       </button>
       <button
         type='button'
-        className='box-border inline-flex h-8 cursor-pointer items-center justify-center gap-2 rounded-card border border-solid border-transparent bg-[rgba(246,243,236,0.92)] px-[15px] text-[14px] font-semibold text-secondary shadow-card'
+        className='mb-auto box-border inline-flex h-8 cursor-pointer items-center justify-center gap-2 rounded-card border border-solid border-transparent bg-[rgba(246,243,236,0.92)] px-[15px] text-[14px] font-semibold text-secondary shadow-card'
         onClick={() => setStatsOpen(true)}
       >
         <StatsIcon />

@@ -34,22 +34,22 @@ export const Share: StageComponent = () => {
   }
 
   return (
-    <div className='box-border flex min-h-[calc(100dvh_-_var(--ad-band-height)_-_var(--bottom-bar-height))] flex-col items-center justify-center gap-5 px-6 py-16 text-center'>
+    <div className='box-border flex min-h-[calc(100dvh-var(--ad-band-height)-var(--bottom-bar-height))] flex-col items-center justify-center gap-5 px-6 py-16 text-center'>
       <h2 className='m-0 text-[1.6rem]'>Մարտահրավերը պատրաստ է</h2>
       <p className='m-0 text-[1rem]'>Ուղարկեք այս հղումը ընկերոջը, որ գուշակի ձեր բառը</p>
       <input
-        className='box-border w-full max-w-[420px] rounded-card border border-solid border-[rgba(35,35,35,0.28)] bg-paper px-3 py-[0.6rem] text-center text-[0.95rem] text-secondary shadow-card select-all'
+        className='box-border w-full max-w-105 rounded-card border border-solid border-[rgba(35,35,35,0.28)] bg-paper px-3 py-[0.6rem] text-center text-[0.95rem] text-secondary shadow-card select-all'
         value={challengeLink}
         readOnly
         onFocus={(e) => e.currentTarget.select()}
       />
       <div className='flex flex-wrap justify-center gap-3'>
         {canShare && (
-          <Button icon={<ShareIcon />} className='min-w-[140px]' onClick={shareLink}>
+          <Button icon={<ShareIcon />} className='min-w-35' onClick={shareLink}>
             Կիսվել
           </Button>
         )}
-        <Button icon={<CopyIcon />} className='min-w-[140px]' onClick={copyLink}>
+        <Button icon={<CopyIcon />} className='min-w-35' onClick={copyLink}>
           Պատճենել
         </Button>
       </div>
