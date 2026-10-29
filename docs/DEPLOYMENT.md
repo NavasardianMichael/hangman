@@ -33,7 +33,6 @@ so a change to one means copying it again.
 |---|---|
 | `hangman.service` | `/etc/systemd/system/hangman.service` |
 | `hangman.eapps.site.conf` | `/etc/nginx/sites-available/`, symlinked into `sites-enabled/` |
-| `hangman.mnavasardian.com.conf` | the same; the old domain, redirected (see [Old domain](#old-domain)) |
 
 ## One-time setup
 
@@ -52,7 +51,6 @@ In the `eapps.site` zone, add the record for `hangman`:
 |---|---|---|---|
 | `A` | `hangman` | the server's IP (the same one `bookie` points at) | **DNS only** (grey cloud, if the zone is on Cloudflare) |
 
-Keep the old `hangman` record in the `mnavasardian.com` zone: it serves the redirect (see [Old domain](#old-domain)).
 Check it before going on:
 
 ```bash
@@ -221,23 +219,6 @@ ln -sfn "$(dirname "$(dirname "$(nvm which 24)")")" ~/.local/node-24
 sudo systemctl restart hangman
 # the old 24.x can go after that: nvm uninstall <old version>
 ```
-
-## Old domain
-
-The app used to live at `hangman.mnavasardian.com`. That name still resolves to this server, and
-`deployment/hangman.mnavasardian.com.conf` answers every request with a 301 to `https://hangman.eapps.site`, path and
-query included, so shared challenge links (`?c=…`) and search results keep working. It reuses the existing
-certificate, which certbot keeps renewing.
-
-```bash
-# replace the old proxying site with the redirect: paste deployment/hangman.mnavasardian.com.conf
-sudo nano /etc/nginx/sites-available/hangman.mnavasardian.com.conf
-sudo nginx -t && sudo systemctl reload nginx
-curl -I "https://hangman.mnavasardian.com/rules?x=1"   # 301, Location: https://hangman.eapps.site/rules?x=1
-```
-
-Browser storage is per origin, so stats, streaks and the passed-word list stay behind on the old domain, and an
-installed app keeps its old start URL (it follows the redirect, but reinstalling from the new domain is cleaner).
 
 ## HTTPS only
 
