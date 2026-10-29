@@ -22,7 +22,7 @@ What the app does once the ID is set:
    - Time zone: Armenia.
    - Currency: whatever you prefer.
 3. **Data streams → Add stream → Web**:
-   - URL: `https://hangman.mnavasardian.com`.
+   - URL: `https://hangman.eapps.site`.
    - Stream name: `hangman web`.
 4. Copy the **Measurement ID** (`G-XXXXXXXXXX`).
    - Don't use a `GTM-…` container ID: the app rejects it and warns in the dev console.
@@ -39,17 +39,17 @@ twice.
 
 ## 3. Set the ID and deploy
 
-1. Add `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-…` to the production `.env`.
+1. Add `NEXT_PUBLIC_GA_MEASUREMENT_ID=G-…` to `.env.production.local`.
 2. Run `pnpm -s envtob64` and save the output as the `ENV_FILE_BASE64` secret (GitHub → repository → **Settings →
    Secrets and variables → Actions**).
 3. Push to `master`, or run the **Deploy to Production** workflow. The ID is baked in at build time, so
    changing it always needs a new build. Re-running only the Deploy job reuses the old bundle.
 
-For local testing, put the same line in `.env.local` and run `pnpm dev`. Dev builds set `debug_mode`.
+For local testing, put the same line in `.env.development.local` and run `pnpm dev`. Dev builds set `debug_mode`.
 
 ## 4. Verify
 
-1. Open https://hangman.mnavasardian.com with no ad blocker (ad blockers block GA too).
+1. Open https://hangman.eapps.site with no ad blocker (ad blockers block GA too).
 2. **DevTools → Network**, filtered by `collect`: requests to `google-analytics.com/g/collect` appear on load and
    on each screen change.
 3. In GA, **Reports → Realtime**: you appear within a minute. Play a round and watch `game_start` and `round_end`

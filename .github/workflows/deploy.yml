@@ -1,12 +1,12 @@
 # =============================================================================
-# Build and deploy https://hangman.mnavasardian.com
+# Build and deploy https://hangman.eapps.site
 #
 # Operator documentation, including the one-time server setup: docs/DEPLOYMENT.md
 #
 # REQUIRED GITHUB SECRETS:
 #   SSH_HOST, SSH_USER, SSH_KEY, SSH_PORT (optional, default 22)
 #   APP_DIR           deployment root, e.g. /home/michael/apps/hangman
-#   ENV_FILE_BASE64   base64 of the production .env (`pnpm envtob64`). It holds both halves:
+#   ENV_FILE_BASE64   base64 of .env.production.local (`pnpm envtob64`). It holds both halves:
 #                     - runtime, written to the server .env: GEMINI_KEY
 #                     - build time, read by the build job only (each service stays off without its own):
 #                       NEXT_PUBLIC_GA_MEASUREMENT_ID   GA4 Measurement ID (docs/GOOGLE_ANALYTICS.md)
@@ -312,5 +312,5 @@ jobs:
             echo "**Release:** \`$GITHUB_SHA\`"
             echo ""
             echo "- \`APP_DIR/current\` → \`releases/$GITHUB_SHA\`, systemd \`hangman\` on \`127.0.0.1:${{ env.APP_PORT }}\`"
-            echo "- https://hangman.mnavasardian.com"
+            echo "- https://hangman.eapps.site"
           } >> "$GITHUB_STEP_SUMMARY"

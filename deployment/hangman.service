@@ -1,4 +1,4 @@
-# Next.js standalone server for hangman.mnavasardian.com.
+# Next.js standalone server for hangman.eapps.site.
 # Install to /etc/systemd/system/hangman.service. Paths assume APP_DIR=/home/michael/apps/hangman.
 #
 # WorkingDirectory points at the `current` symlink and systemd resolves it at
@@ -20,7 +20,7 @@ WorkingDirectory=/home/michael/apps/hangman/current
 # Its values would override the Environment= lines below, so the deploy strips NODE_ENV, PORT and HOSTNAME from it.
 EnvironmentFile=/home/michael/apps/hangman/shared/.env
 Environment=NODE_ENV=production
-# Must match proxy_pass in hangman.mnavasardian.com.conf and APP_PORT in deploy.yml.
+# Must match proxy_pass in hangman.eapps.site.conf and APP_PORT in deploy.yml.
 # Loopback only: the app is reachable through nginx alone.
 Environment=PORT=9005
 Environment=HOSTNAME=127.0.0.1

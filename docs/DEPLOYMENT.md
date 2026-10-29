@@ -7,8 +7,8 @@ rolled back to the previous one automatically. Same pattern as bookie.
 ## Shape
 
 ```
-hangman.mnavasardian.com ──► nginx :443 ──► 127.0.0.1:9005  hangman  (Next standalone, systemd)
-                                  └──────► /_next/static/   from disk (APP_DIR/current/.next/static)
+hangman.eapps.site ──► nginx :443 ──► 127.0.0.1:9005  hangman  (Next standalone, systemd)
+                            └──────► /_next/static/   from disk (APP_DIR/current/.next/static)
 ```
 
 There is no separate API: `POST /getWord` is a route of the same Next server, and it calls Gemini with `GEMINI_KEY`.
@@ -32,7 +32,8 @@ so a change to one means copying it again.
 | File | Goes to |
 |---|---|
 | `hangman.service` | `/etc/systemd/system/hangman.service` |
-| `hangman.mnavasardian.com.conf` | `/etc/nginx/sites-available/`, symlinked into `sites-enabled/` |
+| `hangman.eapps.site.conf` | `/etc/nginx/sites-available/`, symlinked into `sites-enabled/` |
+| `hangman.mnavasardian.com.conf` | the same; the old domain, redirected (see [Old domain](#old-domain)) |
 
 ## One-time setup
 
@@ -45,16 +46,17 @@ The app used to deploy on Vercel. In the Vercel dashboard, open the hangman proj
 
 ### 2. DNS
 
-In the `mnavasardian.com` zone (Cloudflare), add or replace the record for `hangman`:
+In the `eapps.site` zone, add the record for `hangman`:
 
 | Type | Name | Content | Proxy status |
 |---|---|---|---|
-| `A` | `hangman` | the server's IP (the same one `bookie` points at) | **DNS only** (grey cloud) |
+| `A` | `hangman` | the server's IP (the same one `bookie` points at) | **DNS only** (grey cloud, if the zone is on Cloudflare) |
 
-If a `CNAME hangman → cname.vercel-dns.com` exists, delete it first. Check it before going on:
+Keep the old `hangman` record in the `mnavasardian.com` zone: it serves the redirect (see [Old domain](#old-domain)).
+Check it before going on:
 
 ```bash
-nslookup hangman.mnavasardian.com    # must answer with the server's IP
+nslookup hangman.eapps.site    # must answer with the server's IP
 ```
 
 DNS only is deliberate. TLS is terminated on the server by Let's Encrypt, and nginx sees the visitor's real IP, which
@@ -96,18 +98,18 @@ sudo usermod -aG systemd-journal michael
 # 6. TLS certificate. certbot's nginx plugin answers the challenge with a temporary server block, so this works
 #    before the site exists; the hook reloads nginx after every renewal so it serves the new certificate.
 #    options-ssl-nginx.conf and ssl-dhparams.pem, which the site includes, already exist from portfolio's certificate
-sudo certbot certonly --nginx -d hangman.mnavasardian.com --deploy-hook "systemctl reload nginx"
+sudo certbot certonly --nginx -d hangman.eapps.site --deploy-hook "systemctl reload nginx"
 
-# 7. nginx site (needs the certificate from step 6): paste deployment/hangman.mnavasardian.com.conf
-sudo nano /etc/nginx/sites-available/hangman.mnavasardian.com.conf
-sudo ln -s /etc/nginx/sites-available/hangman.mnavasardian.com.conf /etc/nginx/sites-enabled/
+# 7. nginx site (needs the certificate from step 6): paste deployment/hangman.eapps.site.conf
+sudo nano /etc/nginx/sites-available/hangman.eapps.site.conf
+sudo ln -s /etc/nginx/sites-available/hangman.eapps.site.conf /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 
 # 8. Renewal works (certbot's timer renews automatically)
-sudo certbot renew --dry-run --cert-name hangman.mnavasardian.com
+sudo certbot renew --dry-run --cert-name hangman.eapps.site
 
 # 9. DNS, certificate and nginx work: "502 Bad Gateway" is the expected answer until the first deploy
-curl -I https://hangman.mnavasardian.com
+curl -I https://hangman.eapps.site
 ```
 
 If the deploy key isn't on the server yet (bookie's CI uses one already), append its public half to
@@ -126,7 +128,7 @@ Repository → Settings → Secrets and variables → Actions → **Secrets**:
 | `APP_DIR` | `/home/michael/apps/hangman` |
 | `ENV_FILE_BASE64` | output of `pnpm -s envtob64` (see below) |
 
-`ENV_FILE_BASE64` is the whole production `.env`, and the workflow splits it:
+`ENV_FILE_BASE64` is the whole local `.env.production.local` (same keys as `.env.example`), and the workflow splits it:
 - **Build job:** takes `NEXT_PUBLIC_GA_MEASUREMENT_ID`, `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT` and
   `SENTRY_AUTH_TOKEN` (see [GOOGLE_ANALYTICS.md](GOOGLE_ANALYTICS.md) and [SENTRY.md](SENTRY.md)). `NEXT_PUBLIC_*`
   values are inlined into the bundle, so they must be there when `pnpm build` runs. The "Load build-time env" step
@@ -136,12 +138,13 @@ Repository → Settings → Secrets and variables → Actions → **Secrets**:
 Any change to these values needs a new secret and a full run: re-running only the Deploy job reuses the old bundle.
 
 ```bash
-pnpm -s envtob64 | clip      # Windows: base64 of .env straight to the clipboard
+pnpm -s envtob64 | clip      # Windows: base64 of .env.production.local straight to the clipboard
 pnpm -s envtob64 | pbcopy    # macOS
+pnpm -s envtob64 other.env   # a different file
 ```
 
 The script puts only the base64 on stdout. On stderr it lists the key names (never values) and warns about an empty
-`GEMINI_KEY`. `-s` keeps pnpm's own header out of the clipboard. Don't put `NODE_ENV`, `PORT` or `HOSTNAME` in `.env`:
+`GEMINI_KEY`. `-s` keeps pnpm's own header out of the clipboard. Don't put `NODE_ENV`, `PORT` or `HOSTNAME` in the file:
 the unit sets them, and the deploy strips them.
 
 ### 5. First deploy
@@ -181,7 +184,7 @@ Bound to loopback only; nothing is exposed but 80/443 through nginx.
 
 | Port | What | Declared in |
 |---|---|---|
-| 9005 | Next (production) | `hangman.service` (`Environment=PORT`), `hangman.mnavasardian.com.conf` (`proxy_pass`), `deploy.yml` (`APP_PORT`) |
+| 9005 | Next (production) | `hangman.service` (`Environment=PORT`), `hangman.eapps.site.conf` (`proxy_pass`), `deploy.yml` (`APP_PORT`) |
 | 7005 | Next (`pnpm dev`, local only) | `package.json` |
 
 ### Changing the port
@@ -217,6 +220,39 @@ nvm install 24
 ln -sfn "$(dirname "$(dirname "$(nvm which 24)")")" ~/.local/node-24
 sudo systemctl restart hangman
 # the old 24.x can go after that: nvm uninstall <old version>
+```
+
+## Old domain
+
+The app used to live at `hangman.mnavasardian.com`. That name still resolves to this server, and
+`deployment/hangman.mnavasardian.com.conf` answers every request with a 301 to `https://hangman.eapps.site`, path and
+query included, so shared challenge links (`?c=…`) and search results keep working. It reuses the existing
+certificate, which certbot keeps renewing.
+
+```bash
+# replace the old proxying site with the redirect: paste deployment/hangman.mnavasardian.com.conf
+sudo nano /etc/nginx/sites-available/hangman.mnavasardian.com.conf
+sudo nginx -t && sudo systemctl reload nginx
+curl -I "https://hangman.mnavasardian.com/rules?x=1"   # 301, Location: https://hangman.eapps.site/rules?x=1
+```
+
+Browser storage is per origin, so stats, streaks and the passed-word list stay behind on the old domain, and an
+installed app keeps its old start URL (it follows the redirect, but reinstalling from the new domain is cleaner).
+
+## HTTPS only
+
+- **Port 80:** it serves only the ACME challenge and page loads (`GET`/`HEAD`). Those get a 301 to `https://`.
+  `/getWord`, `/monitoring` and any request with another method get a 403 and are never redirected: a redirect would
+  turn the POST into a GET, and the body has already crossed the network unencrypted.
+- **HSTS:** port 443 sends `Strict-Transport-Security: max-age=31536000`, so after the first visit the browser never
+  uses HTTP again. It has no `includeSubDomains` and no `preload`, because the rest of `eapps.site` isn't managed
+  here.
+- **Node:** it listens on `127.0.0.1:9005` only, so nothing reaches it except nginx's HTTPS block.
+
+```bash
+curl -I http://hangman.eapps.site/rules                 # 301 → https://hangman.eapps.site/rules
+curl -i -X POST http://hangman.eapps.site/getWord       # 403
+curl -sI https://hangman.eapps.site | grep -i strict    # strict-transport-security: max-age=31536000
 ```
 
 ## Gotchas

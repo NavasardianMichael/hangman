@@ -1,7 +1,7 @@
 // A choice in a form control
 export type TOption<T> = { label: string; value: T }
 
-export const SITE_URL = 'https://hangman.mnavasardian.com'
+export const SITE_URL = 'https://hangman.eapps.site'
 
 export const MAX_PASSED_WORDS = 50
 

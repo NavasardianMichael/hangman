@@ -26,8 +26,8 @@ AdSense menu names change from time to time. If a label below doesn't match exac
 
 1. Sign in at https://adsense.google.com (or create the account).
 2. Copy your **publisher ID**: Account → Settings → Account information. It looks like `ca-pub-1234567890123456`.
-3. Go to **Sites → Add site** and enter **`mnavasardian.com`**.
-   - Add the root domain, not `hangman.mnavasardian.com`. AdSense works per root domain, and adding it covers the
+3. Go to **Sites → Add site** and enter **`eapps.site`**.
+   - Add the root domain, not `hangman.eapps.site`. AdSense works per root domain, and adding it covers the
      subdomain.
 
 ## 2. Turn the code on
@@ -40,25 +40,25 @@ AdSense menu names change from time to time. If a label below doesn't match exac
 
 ## 3. Check the deploy
 
-Open https://hangman.mnavasardian.com and use View source (`Ctrl+U`). In `<head>`, confirm:
+Open https://hangman.eapps.site and use View source (`Ctrl+U`). In `<head>`, confirm:
 - `<meta name="google-adsense-account" content="ca-pub-…">`
 - `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-…">`
 
 ## 4. ads.txt (on the root domain)
 
-AdSense reads `ads.txt` from the root domain, so the file belongs to the portfolio site, not this app.
+AdSense reads `ads.txt` from the root domain, so the file belongs to whatever serves `eapps.site`, not this app.
 
-1. In the portfolio repo, add this line to `public/ads.txt` with your number (the ID without `ca-`):
+1. On the `eapps.site` root site, serve this line at `/ads.txt` with your number (the ID without `ca-`):
    ```
    google.com, pub-1234567890123456, DIRECT, f08c47fec0942fa0
    ```
-2. Deploy the portfolio and confirm https://mnavasardian.com/ads.txt shows the line.
+2. Confirm https://eapps.site/ads.txt shows the line.
 
 AdSense may report ads.txt as "Not found" for up to a few days after you add it. That's normal.
 
 ## 5. Verify the site and request review
 
-1. Go to **Sites → mnavasardian.com**.
+1. Go to **Sites → eapps.site**.
 2. For verification, choose **AdSense code snippet**. The snippet is already in `<head>` (step 3), so just confirm it.
 3. Click **Request review**. Before you do, make sure `/rules`, `/about` and `/privacy` are live: reviewers look for
    real content and a privacy policy.
@@ -71,8 +71,8 @@ Visitors from the EEA, UK and Switzerland must see a consent message from a Goog
 get few or no ads.
 
 1. Go to **Privacy & messaging → European regulations → Create message**.
-2. Select the site `mnavasardian.com`. Set the language to English (Armenian isn't offered), and link the privacy
-   policy at `https://hangman.mnavasardian.com/privacy`.
+2. Select the site `eapps.site`. Set the language to English (Armenian isn't offered), and link the privacy
+   policy at `https://hangman.eapps.site/privacy`.
 3. **Publish** the message.
 4. Optional: also publish the **US state regulations** message.
 
@@ -80,7 +80,7 @@ The privacy page already describes AdSense cookies and the consent message, so n
 
 ## 7. Auto ads settings
 
-Go to **Ads → By site**, then click the edit (pencil) icon next to `mnavasardian.com`.
+Go to **Ads → By site**, then click the edit (pencil) icon next to `eapps.site`.
 
 1. Turn **Auto ads** on.
 2. **In-page formats: off.** They are inserted inside the page content, which would push the fixed-height game
@@ -105,9 +105,9 @@ Go to **Ads → By site**, then click the edit (pencil) icon next to `mnavasardi
 
 1. Go to **Ads → By site → URL groups → New URL group**.
 2. Add these URLs:
-   - `hangman.mnavasardian.com/rules`
-   - `hangman.mnavasardian.com/about`
-   - `hangman.mnavasardian.com/privacy`
+   - `hangman.eapps.site/rules`
+   - `hangman.eapps.site/about`
+   - `hangman.eapps.site/privacy`
 3. Use the same settings as step 7, but turn **In-page formats on**.
 4. Save and apply.
 

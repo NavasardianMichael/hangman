@@ -46,7 +46,7 @@ Without source maps, stack traces point into minified bundles. The upload is opt
 
 ## 3. Add the values to the deploy secret
 
-Add these to the production `.env`:
+Add these to `.env.production.local`:
 
 | Key | Value |
 |---|---|
@@ -65,12 +65,12 @@ Then push to `master`, or run **Deploy to Production**.
 - The build uploads source maps, tags them with the commit as the release, and deletes the map files, so they're
   never served publicly.
 
-For local testing, put `NEXT_PUBLIC_SENTRY_DSN` in `.env.local`. Leave the token out locally, so dev builds don't
+For local testing, put `NEXT_PUBLIC_SENTRY_DSN` in `.env.development.local`. Leave the token out locally, so dev builds don't
 upload anything. Events from `pnpm dev` carry the `development` environment, which you can filter out in Sentry.
 
 ## 4. Verify
 
-1. Open https://hangman.mnavasardian.com with DevTools.
+1. Open https://hangman.eapps.site with DevTools.
 2. In the console, run:
    ```js
    setTimeout(() => { throw new Error('Sentry test from console') })

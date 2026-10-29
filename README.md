@@ -5,7 +5,7 @@ The Armenian version of Hangman, playable on phones, tablets and desktops (and i
 - play against a friend on one device;
 - send a friend a challenge link.
 
-Live: **https://hangman.mnavasardian.com**
+Live: **https://hangman.eapps.site**
 
 Stack: Next.js 16 (App Router, standalone output) · React 19 · TypeScript 6 · Tailwind CSS 4 · Zustand · `@google/genai`.
 
@@ -48,8 +48,8 @@ Requirements: Node.js 24 LTS (see `.nvmrc`) and pnpm 11. The version is pinned i
 
 ```bash
 pnpm install
-cp .env.example .env   # set GEMINI_KEY
-pnpm dev               # http://localhost:7005
+cp .env.example .env.development.local   # set GEMINI_KEY
+pnpm dev                                  # http://localhost:7005
 ```
 
 | Script | What it does |
@@ -58,7 +58,7 @@ pnpm dev               # http://localhost:7005
 | `pnpm build` / `pnpm start` | Production build / serve it locally on port 7005 |
 | `pnpm lint` | ESLint (flat config, `eslint-config-next`) |
 | `pnpm format` | Prettier over `src/` |
-| `pnpm envtob64` | Prints `.env` as base64 for the `ENV_FILE_BASE64` GitHub secret |
+| `pnpm envtob64` | Prints `.env.production.local` as base64 for the `ENV_FILE_BASE64` GitHub secret |
 
 The service worker is registered in production builds only.
 
@@ -114,7 +114,7 @@ Both are off unless their build-time variable is set.
 
 ## Deployment
 
-Self-hosted at https://hangman.mnavasardian.com, on the same server and pipeline pattern as bookie:
+Self-hosted at https://hangman.eapps.site, on the same server and pipeline pattern as bookie:
 
 1. Every push to `master` runs `.github/workflows/deploy.yml`. It lints, builds the standalone bundle and boots it as
    a smoke test.
