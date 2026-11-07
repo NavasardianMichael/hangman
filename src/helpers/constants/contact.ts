@@ -6,9 +6,9 @@ export const CONTACT_PHONE = '098 75 16 15'
 export const CONTACT_ADDRESS = 'Ք․ Երևան, Կուրղինյան 14շ, 33'
 
 export const CONTACT_DETAILS = [
-  { key: 'address', label: 'Հասցե', value: CONTACT_ADDRESS },
   { key: 'email', label: 'Էլ. փոստ', value: CONTACT_EMAIL },
   { key: 'phone', label: 'Հեռախոս', value: CONTACT_PHONE },
+  { key: 'address', label: 'Հասցե', value: CONTACT_ADDRESS },
 ] as const
 
 // Shared by the form and POST /api/contact

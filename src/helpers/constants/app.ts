@@ -5,7 +5,7 @@ export const SITE_URL = 'https://hangman.eapps.site'
 
 export const MAX_PASSED_WORDS = 50
 
-export const CONTACT_EMAIL = 'navasardianmichael@gmail.com'
+export const CONTACT_EMAIL = 'hangman@eapps.site'
 
 export const SUPPORT_URL = 'https://buymeacoffee.com/navasardian'
 
