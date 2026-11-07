@@ -45,7 +45,7 @@ export const Background: FC = () => (
       imgClassName='scale-110 blur-[18px] brightness-75'
     />
     <BackgroundPicture
-      className='absolute top-0 bottom-0 left-1/2 block w-[min(100%,var(--column-width))] -translate-x-1/2 bg-white min-[600px]:shadow-[0_0_48px_8px_rgba(0,0,0,0.35)]'
+      className='absolute top-0 bottom-0 left-1/2 block w-[min(100%,var(--column-width))] -translate-x-1/2 bg-white min-[600px]:shadow-[0_0_48px_8px_rgba(0,0,0,0.35)] min-[600px]:[body:has([data-info-page])_&]:hidden'
       imgClassName='opacity-80 blur-[10px] [body:has([data-start-screen])_&]:opacity-100 [body:has([data-start-screen])_&]:filter-none'
       fetchPriority='high'
     />

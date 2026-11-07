@@ -17,6 +17,12 @@ const DETAIL_ICONS = {
   phone: <PhoneIcon />,
 }
 
+// Email and phone open the mail app or the dialer; the phone is written the Armenian way (0 + 8 digits)
+const getDetailHref = (key: (typeof CONTACT_DETAILS)[number]['key'], value: string) => {
+  if (key === 'phone') return `tel:+374${value.replace(/\D/g, '').replace(/^0/, '')}`
+  return undefined
+}
+
 // The contact form, with the address, email and phone below it (as on cv-builder's contact page)
 export default function ContactPage() {
   const details = CONTACT_DETAILS.filter(({ value }) => value.trim() !== '')
@@ -29,19 +35,33 @@ export default function ContactPage() {
       }
     >
       <ContactForm />
-      <ul className='mx-0 mt-8 mb-0 flex list-none flex-col gap-5 [border-top:1px_solid_rgba(35,35,35,0.2)] p-0 pt-6 min-[480px]:flex-row min-[480px]:justify-center min-[480px]:gap-6'>
-        {details.map(({ key, label, value }) => (
-          <li key={key} className='flex min-w-0 flex-col items-center gap-1 text-center min-[480px]:flex-1'>
-            <span
-              aria-hidden='true'
-              className='flex size-8 items-center justify-center rounded-full border-[1.5px] border-solid border-[#2b2b2b] text-[1.05rem]'
-            >
-              {DETAIL_ICONS[key]}
-            </span>
-            <span className='text-[0.75rem] text-[#6a6a6a]'>{label}</span>
-            <span className='text-[0.85rem] font-semibold [overflow-wrap:anywhere]'>{value}</span>
-          </li>
-        ))}
+      <ul className='mx-0 mt-7 mb-0 flex list-none flex-col gap-1 border-0 border-t border-dashed border-[rgba(35,35,35,0.22)] p-0 pt-5'>
+        {details.map(({ key, label, value }) => {
+          const href = getDetailHref(key, value)
+          // Email and phone are Latin letters and digits: the system font keeps them readable
+          const valueClasses = `block text-[0.75rem] leading-[1.45] font-semibold text-ink! no-underline wrap-anywhere ${key === 'address' ? '' : 'font-sans tracking-normal!'}`
+
+          return (
+            <li key={key} className='flex min-w-0 items-center gap-3 py-1.5'>
+              <span
+                aria-hidden='true'
+                className='flex size-9 flex-none items-center justify-center rounded-full bg-secondary/10 text-[1.05rem] text-secondary'
+              >
+                {DETAIL_ICONS[key]}
+              </span>
+              <span className='flex min-w-0 flex-col'>
+                <span className='text-[0.7rem] leading-[1.4] text-[#7a7a7a]'>{label}</span>
+                {href ? (
+                  <a href={href} className={`${valueClasses} hover:underline`}>
+                    {value}
+                  </a>
+                ) : (
+                  <span className={valueClasses}>{value}</span>
+                )}
+              </span>
+            </li>
+          )
+        })}
       </ul>
     </InfoPage>
   )
