@@ -1,19 +1,23 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useGameStore } from 'store/game'
+import { isPremiumActive, usePremiumStore } from 'store/premium'
 import { TPlayMode } from 'store/types'
 import { useUiStore } from 'store/ui'
 import { useBackClose } from 'hooks/useBackClose'
 import { useIsClient } from 'hooks/useIsClient'
 import { GAME_STAGES, PLAY_MODES, SUPPORT_URL } from 'helpers/constants/app'
+import { INFO_PATHS } from 'helpers/constants/routes'
 import { StageComponent } from 'helpers/types/stage'
 import { getResumeStage } from 'helpers/utils/gameFlow'
 import { navigate } from 'helpers/utils/gameRouter'
+import { formatPremiumDate, openPremiumDialog } from 'helpers/utils/premium'
 import { combineClassNames } from 'helpers/utils/styles'
 import { DownloadAppBtn } from 'components/downloadAppBtn'
 import { Dialog } from 'components/shared/dialog'
-import { HeartIcon, StatsIcon } from 'components/shared/icons'
+import { CrownIcon, HeartIcon, StatsIcon } from 'components/shared/icons'
 import { StatsPanel } from 'components/stats'
 
 const MODE_LABELS: Record<TPlayMode, string> = {
@@ -39,6 +43,14 @@ const CONTINUE_BTN_CLASSES = combineClassNames(
 const SMALL_BTN_CLASSES =
   'box-border inline-flex h-8 cursor-pointer items-center justify-center gap-2 rounded-card border border-solid border-transparent bg-[rgba(246,243,236,0.92)] px-3.75 text-[14px] font-semibold text-secondary shadow-card'
 
+// Contact and the legal pages, in small print at the bottom
+const FOOTER_LINKS = [
+  { href: INFO_PATHS.contact, label: 'Կապ' },
+  { href: INFO_PATHS.terms, label: 'Պայմաններ' },
+  { href: INFO_PATHS.privacy, label: 'Գաղտնիություն' },
+  { href: INFO_PATHS.refund, label: 'Վերադարձ' },
+]
+
 const BTN_TITLE_CLASSES = 'leading-[1.3]'
 const BTN_SUBTITLE_CLASSES = 'text-[0.72rem] leading-[1.3] font-normal'
 
@@ -52,6 +64,12 @@ export const Start: StageComponent = () => {
   // An unfinished game saved from an earlier visit (e.g. the app was closed mid-round)
   const resumeStage = useGameStore(getResumeStage)
   const savedMode = useGameStore((state) => state.mode)
+  const premiumUntil = usePremiumStore((state) => state.until)
+  // Saved on this device, so the server paints the plain label
+  const premiumLabel =
+    isClient && isPremiumActive(premiumUntil) && premiumUntil
+      ? `Պրեմիում՝ մինչև ${formatPremiumDate(premiumUntil)}`
+      : 'Պրեմիում'
 
   // Starting another game replaces the saved one, so ask first
   const startMode = (mode: TPlayMode) => {
@@ -97,6 +115,10 @@ export const Start: StageComponent = () => {
         <StatsIcon />
         Վիճակագրություն
       </button>
+      <button type='button' className={SMALL_BTN_CLASSES} onClick={() => openPremiumDialog('offer')}>
+        <CrownIcon />
+        {premiumLabel}
+      </button>
       <a
         className={combineClassNames(SMALL_BTN_CLASSES, 'mb-auto no-underline')}
         href={SUPPORT_URL}
@@ -106,6 +128,17 @@ export const Start: StageComponent = () => {
         <HeartIcon />
         Աջակցել ծրագրին
       </a>
+      {/* A paper strip, so the small print stays readable over the drawing */}
+      <nav
+        aria-label='Տեղեկատվություն'
+        className='box-border flex max-w-[calc(100%-2rem)] flex-wrap justify-center gap-x-3.5 gap-y-0.5 rounded-card bg-[rgba(246,243,236,0.88)] px-3 py-1 text-[0.68rem] shadow-card'
+      >
+        {FOOTER_LINKS.map(({ href, label }) => (
+          <Link key={href} href={href} className='text-[#2b2b2b] no-underline hover:underline'>
+            {label}
+          </Link>
+        ))}
+      </nav>
 
       <Dialog variant='square' title='Վիճակագրություն' open={statsOpen} onClose={() => setStatsOpen(false)}>
         <StatsPanel />

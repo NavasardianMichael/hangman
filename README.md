@@ -15,7 +15,13 @@ Stack: Next.js 16 (App Router, standalone output) · React 19 · TypeScript 6 ·
   - **Single player** against AI words, by category and difficulty.
   - **Two players** on one device.
   - **Challenge**: write a word, then share a link; the friend plays it on their own device.
-- **AI hints:** one free hint per day. Further hints unlock with a rewarded ad (AdSense H5 Games Ads, once Google approves it).
+- **Hints and letter reveals** in single player: one free hint and three free letter reveals a day. A letter reveal
+  opens every cell of one random hidden letter.
+- **Premium** (Ameriabank card payment, no account): 1000 ֏ for 30 days of unlimited hints and letter reveals. It's
+  a one-time payment, not a subscription; when the month ends the player is told to pay again. See
+  [docs/PAYMENTS.md](docs/PAYMENTS.md).
+- **Contact and legal pages:** `/contact` (a form to the admin inbox, plus address, email and phone), `/terms`,
+  `/privacy` and `/refund-policy`, linked from the start screen.
 - **Next-word prefetch:** the next AI word loads while the current round is played.
 - **Stats and streaks** for single-player rounds, stored locally.
 - **Sound on/off toggle.**
@@ -25,7 +31,7 @@ Stack: Next.js 16 (App Router, standalone output) · React 19 · TypeScript 6 ·
 - **Responsive layout:**
   - a full-width game on phones;
   - a two-pane layout on short landscape screens;
-  - a centered 600px column on larger screens, with AdSense Auto ads side rails in the free space.
+  - a centered 600px column on larger screens.
 - **Ink-style SVG hangman** that is drawn stroke by stroke with each mistake.
 - **Routing and back gestures** (`src/helpers/utils/gameRouter.ts`, `src/helpers/utils/gameFlow.ts`):
   - Every screen has its own URL: `/`, `/settings`, `/composition`, `/discovery`, `/summary`, `/share`, `/end`. The URL is the source of truth for the current screen, and reloads keep you on it.
@@ -37,10 +43,12 @@ Stack: Next.js 16 (App Router, standalone output) · React 19 · TypeScript 6 ·
     - **A game in progress** asks "Leave the game?", and the timer pauses while it asks.
   - Start offers **Continue** for an unfinished saved game, and asks before a new game replaces it.
   - A link to a screen that doesn't fit the saved game goes to one that does.
-- **Content pages:** `/rules`, `/about`, `/privacy`.
-- **GTM `dataLayer` events** (`src/helpers/utils/analytics.ts`): `game_start`, `round_end`, `game_end`, `hint_used`, `hint_locked`, `ai_word_failed`, `offline_word_used`, `challenge_created`, `challenge_opened`, `sound_toggled`, `pwa_prompt_shown`, `pwa_installed`, `interstitial_shown`.
+- **SEO:** only `/` is indexed. Its title, description and JSON-LD (`WebSite`, `VideoGame`) carry the names the game is searched by, in `src/helpers/constants/seo.ts`. The game screens are noindex, with `/` as canonical.
+- **GTM `dataLayer` events** (`src/helpers/utils/analytics.ts`): `game_start`, `round_end`, `game_end`, `hint_used`, `hint_locked`, `letter_revealed`, `letter_locked`, `premium_offer_shown`, `premium_checkout_started`, `premium_checkout_failed`, `purchase`, `premium_expired_shown`, `ai_word_failed`, `offline_word_used`, `challenge_created`, `challenge_opened`, `sound_toggled`, `pwa_prompt_shown`, `pwa_installed`.
 
-Game state lives in one persisted Zustand store (`src/store/game.ts`, saved to localStorage).
+Game state lives in one persisted Zustand store (`src/store/game.ts`, saved to localStorage); this browser's premium
+lives in another (`src/store/premium.ts`). The server keeps only payment records, in a SQLite file
+(`src/server/db.ts`).
 
 ## Development
 
@@ -67,34 +75,20 @@ The service worker is registered in production builds only.
 | Variable | Required | Description |
 |---|---|---|
 | `GEMINI_KEY` | yes | Google Gemini API key. Used server-side only by `POST /getWord`. |
+| `PAYMENT_GATEWAY` | for premium | `ameria` in production; `mock` (the default) is a fake bank for development, refused in production. |
+| `AMERIA_CLIENT_ID`, `AMERIA_USERNAME`, `AMERIA_PASSWORD` | for premium | Ameriabank vPOS credentials. |
+| `AMERIA_TEST_MODE`, `AMERIA_ORDER_ID_OFFSET`, `AMERIA_AMOUNT_OVERRIDE` | no | Test terminal, OrderID offset, test amount ([docs/PAYMENTS.md](docs/PAYMENTS.md)). |
+| `DATA_DIR` | no | Payments database directory. Default `./.data`; production: set by the deploy to `APP_DIR/shared/data`. |
+| `MAIL_API_URL`, `MAIL_API_KEY` | production | Mail engine for the contact form and payment alerts. Empty in development: they print to the console. |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | no | GA4 Measurement ID (`G-…`). Build time. Empty: analytics off. |
 | `NEXT_PUBLIC_SENTRY_DSN` | no | Sentry DSN. Build time. Empty: error tracking off. |
 | `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` | no | Source map upload to Sentry. Build time, CI only. |
 
-`GEMINI_KEY` is read at runtime. Without a key, single player still works with the built-in words. The other variables
+`GEMINI_KEY`, the payment and the mail variables are read at runtime. Without a key, single player still works with the built-in words. The other variables
 are optional and read by `pnpm build` (`NEXT_PUBLIC_*` values are inlined into the bundle); in production the
 build job reads them from the `ENV_FILE_BASE64` secret, and they're kept out of the server `.env`.
 
 A free-tier key is enough. `/getWord` tries `gemini-3.5-flash-lite`, then `gemini-3.6-flash`, then `gemini-3.8-flash`. Free quotas are per model, so the fallback also adds capacity. After a quota (429) or overload (503) error, that model is skipped for the wait time Google returns.
-
-## Ads (Google AdSense)
-
-Ads are served by **AdSense Auto ads**: Google places them, so the code holds no ad units or slot IDs. All ad code is inactive until `ADSENSE_CLIENT` in `src/helpers/constants/ads.ts` is set: no script, no meta tag and no reserved band. When it's set:
-- **Verification and Auto ads:** `<meta name="google-adsense-account">` and the AdSense script (with the H5 Games Ads initializer) are added to `<head>`.
-- **Top anchor:** a band at the top is reserved for the Auto ads **top anchor**, on phones and desktops, so it never covers the game or the keyboard.
-- **Side rails:** on wide screens, Auto ads puts its own side rails in the free space beside the 600px column.
-- **Vignettes:** full-screen ads between page loads (e.g. start screen → Rules). The game router ignores the `#google_vignette` URL hash they add, so it isn't taken for a back gesture.
-- **In-page ads are off**, since they would be injected into the fixed-height game column.
-- **H5 Games Ads**, when `H5_GAMES_ADS_APPROVED = true`:
-  - an interstitial between rounds (`adBreak` `next`);
-  - rewarded ads that unlock extra hints (`adBreak` `reward`).
-
-  Development builds use Google's test ads.
-
-The step-by-step AdSense account setup (site, ads.txt, review, consent message, Auto ads settings) is in
-[docs/ADSENSE.md](docs/ADSENSE.md).
-
-A plain "watch an ad to unlock" modal built on a normal display unit isn't used: AdSense policy forbids rewarding users for viewing non-rewarded ads.
 
 ## Analytics and error tracking
 

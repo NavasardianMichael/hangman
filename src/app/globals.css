@@ -28,7 +28,6 @@
     /* Layout */
     --column-width: 600px;
     --bottom-bar-height: 3.75rem;
-    --ad-band-height: 0px;
     --keyboard-key-height: 2.4rem;
     /* Room the notch, status bar and home indicator take now that the page draws edge to edge; 0 on plain screens */
     --safe-top: env(safe-area-inset-top, 0px);
@@ -36,7 +35,7 @@
     --safe-left: env(safe-area-inset-left, 0px);
     --safe-right: env(safe-area-inset-right, 0px);
     /* Room every screen keeps clear above and below its content */
-    --top-inset: calc(var(--ad-band-height) + var(--safe-top));
+    --top-inset: var(--safe-top);
     --bottom-inset: calc(var(--bottom-bar-height) + var(--safe-bottom));
     /* Room the top-right buttons take: up to three of them, four with the install button */
     --top-bar-reserve: 10.5rem;
@@ -50,14 +49,15 @@
     --key-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 2px 0 rgba(0, 0, 0, 0.28), 0 3px 6px rgba(0, 0, 0, 0.16);
   }
 
-  /* With ads on, the top band is reserved for the AdSense anchor (it overlays only this band) */
-  :root.ads-enabled {
-    --ad-band-height: 3.8rem;
+  /* One more button in the top bar (install, or reveal-a-letter in a single-player round): content beside it keeps
+     clear; two more with both */
+  :root:has([data-install-button]),
+  :root:has([data-reveal-button]) {
+    --top-bar-reserve: 13rem;
   }
 
-  /* One more button in the top bar: content beside it keeps clear */
-  :root:has([data-install-button]) {
-    --top-bar-reserve: 13rem;
+  :root:has([data-install-button]):has([data-reveal-button]) {
+    --top-bar-reserve: 15.5rem;
   }
 
   /* Short landscape screens: the column takes the full width beside the notch */
@@ -90,9 +90,10 @@
     }
   }
 
-  /* The content pages stay put. Only they opt into that, so the game can still scroll. */
-  html:has([data-content-page]),
-  body:has([data-content-page]) {
+  /* The info pages (contact, terms, privacy, refund) stay put and scroll inside. Only they opt into that, so the
+     game can still scroll. */
+  html:has([data-info-page]),
+  body:has([data-info-page]) {
     height: 100%;
     overflow: hidden;
   }

@@ -39,7 +39,8 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=read-only
-# Next writes its image-optimizer cache under the release's .next/cache; nothing else is written
+# Next writes its image-optimizer cache under the release's .next/cache, and the payments database lives in
+# shared/data (DATA_DIR, written into shared/.env by the deploy)
 ReadWritePaths=/home/michael/apps/hangman
 
 StandardOutput=journal

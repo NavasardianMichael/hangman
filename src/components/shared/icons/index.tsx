@@ -156,3 +156,43 @@ export const ErrorIcon: FC<TIconProps> = (props) => (
     <path d='m8.6 8.6 6.8 6.8M15.4 8.6l-6.8 6.8' fill='none' stroke='#fff' strokeWidth={2.2} />
   </Icon>
 )
+
+// A letter cell with a spark: open one letter of the word
+export const RevealLetterIcon: FC<TIconProps> = (props) => (
+  <Icon {...props}>
+    <rect x='3.8' y='7.4' width='11.6' height='12.4' rx='1.4' />
+    <path d='m6.9 17 2.7-6.6 2.7 6.6M7.9 14.7h3.4' />
+    <path d='M19.2 2.8v3.6M17.4 4.6H21M20 9.6v2.2M18.9 10.7h2.2' />
+  </Icon>
+)
+
+// A crown: premium
+export const CrownIcon: FC<TIconProps> = (props) => (
+  <Icon {...props}>
+    <path d='M4.4 17.4 3.2 7.8l4.9 3.8L12 5.2l3.9 6.4 4.9-3.8-1.2 9.6Z' />
+    <path d='M5 20.2h14' />
+  </Icon>
+)
+
+// A pin: the address
+export const LocationIcon: FC<TIconProps> = (props) => (
+  <Icon {...props}>
+    <path d='M12 21s-6.4-6.1-6.4-11.2a6.4 6.4 0 0 1 12.8 0C18.4 14.9 12 21 12 21z' />
+    <circle cx='12' cy='9.8' r='2.3' />
+  </Icon>
+)
+
+// An envelope: the email
+export const MailIcon: FC<TIconProps> = (props) => (
+  <Icon {...props}>
+    <rect x='3.4' y='5.6' width='17.2' height='12.8' rx='1.6' />
+    <path d='m4 6.6 8 6.4 8-6.4' />
+  </Icon>
+)
+
+// A handset: the phone
+export const PhoneIcon: FC<TIconProps> = (props) => (
+  <Icon {...props}>
+    <path d='M8.6 3.8 6.2 4.4c-1.3.4-2.1 1.7-1.8 3 1.6 6.4 6.2 11 12.2 12.4 1.3.3 2.6-.5 3-1.8l.6-2.4-4.2-2.2-1.9 1.8c-2.4-1-4.3-3-5.3-5.4l1.8-1.9Z' />
+  </Icon>
+)

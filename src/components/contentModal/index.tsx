@@ -1,8 +1,21 @@
 'use client'
 
 import { FC, ReactNode } from 'react'
-import { CONTENT_CLASSES, TContentSection } from 'components/contentPage'
 import { Dialog } from 'components/shared/dialog'
+
+export type TContentSection = {
+  title: string
+  body: ReactNode
+}
+
+// The display font is all caps and wide, so long text uses smaller sizes and tighter spacing than the game
+const CONTENT_CLASSES = {
+  title: 'mx-0 mt-0 mb-1 text-[1.45rem] leading-[1.3] tracking-[1px]',
+  intro: 'text-[0.95rem] [&_a]:text-[#1f4e79]',
+  section: 'mt-5',
+  sectionTitle: 'mx-0 mt-0 mb-[0.4rem] text-[1.1rem] leading-[1.4] tracking-[1px]',
+  body: 'text-[0.9rem] [&_a]:[word-break:break-word] [&_a]:text-[#1f4e79] [&_li]:mb-[0.3rem] [&_ol]:mt-0 [&_ol]:mb-2 [&_ol]:pl-5 [&_p]:mt-0 [&_p]:mb-2 [&_ul]:mt-0 [&_ul]:mb-2 [&_ul]:pl-5',
+}
 
 type TProps = {
   open: boolean
@@ -13,7 +26,7 @@ type TProps = {
   onClose: () => void
 }
 
-// A dialog with the same look and typography as the content pages
+// A paper dialog for longer text, such as the round's hint
 export const ContentModal: FC<TProps> = ({ open, title, intro, sections = [], footer, onClose }) => (
   <Dialog
     variant='paper'

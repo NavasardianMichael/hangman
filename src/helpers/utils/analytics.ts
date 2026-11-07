@@ -7,6 +7,13 @@ type TAnalyticsEvent =
   | 'game_abandoned'
   | 'hint_used'
   | 'hint_locked'
+  | 'letter_revealed'
+  | 'letter_locked'
+  | 'premium_offer_shown'
+  | 'premium_checkout_started'
+  | 'premium_checkout_failed'
+  | 'purchase'
+  | 'premium_expired_shown'
   | 'ai_word_failed'
   | 'offline_word_used'
   | 'challenge_created'
@@ -14,7 +21,6 @@ type TAnalyticsEvent =
   | 'sound_toggled'
   | 'pwa_prompt_shown'
   | 'pwa_installed'
-  | 'interstitial_shown'
 
 type TDataLayerWindow = Window & { dataLayer?: unknown[] }
 

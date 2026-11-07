@@ -17,12 +17,13 @@ import {
   subscribeToInstallPrompt,
 } from 'helpers/utils/installPrompt'
 import { HintButton } from 'components/hintButton'
+import { RevealLetterButton } from 'components/revealLetterButton'
 import { Dialog } from 'components/shared/dialog'
 import { IconButton } from 'components/shared/iconButton'
 import { DownloadIcon, HomeIcon, InfoIcon, SoundOffIcon, SoundOnIcon } from 'components/shared/icons'
 
 // Install (when the browser offers it), turn info (multiplayer), home (asks first when a game would be lost),
-// hint (single-player round) and sound buttons in the top-right corner
+// hint and reveal-a-letter (single-player round) and sound buttons in the top-right corner
 export const TopBar: FC = () => {
   const stage = useStage()
   const { currentPlayer, mode, soundEnabled, isRoundInProgress, hasHint } = useGameStore(
@@ -59,7 +60,8 @@ export const TopBar: FC = () => {
 
   const showHome = !STAGES_HIDE_BREADCRUMB.includes(stage)
   const showInfo = showHome && mode === PLAY_MODES.multiplayer && stage !== GAME_STAGES.summary
-  const showHint = stage === GAME_STAGES.discovery && mode === PLAY_MODES.single && isRoundInProgress && hasHint
+  const isSingleRound = stage === GAME_STAGES.discovery && mode === PLAY_MODES.single && isRoundInProgress
+  const showHint = isSingleRound && hasHint
   const showInstall = !!installPrompt && !isInstalledApp() && !isInWebView()
 
   const handleInstallClick = () => {
@@ -95,6 +97,7 @@ export const TopBar: FC = () => {
         </IconButton>
       )}
       {showHint && <HintButton />}
+      {isSingleRound && <RevealLetterButton />}
       <IconButton
         aria-label={isSoundOn ? 'Անջատել ձայնը' : 'Միացնել ձայնը'}
         title={isSoundOn ? 'Անջատել ձայնը' : 'Միացնել ձայնը'}

@@ -40,6 +40,9 @@
       "services/*": [
         "./src/services/*"
       ],
+      "server/*": [
+        "./src/server/*"
+      ],
       "store/*": [
         "./src/store/*"
       ],

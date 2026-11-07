@@ -19,6 +19,7 @@ const createRound = (settings: TSettings, hint = '', withTimer = true): TRound =
   remainingSeconds: withTimer && settings.withTimeLimit && settings.timeLimit > 0 ? settings.timeLimit : null,
   hint,
   hintRevealed: false,
+  revealedLetters: 0,
   result: null,
 })
 
@@ -47,8 +48,7 @@ const initialPreferences: TPreferences = {
     currentStreak: 0,
     bestStreak: 0,
   },
-  lastFreeHintDate: null,
-  freeHintsUsed: 0,
+  freeUse: { date: null, hints: 0, letters: 0 },
 }
 
 export const useGameStore = create<TGameStore>()(
@@ -115,11 +115,20 @@ export const useGameStore = create<TGameStore>()(
 
       revealHint: () => set((state) => ({ round: { ...state.round, hintRevealed: true } })),
 
-      markFreeHintUsed: (date) =>
+      revealLetter: (letter) =>
         set((state) => ({
-          lastFreeHintDate: date,
-          freeHintsUsed: state.lastFreeHintDate === date ? state.freeHintsUsed + 1 : 1,
+          round: {
+            ...state.round,
+            guessedLetters: { ...state.round.guessedLetters, [letter]: true },
+            revealedLetters: (state.round.revealedLetters ?? 0) + 1,
+          },
         })),
+
+      markFreeUse: (kind, date) =>
+        set(({ freeUse }) => {
+          const today = freeUse.date === date ? freeUse : { date, hints: 0, letters: 0 }
+          return { freeUse: { ...today, [kind]: today[kind] + 1 } }
+        }),
 
       recordGameStarted: () =>
         set((state) => ({ stats: { ...state.stats, gamesPlayed: state.stats.gamesPlayed + 1 } })),
@@ -128,19 +137,26 @@ export const useGameStore = create<TGameStore>()(
 
       toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
 
-      // Keeps the chosen settings for the next game, along with sound, stats and the daily hint
+      // Keeps the chosen settings for the next game, along with sound, stats and the daily free counts
       resetGame: () => set((state) => ({ ...structuredClone(initialAppState), settings: state.settings })),
     }),
     {
       name: STORE_VARS.PERSIST_KEY,
       storage: createJSONStorage(() => localStorage),
-      version: 3,
+      version: 4,
       // v2: the current screen moved from the store to the URL
       // v3: free hints are counted per day; a saved date without a count was the old single daily hint
+      // v4: free hints and letter reveals are counted together in freeUse
       migrate: (persisted, version) => {
         const state: Record<string, unknown> = { roundsPlayed: 0, ...(persisted as Record<string, unknown>) }
         delete state.currentStage
         if (version < 3) state.freeHintsUsed = state.lastFreeHintDate ? 1 : 0
+        if (version < 4) {
+          const date = typeof state.lastFreeHintDate === 'string' ? state.lastFreeHintDate : null
+          state.freeUse = { date, hints: date ? Number(state.freeHintsUsed) || 0 : 0, letters: 0 }
+          delete state.lastFreeHintDate
+          delete state.freeHintsUsed
+        }
         return state as unknown as TGameStore
       },
     }

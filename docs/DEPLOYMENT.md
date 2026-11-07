@@ -11,7 +11,9 @@ hangman.eapps.site ──► nginx :443 ──► 127.0.0.1:9005  hangman  (Next
                             └──────► /_next/static/   from disk (APP_DIR/current/.next/static)
 ```
 
-There is no separate API: `POST /getWord` is a route of the same Next server, and it calls Gemini with `GEMINI_KEY`.
+There is no separate API: `POST /getWord`, the payment routes (`/api/premium/*`) and the contact form (`/api/contact`)
+are routes of the same Next server. Payment records live in a SQLite file in `shared/data`
+([PAYMENTS.md](PAYMENTS.md)).
 
 On-host layout:
 
@@ -19,7 +21,8 @@ On-host layout:
 $APP_DIR/                    e.g. /home/michael/apps/hangman
   releases/<sha>/            server.js · .next · public · node_modules (the 3 newest are kept)
   current -> releases/<sha>  the unit's WorkingDirectory; systemd resolves it at start
-  shared/.env                GEMINI_KEY, mode 600, written by every deploy
+  shared/.env                GEMINI_KEY, payment and mail keys, DATA_DIR; mode 600, written by every deploy
+  shared/data/hangman.db     payment records (SQLite); never touched by a deploy — back it up
 ```
 
 The nginx site has the same shape as `portfolio.mnavasardian.com.conf`: port 80 serves the ACME challenge and redirects,
@@ -131,7 +134,9 @@ Repository → Settings → Secrets and variables → Actions → **Secrets**:
   `SENTRY_AUTH_TOKEN` (see [GOOGLE_ANALYTICS.md](GOOGLE_ANALYTICS.md) and [SENTRY.md](SENTRY.md)). `NEXT_PUBLIC_*`
   values are inlined into the bundle, so they must be there when `pnpm build` runs. The "Load build-time env" step
   logs each one as set or not set. A service stays off when its key is empty.
-- **Deploy job:** writes the rest (`GEMINI_KEY`) to the server `.env`. The build-time keys are stripped from it.
+- **Deploy job:** writes the rest (`GEMINI_KEY`, `PAYMENT_GATEWAY`, `AMERIA_*`, `MAIL_API_*`) to the server `.env`, and
+  adds `DATA_DIR=$APP_DIR/shared/data`. The build-time keys are stripped from it. The log warns when `GEMINI_KEY`,
+  `PAYMENT_GATEWAY=ameria` or `MAIL_API_KEY` is missing.
 
 Any change to these values needs a new secret and a full run: re-running only the Deploy job reuses the old bundle.
 
@@ -165,8 +170,9 @@ fails, fix it and use **Re-run failed jobs**: only `deploy` runs again, with the
 1. Installs, lints and builds. Type checking is part of the build. `.next/cache` (Turbopack's build cache) is kept
    between runs with `actions/cache`, so builds after the first start warm.
 2. Copies `public/` and `.next/static` into `.next/standalone` and packs it.
-3. **Boots the bundle** and requires `GET /` → 200 and `POST /getWord {}` → 400. The 400 proves the word route loads,
-   without calling Gemini. A tracing gap would otherwise surface only on the server.
+3. **Boots the bundle** and requires `GET /` → 200, and `POST /getWord {}` and `POST /api/premium/status {}` → 400.
+   The 400s prove the word route and the payment routes (with `node:sqlite`) load, without calling Gemini or the bank.
+   A tracing gap would otherwise surface only on the server.
 4. Decodes `ENV_FILE_BASE64`: strips CRLF, `export ` and the unit-owned keys, and prints key names only.
 5. Copies the tarball and env file over SSH, then extracts `releases/<sha>` and installs `shared/.env` (mode 600).
 6. Points `current` at the new release, runs `sudo -n systemctl restart hangman` and polls `127.0.0.1:9005` for
@@ -231,7 +237,7 @@ sudo systemctl restart hangman
 - **Node:** it listens on `127.0.0.1:9005` only, so nothing reaches it except nginx's HTTPS block.
 
 ```bash
-curl -I http://hangman.eapps.site/rules                 # 301 → https://hangman.eapps.site/rules
+curl -I http://hangman.eapps.site/settings              # 301 → https://hangman.eapps.site/settings
 curl -i -X POST http://hangman.eapps.site/getWord       # 403
 curl -sI https://hangman.eapps.site | grep -i strict    # strict-transport-security: max-age=31536000
 ```
@@ -252,4 +258,7 @@ curl -sI https://hangman.eapps.site | grep -i strict    # strict-transport-secur
   already holds on the current server.
 - **Never add `proxy_cache` to the site:** `/sw.js` must always be fresh, and `/getWord` answers per request.
 - **Releases are disposable:** rotation deletes everything under `releases/`, so nothing stateful may live there.
-  `shared/` is outside on purpose.
+  `shared/` is outside on purpose. The payments database is in `shared/data`; without `DATA_DIR`, production
+  refuses payments rather than write there.
+- **Back up `shared/data/hangman.db`:** it is the only record of who paid. `sqlite3` can copy it while the app runs
+  (`.backup`).

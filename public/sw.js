@@ -1,6 +1,6 @@
 /* Service worker: lets the game load and play offline.
  * Bump VERSION whenever this file changes so old caches are dropped. */
-const VERSION = 'v3'
+const VERSION = 'v4'
 const CACHE = `hangman-${VERSION}`
 
 // The game screens are separate URLs, so each one can be reloaded offline
@@ -98,10 +98,12 @@ const staleWhileRevalidate = async (request) => {
 
 self.addEventListener('fetch', (event) => {
   const { request } = event
-  // Word requests (POST), ads and analytics (other origins) always go to the network
+  // Word requests (POST) and analytics (other origins) always go to the network
   if (request.method !== 'GET') return
   const url = new URL(request.url)
   if (url.origin !== self.location.origin) return
+  // The payment and contact API (including the bank's redirect back) is never answered from a cache
+  if (url.pathname.startsWith('/api/')) return
 
   if (request.mode === 'navigate') {
     event.respondWith(networkFirst(event))

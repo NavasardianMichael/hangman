@@ -128,6 +128,8 @@ jobs:
       # standalone server needs, and that shows up only when node runs server.js:
       # `next build` stays green. POST /getWord with an empty body proves the route
       # loads without calling Gemini (no key here): it must be rejected with 400.
+      # POST /api/premium/status {} does the same for the payment routes and Node's
+      # built-in node:sqlite they load (a module that failed to load answers 500).
       - name: Smoke-test the standalone bundle
         working-directory: .next/standalone
         env:
@@ -157,15 +159,18 @@ jobs:
             kill "$pid" 2>/dev/null || true
             exit 1
           fi
-          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST \
-            -H 'Content-Type: application/json' -d '{}' "http://127.0.0.1:$PORT/getWord" || true)
+          for route in /getWord /api/premium/status; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST \
+              -H 'Content-Type: application/json' -d '{}' "http://127.0.0.1:$PORT$route" || true)
+            if [ "$code" != "400" ]; then
+              echo "::error::POST $route answered HTTP $code, expected 400"
+              kill "$pid" 2>/dev/null || true
+              cat /tmp/smoke.log
+              exit 1
+            fi
+            echo "POST $route rejects an invalid request (400)"
+          done
           kill "$pid" 2>/dev/null || true
-          if [ "$code" != "400" ]; then
-            echo "::error::POST /getWord answered HTTP $code, expected 400"
-            cat /tmp/smoke.log
-            exit 1
-          fi
-          echo "POST /getWord rejects an invalid request (400)"
 
       - name: Upload bundle
         uses: actions/upload-artifact@v6
@@ -200,7 +205,9 @@ jobs:
       # The runtime half of the env (NODE_ENV, PORT, HOSTNAME) is owned by the systemd
       # unit; values here would override it, so they are stripped. Build-time keys are
       # already in the bundle, and the Sentry token has no business on the server, so
-      # they're stripped too. Prints key names only.
+      # they're stripped too. DATA_DIR (the payments database) is always APP_DIR/shared/data,
+      # outside the releases every deploy rotates away, so it is set here rather than in
+      # the secret. Prints key names only.
       - name: Prepare env file
         env:
           ENV_FILE_BASE64: ${{ secrets.ENV_FILE_BASE64 }}
@@ -211,9 +218,17 @@ jobs:
           fi
           printf '%s' "$ENV_FILE_BASE64" | base64 -d | tr -d '\r' > /tmp/hangman.env
           sed -i -e 's/^export //' -e '/^\(NODE_ENV\|PORT\|HOSTNAME\)=/d' \
-            -e '/^\(NEXT_PUBLIC_[A-Z0-9_]*\|SENTRY_ORG\|SENTRY_PROJECT\|SENTRY_AUTH_TOKEN\)=/d' /tmp/hangman.env
+            -e '/^\(NEXT_PUBLIC_[A-Z0-9_]*\|SENTRY_ORG\|SENTRY_PROJECT\|SENTRY_AUTH_TOKEN\)=/d' \
+            -e '/^DATA_DIR=/d' /tmp/hangman.env
+          echo "DATA_DIR=$APP_DIR/shared/data" >> /tmp/hangman.env
           if ! grep -qE '^GEMINI_KEY=.+' /tmp/hangman.env; then
             echo "::warning::GEMINI_KEY is empty: single player will use the built-in words only"
+          fi
+          if ! grep -qE '^PAYMENT_GATEWAY="?ameria' /tmp/hangman.env; then
+            echo "::warning::PAYMENT_GATEWAY is not ameria: premium can't be bought (docs/PAYMENTS.md)"
+          fi
+          if ! grep -qE '^MAIL_API_KEY="?[^"]' /tmp/hangman.env; then
+            echo "::warning::MAIL_API_KEY is empty: the contact form answers 503 and payment alerts aren't mailed"
           fi
           echo "keys:"; sed -n 's/^\([A-Za-z_][A-Za-z0-9_]*\)=.*/  - \1/p' /tmp/hangman.env
 

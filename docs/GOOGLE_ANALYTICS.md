@@ -7,7 +7,7 @@ What the app does once the ID is set:
 - **`<head>`** (`src/app/layout.tsx`): defines `gtag`, sends `config` with `send_page_view: false`, and loads
   `https://www.googletagmanager.com/gtag/js?id=G-…`. Development builds also add `debug_mode`.
 - **Page views** (`src/components/pageViewTracker`): one `page_view` per screen (`/`, `/settings`, `/discovery`,
-  `/rules`, …).
+  `/end`, …).
   - The game changes the URL without a page load, so the app sends these itself.
   - Only the path is sent. A challenge link's `?c=…` token holds the word and never reaches GA.
 - **Game events** (`trackEvent` in `src/helpers/utils/analytics.ts`), listed below.
@@ -77,11 +77,10 @@ as key event** on the ones that mean success, for example:
 
 ## 7. Consent (EU visitors)
 
-The AdSense **European regulations** consent message (see [ADSENSE.md](ADSENSE.md), step 6) is a Google-certified
-CMP.
-- It sends Google consent mode signals that `gtag.js` follows.
-- So GA respects the visitor's choice with no extra code, as long as that message is published.
-- To check it, go to **Admin → Data collection → Consent settings** in GA.
+The site shows no consent banner, so GA runs for every visitor.
+- For visitors from the EEA, the UK and Switzerland, that may need consent. To ask for it, add a Google-certified CMP:
+  it sends consent mode signals that `gtag.js` follows with no extra code.
+- To check what GA receives, go to **Admin → Data collection → Consent settings**.
 
 ## 8. Retire the old Tag Manager container
 
@@ -104,11 +103,18 @@ The default of 2 months limits Explorations to recent data.
 |---|---|---|
 | `page_view` | each screen change | `page_path`, `page_title`, `page_location` |
 | `game_start` | a game starts from settings | `mode` |
-| `round_end` | a round is won or lost | `mode`, `result`, `wordLength`, `mistakes`, `usedHint` |
+| `round_end` | a round is won or lost | `mode`, `result`, `wordLength`, `mistakes`, `usedHint`, `revealedLetters` |
 | `game_end` | the final result screen | `mode`, `winner` |
 | `game_abandoned` | the player leaves a running game with back | `stage` |
-| `hint_used` | a hint is opened | `source` |
-| `hint_locked` | a hint was asked for but none is left | none |
+| `hint_used` | a hint is opened | `source` (`free` / `premium`) |
+| `hint_locked` | a hint was asked for but today's free one is used | none |
+| `letter_revealed` | the reveal button opened a letter | `source` (`free` / `premium`) |
+| `letter_locked` | a letter was asked for but today's free ones are used | none |
+| `premium_offer_shown` | the premium offer opened | `reason` (`hint-limit`, `letter-limit`, `offer`) |
+| `premium_checkout_started` | the player was sent to the bank | `source` |
+| `premium_checkout_failed` | the bank page could not be opened | `source` |
+| `purchase` | a payment's result shows premium active | `currency`, `value`, `transaction_id` |
+| `premium_expired_shown` | the "month is over" notice was shown | none |
 | `ai_word_failed` | the AI word request failed | `status` |
 | `offline_word_used` | a built-in word was used instead | `category` |
 | `challenge_created` | a challenge link was made | `wordLength` |
@@ -116,7 +122,6 @@ The default of 2 months limits Explorations to recent data.
 | `sound_toggled` | sound on/off | `enabled` |
 | `pwa_prompt_shown` | the install prompt was shown | `source` |
 | `pwa_installed` | the app was installed | none |
-| `interstitial_shown` | an H5 interstitial ad started | `name` |
 
 To add an event, extend `TAnalyticsEvent` in `src/helpers/utils/analytics.ts` and call `trackEvent`. Never send
 personal data or the guessed word.
@@ -128,4 +133,3 @@ personal data or the guessed word.
 | No `collect` requests | Does the deploy log's "Load build-time env" step show the ID as set? Did the build run after it was set? Is an ad blocker on? Does the head contain `gtag/js?id=G-…`? |
 | Every screen counted twice | Step 2: "browser history events" is still on. |
 | Parameters missing in reports | Step 5: register them. They fill in from that point on. |
-| Few or no EU users | Expected until they accept consent, as long as the consent message is published. |

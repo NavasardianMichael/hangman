@@ -29,8 +29,8 @@ const getCountdownDeadline = (remainingSeconds: number | null = null) => {
   return Date.now() + (remainingSeconds ?? round.remainingSeconds ?? settings.timeLimit) * 1000
 }
 
-const isTimerPausedByUi = ({ leaveDialog, isHintFlowActive }: ReturnType<typeof useUiStore.getState>) =>
-  !!leaveDialog || isHintFlowActive
+const isTimerPausedByUi = ({ leaveDialog, isHintFlowActive, premiumDialog }: ReturnType<typeof useUiStore.getState>) =>
+  !!leaveDialog || isHintFlowActive || !!premiumDialog
 
 export const Discovery: StageComponent = ({ toNextPage }) => {
   const { currentWord, mode, withTimeLimit, timeLimit, minLettersCount, category, difficulty } = useGameStore(
@@ -59,7 +59,7 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
   // it's saved only when the page is hidden, closed or reloaded.
   const remainingSecondsRef = useRef<number | null>(null)
 
-  // During the leave question or a hint dialog, the countdown pauses and then resumes where it stopped
+  // During the leave question, a hint dialog or the premium dialog, the countdown pauses and then resumes where it stopped
   useEffect(
     () =>
       useUiStore.subscribe((state, previous) => {
@@ -109,6 +109,7 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
         wordLength: currentWordLetters.length,
         mistakes: Object.keys(round.wastedLetters).length,
         usedHint: round.hintRevealed,
+        revealedLetters: round.revealedLetters ?? 0,
       })
     },
     [currentWordLetters.length, mode]

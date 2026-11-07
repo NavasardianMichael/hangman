@@ -25,6 +25,8 @@ export type TRound = {
   remainingSeconds: number | null
   hint: string
   hintRevealed: boolean
+  // Letters opened with the reveal button this round (missing in rounds saved before it existed)
+  revealedLetters?: number
   result: TRoundResult | null
 }
 
@@ -55,11 +57,16 @@ export type TAppSlice = {
 export type TPreferences = {
   soundEnabled: boolean
   stats: TStats
-  // Local date (YYYY-MM-DD) the free-hint count belongs to
-  lastFreeHintDate: string | null
-  // Free hints used on lastFreeHintDate
-  freeHintsUsed: number
+  // Free hints and letter reveals used on one local day (without premium)
+  freeUse: TFreeUse
 }
+
+export type TFreeUseKind = 'hints' | 'letters'
+
+export type TFreeUse = {
+  // Local date (YYYY-MM-DD) the counts belong to
+  date: string | null
+} & Record<TFreeUseKind, number>
 
 export type TWordInfo = {
   word: string
@@ -77,11 +84,13 @@ export type TGameActions = {
   setRemainingSeconds: (seconds: number) => void
   finishRound: (result: TRoundResult) => void
   revealHint: () => void
-  markFreeHintUsed: (date: string) => void
+  // Opens every cell of one letter of the word
+  revealLetter: (letter: TLetter) => void
+  markFreeUse: (kind: TFreeUseKind, date: string) => void
   recordGameStarted: () => void
   recordGameWon: () => void
   toggleSound: () => void
-  // Ends the game; keeps settings, sound, stats and the daily hint
+  // Ends the game; keeps settings, sound, stats and the daily free counts
   resetGame: () => void
 }
 

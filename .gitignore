@@ -28,3 +28,6 @@
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local SQLite payments database (DATA_DIR in development)
+/.data/

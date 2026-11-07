@@ -22,3 +22,11 @@ export const stageFromPath = (pathname: string): TStage => {
   const match = (Object.keys(STAGE_PATHS) as TStage[]).find((stage) => STAGE_PATHS[stage] === pathname)
   return match ?? GAME_STAGES.start
 }
+
+// Pages outside the game (src/app/<path>): contact and the legal pages the bank requires for card payments
+export const INFO_PATHS = {
+  contact: '/contact',
+  terms: '/terms',
+  privacy: '/privacy',
+  refund: '/refund-policy',
+} as const

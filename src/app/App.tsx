@@ -4,14 +4,16 @@ import { FC, useEffect } from 'react'
 import { useGameStore } from 'store/game'
 import { TGameStage } from 'store/types'
 import { useUiStore } from 'store/ui'
+import { usePremiumSync } from 'hooks/usePremiumSync'
 import { useStage } from 'hooks/useStage'
 import { GAME_STAGES, PLAY_MODES } from 'helpers/constants/app'
-import { configureAds } from 'helpers/utils/ads'
 import { trackEvent } from 'helpers/utils/analytics'
 import { CHALLENGE_PARAM, decodeChallengeToken, endChallengeOpening } from 'helpers/utils/challenge'
 import { getResumeStage, handleUserBack, handleUserForward, isStageAllowed } from 'helpers/utils/gameFlow'
 import { initGameRouter } from 'helpers/utils/gameRouter'
+import { takePaymentResultFromUrl } from 'helpers/utils/premium'
 import { LeaveGameDialog } from 'components/leaveGameDialog'
+import { PremiumDialog } from 'components/premiumDialog'
 import { Stages } from 'components/stages/Stages'
 import { Toaster } from 'components/toaster'
 import { TopBar } from 'components/topBar'
@@ -38,6 +40,8 @@ const startChallengeFromUrl = () => {
 const resolveInitialStage = (urlStage: TGameStage): TGameStage => {
   if (startChallengeFromUrl()) return GAME_STAGES.discovery
   const state = useGameStore.getState()
+  // Back from the bank: the payment's result shows over the game that was left for it
+  if (takePaymentResultFromUrl()) return getResumeStage(state) ?? GAME_STAGES.start
   if (isStageAllowed(urlStage, state)) return urlStage
   return getResumeStage(state) ?? GAME_STAGES.start
 }
@@ -57,7 +61,7 @@ const registerServiceWorker = async () => {
 export const App: FC = () => {
   const stage = useStage()
   const isRouterReady = useUiStore((state) => state.isRouterReady)
-  const soundEnabled = useGameStore((state) => state.soundEnabled)
+  usePremiumSync()
 
   useEffect(
     () =>
@@ -75,10 +79,6 @@ export const App: FC = () => {
       registerServiceWorker()
     }
   }, [])
-
-  useEffect(() => {
-    configureAds(soundEnabled)
-  }, [soundEnabled])
 
   // The challenge round from a link is on screen
   useEffect(() => {
@@ -98,6 +98,7 @@ export const App: FC = () => {
         </div>
       )}
       <LeaveGameDialog />
+      <PremiumDialog />
       <Toaster />
     </>
   )
