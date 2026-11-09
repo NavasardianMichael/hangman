@@ -13,7 +13,7 @@ import { toast } from 'helpers/utils/toast'
 import { CustomButton } from 'components/shared/customButton'
 import { Spinner } from 'components/shared/spinner'
 
-const SUMMARY_CLASSES = 'relative flex min-h-[calc(100dvh_-_var(--top-inset)_-_var(--bottom-inset))]'
+const SUMMARY_CLASSES = 'relative flex min-h-[calc(100dvh-var(--top-inset)-var(--bottom-inset))]'
 
 const HINTS_CLASSES =
   'my-auto box-border flex w-full flex-col items-center gap-6 p-4 text-center text-[1.7rem] font-medium landscape:pt-0 landscape:[&_p]:m-0'

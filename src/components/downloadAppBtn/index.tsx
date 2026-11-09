@@ -140,7 +140,7 @@ const IosInstallHint: FC = () => {
     <Dialog
       title='Ինչպե՞ս ներբեռնել հավելվածը'
       width='min(80vw, 420px)'
-      bodyClassName='max-h-[calc(100dvh_-_10rem)] overflow-y-auto'
+      bodyClassName='max-h-[calc(100dvh-10rem)] overflow-y-auto'
       open={showIosDownloadAppHintModal}
       onClose={closeIosHint}
     >

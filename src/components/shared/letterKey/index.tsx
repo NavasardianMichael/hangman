@@ -21,8 +21,8 @@ export const LetterKey: FC<TProps> = ({ state = 'idle', type = 'button', classNa
   <button
     type={type}
     className={combineClassNames(
-      'relative m-0 box-border basis-[calc(100%/10_-_9*0.2rem/10)] cursor-pointer rounded-card border-0 p-0 text-center [font-size:inherit] leading-(--keyboard-key-height) [font-weight:inherit] text-inherit select-none disabled:cursor-default',
-      'transition-[translate,box-shadow,background-color] duration-[120ms] ease-[ease] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-secondary',
+      'relative m-0 box-border basis-[calc(100%/10-9*0.2rem/10)] cursor-pointer rounded-card border-0 p-0 text-center [font-size:inherit] leading-(--keyboard-key-height) [font-weight:inherit] text-inherit select-none disabled:cursor-default',
+      'transition-[translate,box-shadow,background-color] duration-120 ease-[ease] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-secondary',
       STATE_CLASSES[state],
       className
     )}

@@ -11,8 +11,8 @@ import { Spinner } from 'components/shared/spinner'
 const FIELD_CLASSES =
   'box-border block w-full appearance-none rounded-md border border-solid border-[rgba(35,35,35,0.2)] bg-transparent px-3 py-1.5 font-[inherit] text-[0.8rem] leading-normal tracking-[1px] text-ink shadow-[inset_0_1px_2px_rgba(35,35,35,0.07)] outline-none transition-[border-color,box-shadow,background-color] duration-150 placeholder:text-[#9b968c] placeholder:opacity-100 hover:enabled:border-[rgba(35,35,35,0.38)] focus:border-secondary focus:shadow-[inset_0_1px_2px_rgba(35,35,35,0.07),0_0_0_3px_rgba(87,87,87,0.16)] disabled:cursor-not-allowed disabled:opacity-60'
 
-// Latin text (an email) would fall through to the serif fallback of the Armenian font, so it gets the system font
-const LATIN_FIELD_CLASSES = combineClassNames(FIELD_CLASSES, 'font-sans text-[0.75rem] tracking-normal')
+// Latin text (an email) reads better a little smaller and without the wide letter spacing of the Armenian fields
+const LATIN_FIELD_CLASSES = combineClassNames(FIELD_CLASSES, 'text-[0.75rem] tracking-normal')
 
 const LABEL_CLASSES = 'mb-1 block text-[0.75rem] leading-[1.4] tracking-[1px] text-secondary'
 
@@ -127,6 +127,7 @@ export const ContactForm: FC = () => {
           required
           rows={4}
           placeholder='Ինչո՞վ կարող ենք օգնել'
+          style={{ resize: 'none' }}
           maxLength={CONTACT_LIMITS.message}
           disabled={isSending}
           className={combineClassNames(FIELD_CLASSES, 'min-h-24 resize-y')}

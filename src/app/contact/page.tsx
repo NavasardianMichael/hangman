@@ -39,7 +39,7 @@ export default function ContactPage() {
         {details.map(({ key, label, value }) => {
           const href = getDetailHref(key, value)
           // Email and phone are Latin letters and digits: the system font keeps them readable
-          const valueClasses = `block text-[0.75rem] leading-[1.45] font-semibold text-ink! no-underline wrap-anywhere ${key === 'address' ? '' : 'font-sans tracking-normal!'}`
+          const valueClasses = `block text-[0.75rem] leading-[1.45] text-ink! no-underline wrap-anywhere ${key === 'address' ? '' : 'font-sans tracking-normal!'}`
 
           return (
             <li key={key} className='flex min-w-0 items-center gap-3 py-1.5'>

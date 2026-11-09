@@ -75,6 +75,9 @@
   */
   html {
     font-size: 17px;
+    /* Inherited by every scroll area: a see-through track over whatever it scrolls (the paper of the info pages,
+       the page background) and a thumb in the game's grey */
+    scrollbar-color: rgba(87, 87, 87, 0.45) transparent;
 
     @media (min-width: 390px) {
       font-size: 18px;
@@ -126,6 +129,12 @@
   a {
     letter-spacing: 2px;
     line-height: 1.8;
+    font-family: var(--font-app), math;
+  }
+
+  /* Form fields don't inherit the page font by default; they take the app font and keep their own spacing */
+  input,
+  textarea {
     font-family: var(--font-app), math;
   }
 

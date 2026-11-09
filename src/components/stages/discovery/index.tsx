@@ -151,8 +151,8 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
         'box-border flex flex-col phone-landscape:grid phone-landscape:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] phone-landscape:grid-rows-[auto_auto_auto_minmax(0,1fr)] phone-landscape:gap-x-2',
         // The continue button takes the bottom bar once the round is over
         isRoundOver
-          ? 'h-[calc(100dvh_-_var(--top-inset)_-_var(--bottom-inset))]'
-          : 'h-[calc(100dvh_-_var(--top-inset)_-_var(--safe-bottom))]'
+          ? 'h-[calc(100dvh-var(--top-inset)-var(--bottom-inset))]'
+          : 'h-[calc(100dvh-var(--top-inset)-var(--safe-bottom))]'
       )}
     >
       {/* Leaves room for the top-right buttons */}
@@ -171,7 +171,7 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
             <span
               key={i}
               className={combineClassNames(
-                'basis-[calc(100%/10_-_9*0.5rem/10)]',
+                'basis-[calc(100%/10-9*0.5rem/10)]',
                 !isSpace &&
                   combineClassNames(
                     CELL_CLASSES,
@@ -196,7 +196,7 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
       <Audio deps={[isLost, finishedAudioTrigger]} src='/loss.mp3' volume={0.7} />
       <Audio deps={[Object.keys(guessedLetters).length]} src='/correct.mp3' />
       <Hangman
-        className='mx-auto my-1 block h-auto min-h-[80px] w-[min(100%,340px)] flex-[1_1_0] phone-landscape:col-start-1 phone-landscape:row-start-4 phone-landscape:size-full phone-landscape:min-h-0'
+        className='mx-auto my-1 block h-auto min-h-[80px] w-[min(100%,340px)] flex-1 phone-landscape:col-start-1 phone-landscape:row-start-4 phone-landscape:size-full phone-landscape:min-h-0'
         step={wastedLettersCount}
         status={hangmanStatus}
       />

@@ -37,12 +37,12 @@ export const InfoPage: FC<TProps> = ({ title, intro, sections = [], children, fo
       <article className='box-border flex h-full min-h-0 w-[min(100%,var(--column-width))] paper-sheet flex-col overflow-hidden rounded-[2px] px-6 pt-6 pb-2 leading-[1.6] tracking-[1px] text-[#2b2b2b] [&_a]:leading-[inherit] [&_a]:tracking-[inherit] [&_a]:[word-break:break-word] [&_a]:text-[#1f4e79] [&_div]:leading-[inherit] [&_div]:tracking-[inherit]'>
         <Link
           href='/'
-          className='inline-flex flex-none items-center gap-1.5 self-start text-[0.8rem] text-secondary! no-underline transition-colors hover:text-ink!'
+          className='inline-flex flex-none items-center gap-1.5 self-start text-[0.8rem] text-secondary! underline underline-offset-4 transition-colors hover:text-ink!'
         >
           <BackIcon className='size-[1.1em]' />
           Վերադառնալ խաղին
         </Link>
-        <div className='-mx-2 min-h-0 flex-[1_1_auto] [-webkit-overflow-scrolling:touch] overflow-y-auto overscroll-contain px-2 pt-3 pb-4'>
+        <div className='-mx-2 min-h-0 flex-auto [-webkit-overflow-scrolling:touch] overflow-y-auto overscroll-contain px-2 pt-3 pb-4'>
           <h1 className={CLASSES.title}>{title}</h1>
           {intro && <div className={CLASSES.intro}>{intro}</div>}
           {sections.map(({ title: sectionTitle, body }) => (

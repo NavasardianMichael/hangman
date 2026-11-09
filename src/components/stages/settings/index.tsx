@@ -31,10 +31,10 @@ const LABEL_CLASSES = 'block p-0 pb-2 text-[1rem] leading-[1.5715] text-black/88
 
 // What the form controls share; the height follows the text size, like the line it holds
 const CONTROL_CLASSES =
-  'box-border h-[calc(1rem*1.5714_+_10px)] w-full rounded-md border border-solid px-[11px] text-[1rem] text-black/88 outline-hidden focus-visible:shadow-[0_0_0_1px_var(--secondary-color)] disabled:cursor-not-allowed disabled:bg-black/4 disabled:text-black/25'
+  'box-border h-[calc(1rem*1.5714+10px)] w-full rounded-md border border-solid px-[11px] text-[1rem] text-black/88 outline-hidden focus-visible:shadow-[0_0_0_1px_var(--secondary-color)] disabled:cursor-not-allowed disabled:bg-black/4 disabled:text-black/25'
 
-// Numbers: an outline in the game's gray on the background art, digits in the system font
-const NUMBER_INPUT_CLASSES = combineClassNames(CONTROL_CLASSES, 'border-secondary bg-transparent font-sans')
+// Numbers: an outline in the game's gray on the background art
+const NUMBER_INPUT_CLASSES = combineClassNames(CONTROL_CLASSES, 'border-secondary bg-transparent')
 
 // Lists: a white field with a light outline and the app font
 const SELECT_CLASSES = combineClassNames(
@@ -179,7 +179,7 @@ export const Settings: StageComponent = ({ toNextPage }) => {
       >
         <BackIcon />
       </IconButton>
-      <div className='box-border flex min-h-[calc(100dvh_-_var(--top-inset)_-_var(--bottom-inset))] flex-col justify-center px-6 py-16 phone-landscape:justify-start phone-landscape:pt-12 phone-landscape:pb-[calc(var(--bottom-inset)_+_1rem)]'>
+      <div className='box-border flex min-h-[calc(100dvh-var(--top-inset)-var(--bottom-inset))] flex-col justify-center px-6 py-16 phone-landscape:justify-start phone-landscape:pt-12 phone-landscape:pb-[calc(var(--bottom-inset)+1rem)]'>
         <form
           className='flex flex-col gap-5 phone-landscape:grid phone-landscape:grid-cols-2 phone-landscape:gap-x-8 phone-landscape:gap-y-3'
           onSubmit={(event) => event.preventDefault()}
