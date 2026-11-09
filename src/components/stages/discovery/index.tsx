@@ -17,8 +17,9 @@ import { LetterKey } from 'components/shared/letterKey'
 import { Countdown } from './countdown'
 import { Hangman, THangmanStatus } from './hangman'
 
+// Square: a tenth of the row on wide screens, at least 2rem on narrow ones (the row then wraps sooner)
 const CELL_CLASSES =
-  'box-border flex min-h-[2.35rem] items-center justify-center rounded-card border border-solid border-[rgba(35,35,35,0.28)] shadow-card'
+  'box-border flex aspect-square min-h-8 min-w-8 items-center justify-center rounded-card border border-solid border-[rgba(35,35,35,0.28)] shadow-card'
 
 type TWordCell = TLetter | ' '
 
@@ -156,7 +157,7 @@ export const Discovery: StageComponent = ({ toNextPage }) => {
       )}
     >
       {/* Leaves room for the top-right buttons */}
-      <div className='flex min-h-[2.5rem] flex-none items-center gap-3 pt-[4px] pr-(--top-bar-reserve) pb-0 pl-[16px] phone-landscape:col-start-1 phone-landscape:pr-[16px]'>
+      <div className='flex min-h-10 flex-none items-center gap-3 pt-1 pr-(--top-bar-reserve) pb-0 pl-[16px] phone-landscape:col-start-1 phone-landscape:pr-[16px]'>
         {hasTimer && !isRoundOver && !isTimerPaused && (
           <Countdown deadline={countdownDeadline} onChange={countdownOnChange} onFinish={handleTimerFinish} />
         )}

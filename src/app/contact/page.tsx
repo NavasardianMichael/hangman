@@ -38,8 +38,8 @@ export default function ContactPage() {
       <ul className='mx-0 mt-7 mb-0 flex list-none flex-col gap-1 border-0 border-t border-dashed border-[rgba(35,35,35,0.22)] p-0 pt-5'>
         {details.map(({ key, label, value }) => {
           const href = getDetailHref(key, value)
-          // Email and phone are Latin letters and digits: the system font keeps them readable
-          const valueClasses = `block text-[0.75rem] leading-[1.45] text-ink! no-underline wrap-anywhere ${key === 'address' ? '' : 'font-sans tracking-normal!'}`
+          // The email is Latin letters: it reads better without the wide letter spacing
+          const valueClasses = `block text-[0.75rem] leading-[1.45] text-ink! no-underline wrap-anywhere ${key === 'email' ? 'tracking-normal!' : ''}`
 
           return (
             <li key={key} className='flex min-w-0 items-center gap-3 py-1.5'>
